@@ -217,6 +217,15 @@ Visit `http://localhost:3000` to access the app.
 > 🚧 **Live demo coming soon.** Deployment is in progress — check back shortly or watch the repository for updates.
 
 ---
+## 🎨 Figma Design
+ 
+Explore the full UI/UX design of Smart Shuttle — including wireframes, components, and interactive prototypes.
+ 
+| Design Asset | Link |
+|---|---|
+| 🖼️ Wireframes | [View Wireframes](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&t=jMxavJoHzKvCCG74-1) |
+
+---
 
 ## 🎯 Roadmap
 
@@ -246,7 +255,6 @@ git push origin feature/your-feature-name
 # Open a Pull Request 🎉
 ```
 
-Please follow the [Conventional Commits](https://www.conventionalcommits.org/) format for commit messages.
 
 ---
 

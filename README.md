@@ -279,7 +279,7 @@ If Smart Shuttle resonates with you:
 - ⭐ **Star** the repository to show support
 - 🍴 **Fork** it and build something great
 - 🛠️ **Contribute** a fix, feature, or idea
-- 📢 **Share** it with someone who needs smarter commutes
+
 
 ---
 

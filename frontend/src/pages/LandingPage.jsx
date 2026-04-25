@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
@@ -46,10 +47,10 @@ const LandingPage = () => {
               Orchestrate high-velocity fleet movements with real-time AI dispatching and predictive demand modeling. Precision transit for the next generation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-[#3B82F6] text-white font-manrope font-bold rounded-lg shadow-lg shadow-[#3B82F6]/20 flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+              <Link to="/signup" className="px-8 py-4 bg-[#3B82F6] text-white font-manrope font-bold rounded-lg shadow-lg shadow-[#3B82F6]/20 flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all">
                 Launch Command Center
                 <span className="material-symbols-outlined">rocket_launch</span>
-              </button>
+              </Link>
               <button className="px-8 py-4 bg-transparent border border-[#4A5568] text-white font-manrope font-bold rounded-lg hover:bg-white/5 transition-all flex items-center justify-center gap-2">
                 View Operational Specs
                 <span className="material-symbols-outlined">description</span>

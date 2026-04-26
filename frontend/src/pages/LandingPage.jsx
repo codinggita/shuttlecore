@@ -20,7 +20,9 @@ const LandingPage = () => {
               <input className="bg-transparent border-none text-xs text-white focus:ring-0 w-32" placeholder="Search Fleet..." type="text" />
             </div>
             <span className="material-symbols-outlined text-slate-400 cursor-pointer hover:text-white transition-colors">notifications</span>
-            <span className="material-symbols-outlined text-slate-400 cursor-pointer hover:text-white transition-colors">settings</span>
+            <Link to="/login" className="text-sm font-manrope font-medium text-slate-400 hover:text-white transition-colors">
+              Login
+            </Link>
             <div className="w-8 h-8 rounded bg-primary-container flex items-center justify-center overflow-hidden border border-[#3B82F6]/50">
               <img alt="Fleet Manager Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7yLYCt-iAMspqKqZuJb0j3a8_rkViqyebQ0k8xI-9OdD-iKqV_0Syu18VeAHbmoUR4qxst--FYvcOHW1vmSD3pAp3mpqPXlr_oGcejUWQL-NRL1jrK1IGJLCQPsJAH-wFDcAu54fVZ-Weto20n-YzTn3Fz9YAA9EH3vkOb3jPZ3BW2yoZRNvMtMH7UZ6meFfm-1ALtuZBIZiNvwG4Mr4THcTbgqlh0Xy_HMYkyr7P1LZJRPyYAHo3Eienam_TcN6mmtqboN_RfOg" />
             </div>

@@ -11,7 +11,7 @@ const SignupPage = () => {
         </Link>
         <div className="flex items-center gap-4">
           <span className="font-label-sm text-slate-400">ALREADY HAVE AN ACCOUNT?</span>
-          <button className="font-label-md text-[#3B82F6] hover:bg-white/5 px-4 py-2 transition-colors">LOG IN</button>
+          <Link to="/login" className="font-label-md text-[#3B82F6] hover:bg-white/5 px-4 py-2 transition-colors">LOG IN</Link>
         </div>
       </header>
 

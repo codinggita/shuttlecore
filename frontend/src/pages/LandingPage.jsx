@@ -7,7 +7,7 @@ const LandingPage = () => {
       <header className="bg-[#1F2A38]/80 backdrop-blur-xl border-b border-[#4A5568]/30 docked full-width top-0 z-40 fixed w-full">
         <div className="flex justify-between items-center px-6 h-16 w-full max-w-7xl mx-auto">
           <div className="flex items-center gap-8">
-            <span className="text-lg font-black tracking-tighter text-white font-manrope">SlateTransit</span>
+            <span className="text-lg font-black tracking-tighter text-white font-manrope">ShuttleCore</span>
             <nav className="hidden md:flex gap-6 items-center">
               <a className="font-manrope text-sm font-medium text-[#3B82F6] font-bold" href="#">Fleet Overview</a>
               <a className="font-manrope text-sm font-medium text-slate-400 hover:bg-white/5 transition-colors px-2 py-1" href="#">AI Dispatch</a>
@@ -131,7 +131,7 @@ const LandingPage = () => {
               <div>
                 <h2 className="font-display-lg text-display-lg text-white mb-6">Operational Intelligence <span className="text-[#3B82F6]">at Scale.</span></h2>
                 <p className="font-body-lg text-body-lg text-slate-400 mb-8">
-                  SlateTransit provides the unified dashboard for fleet managers to monitor, intervene, and optimize autonomous networks across entire metropolitan zones.
+                  ShuttleCore provides the unified dashboard for fleet managers to monitor, intervene, and optimize autonomous networks across entire metropolitan zones.
                 </p>
                 <div className="space-y-6">
                   <div className="flex gap-4">
@@ -180,7 +180,7 @@ const LandingPage = () => {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#3B82F6] to-transparent"></div>
             <h2 className="font-display-lg text-display-lg text-white mb-6">Ready to Optimize?</h2>
             <p className="font-body-lg text-body-lg text-slate-400 mb-10">
-              Join the ranks of modern metropolitan authorities leveraging SlateTransit for a cleaner, faster urban future.
+              Join the ranks of modern metropolitan authorities leveraging ShuttleCore for a cleaner, faster urban future.
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <button className="px-10 py-5 bg-[#3B82F6] text-white font-manrope font-extrabold rounded-lg hover:opacity-90 active:scale-95 transition-all">
@@ -197,7 +197,7 @@ const LandingPage = () => {
       <footer className="bg-[#1F2A38] border-t border-[#4A5568]/20 py-8">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-white font-black tracking-tighter text-sm font-manrope">SlateTransit</span>
+            <span className="text-white font-black tracking-tighter text-sm font-manrope">ShuttleCore</span>
             <span className="font-manrope text-[10px] text-slate-500 uppercase tracking-widest">Autonomous Ops Hub</span>
           </div>
           <div className="flex gap-8">
@@ -206,7 +206,7 @@ const LandingPage = () => {
             <a className="font-manrope text-[10px] text-slate-500 hover:text-white transition-colors underline-offset-4" href="#">Privacy</a>
             <a className="font-manrope text-[10px] text-slate-500 hover:text-white transition-colors underline-offset-4" href="#">API Support</a>
           </div>
-          <span className="font-manrope text-[10px] text-slate-500">© 2024 Slate & Signal Transportation Systems. All rights reserved.</span>
+          <span className="font-manrope text-[10px] text-slate-500">© 2024 ShuttleCore Logistics Systems. All rights reserved.</span>
         </div>
       </footer>
     </div>

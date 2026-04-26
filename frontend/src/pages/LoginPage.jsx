@@ -41,7 +41,7 @@ const LoginPage = () => {
             <div className="relative z-10 p-10 flex flex-col justify-between h-full">
               <Link to="/" className="flex items-center gap-2 group">
                 <span className="material-symbols-outlined text-[#3B82F6] text-3xl">route</span>
-                <span className="text-xl font-black tracking-tighter text-white uppercase">SlateTransit</span>
+                <span className="text-xl font-black tracking-tighter text-white uppercase">ShuttleCore</span>
               </Link>
               
               <div className="space-y-4">
@@ -66,7 +66,7 @@ const LoginPage = () => {
               <div className="md:hidden text-center mb-8">
                 <Link to="/" className="inline-flex items-center gap-2">
                   <span className="material-symbols-outlined text-[#3B82F6] text-3xl">route</span>
-                  <span className="text-xl font-black text-white uppercase tracking-tighter">SlateTransit</span>
+                  <span className="text-xl font-black text-white uppercase tracking-tighter">ShuttleCore</span>
                 </Link>
               </div>
 
@@ -104,7 +104,7 @@ const LoginPage = () => {
                     </label>
                     <input 
                       className="w-full h-12 recessed-input border-b-2 border-outline-variant/20 focus:border-[#3B82F6] text-white px-4 rounded-t-xl transition-all focus:outline-none placeholder:text-slate-700" 
-                      placeholder="fleet_admin@slate.transit" 
+                      placeholder="admin@shuttlecore.com" 
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -170,7 +170,7 @@ const LoginPage = () => {
       {/* Footer */}
       <footer className="relative z-10 w-full bg-surface-container-lowest/80 backdrop-blur-md border-t border-[#4A5568]/10 py-6">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-          <span className="font-manrope text-[10px] text-slate-500 uppercase tracking-widest">© 2024 Slate & Signal Transportation Systems. All rights reserved.</span>
+          <span className="font-manrope text-[10px] text-slate-500 uppercase tracking-widest">© 2024 ShuttleCore Logistics Systems. All rights reserved.</span>
           <div className="flex gap-6">
             <a className="font-manrope text-[10px] text-slate-500 hover:text-white transition-colors" href="#">Security Docs</a>
             <a className="font-manrope text-[10px] text-slate-500 hover:text-white transition-colors" href="#">Privacy</a>

@@ -7,7 +7,7 @@ const SignupPage = () => {
       {/* TopAppBar */}
       <header className="bg-[#1F2A38]/80 backdrop-blur-xl border-b border-[#4A5568]/30 flex justify-between items-center px-6 h-16 w-full fixed top-0 z-50">
         <Link to="/" className="text-lg font-black tracking-tighter text-white font-display-lg">
-          SlateTransit
+          ShuttleCore
         </Link>
         <div className="flex items-center gap-4">
           <span className="font-label-sm text-slate-400">ALREADY HAVE AN ACCOUNT?</span>
@@ -150,7 +150,7 @@ const SignupPage = () => {
             </form>
             <div className="mt-xl pt-lg border-t border-[#4A5568]/20">
               <p className="text-center text-slate-500 font-label-sm text-xs uppercase tracking-widest">
-                SECURED BY SLATE & SIGNAL ENCRYPTION PROTOCOLS
+                SECURED BY SHUTTLECORE ENCRYPTION PROTOCOLS
               </p>
               <div className="flex justify-center gap-lg mt-md">
                 <span className="material-symbols-outlined text-slate-600 text-xl">security</span>
@@ -165,7 +165,7 @@ const SignupPage = () => {
       <footer className="bg-[#1F2A38] border-t border-[#4A5568]/20 py-8">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="font-manrope text-[10px] text-slate-500 uppercase tracking-widest">
-            © 2024 Slate & Signal Transportation Systems. All rights reserved.
+            © 2024 ShuttleCore Logistics Systems. All rights reserved.
           </div>
           <div className="flex gap-lg">
             <a className="font-manrope text-[10px] text-slate-500 hover:text-white transition-colors underline-offset-4 uppercase tracking-widest" href="#">

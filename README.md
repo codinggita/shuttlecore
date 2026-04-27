@@ -223,7 +223,7 @@ Explore the full UI/UX design of Smart Shuttle — including wireframes, compone
  
 | Design Asset | Link |
 |---|---|
-| 🖼️ Wireframes | [View Wireframes](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&t=jMxavJoHzKvCCG74-1) |
+| 🖼️ Wireframes | [View Wireframes](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&t=VPiiFhj5jTisvL5N-1) |
 
 ---
 

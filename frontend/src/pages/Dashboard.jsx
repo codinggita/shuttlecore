@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 const Dashboard = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -20,9 +20,22 @@ const Dashboard = () => {
     { label: 'Security Level', value: 'L-7 SYNC', icon: 'security', trend: 'Active', color: 'text-indigo-400' }
   ];
 
+  const performanceData = [
+    { time: '00:00', load: 40 }, { time: '01:00', load: 65 },
+    { time: '02:00', load: 45 }, { time: '03:00', load: 85 },
+    { time: '04:00', load: 55 }, { time: '05:00', load: 95 },
+    { time: '06:00', load: 70 }, { time: '07:00', load: 80 },
+    { time: '08:00', load: 50 }, { time: '09:00', load: 60 },
+    { time: '10:00', load: 45 }, { time: '11:00', load: 75 },
+    { time: '12:00', load: 90 }, { time: '13:00', load: 65 },
+    { time: '14:00', load: 85 }, { time: '15:00', load: 60 },
+    { time: '16:00', load: 40 }, { time: '17:00', load: 70 },
+    { time: '18:00', load: 95 }, { time: '19:00', load: 80 },
+  ];
+
   const menuItems = [
     { id: 'simulation', label: 'Simulation', icon: 'model_training' },
-    { id: 'analytics', label: 'Analytics', icon: 'query_stats' },
+    { id: 'analytics', label: 'AI Dispatch', icon: 'query_stats' },
     { id: 'fleet', label: 'Fleet Management', icon: 'airport_shuttle' },
     { id: 'safety', label: 'Safety & Security', icon: 'verified_user' },
   ];
@@ -55,7 +68,13 @@ const Dashboard = () => {
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  if (item.id === 'analytics') {
+                    navigate('/');
+                  } else {
+                    setActiveTab(item.id);
+                  }
+                }}
                 className={`nav-link w-full ${activeTab === item.id ? 'nav-link-active' : 'nav-link-inactive'}`}
               >
                 <span className="material-symbols-outlined">{item.icon}</span>
@@ -177,19 +196,26 @@ const Dashboard = () => {
                 </div>
               </div>
               
-              <div className="h-64 w-full relative flex items-end gap-1.5 px-2">
-                {/* Mock Chart Visualization */}
-                {[40, 65, 45, 85, 55, 95, 70, 80, 50, 60, 45, 75, 90, 65, 85, 60, 40, 70, 95, 80].map((h, i) => (
-                  <div 
-                    key={i} 
-                    className="flex-1 bg-gradient-to-t from-sky-600/40 to-sky-400 rounded-t-lg transition-all hover:brightness-125 relative group" 
-                    style={{ height: `${h}%` }}
-                  >
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-[8px] font-bold px-1.5 py-1 rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                      {h}% Load
-                    </div>
-                  </div>
-                ))}
+              <div className="h-64 w-full relative pt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={performanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: 'var(--surface-light)', borderColor: 'var(--border)', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', color: 'var(--text-main)' }}
+                      itemStyle={{ color: '#0EA5E9', fontWeight: 'bold' }}
+                      labelStyle={{ color: 'var(--text-muted)', marginBottom: '4px', fontSize: '12px' }}
+                    />
+                    <Area type="monotone" dataKey="load" stroke="#0EA5E9" strokeWidth={3} fillOpacity={1} fill="url(#colorLoad)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
 
               <div className="mt-8 grid grid-cols-3 gap-4 border-t border-border pt-6">

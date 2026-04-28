@@ -68,13 +68,7 @@ const Dashboard = () => {
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => {
-                  if (item.id === 'analytics') {
-                    navigate('/');
-                  } else {
-                    setActiveTab(item.id);
-                  }
-                }}
+                onClick={() => setActiveTab(item.id)}
                 className={`nav-link w-full ${activeTab === item.id ? 'nav-link-active' : 'nav-link-inactive'}`}
               >
                 <span className="material-symbols-outlined">{item.icon}</span>

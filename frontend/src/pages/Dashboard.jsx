@@ -18,6 +18,8 @@ const Dashboard = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const [chartView, setChartView] = useState("realtime");
+
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
@@ -75,6 +77,16 @@ const Dashboard = () => {
     { time: "17:00", load: 70 },
     { time: "18:00", load: 95 },
     { time: "19:00", load: 80 },
+  ];
+
+  const historyData = [
+    { time: "Mon", load: 60 },
+    { time: "Tue", load: 80 },
+    { time: "Wed", load: 50 },
+    { time: "Thu", load: 90 },
+    { time: "Fri", load: 40 },
+    { time: "Sat", load: 30 },
+    { time: "Sun", load: 70 },
   ];
 
   const menuItems = [
@@ -405,10 +417,10 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <div className="flex gap-2 bg-[var(--surface-light)] p-1.5 rounded-xl border border-[var(--border)] self-start">
-                    <button className="px-4 py-1.5 text-[10px] font-black rounded-lg bg-[var(--primary)] text-white uppercase tracking-widest shadow-lg">
+                    <button onClick={() => setChartView("realtime")} className={`px-4 py-1.5 text-[10px] font-black rounded-lg uppercase tracking-widest transition-all ${chartView === "realtime" ? "bg-[var(--primary)] text-white shadow-lg" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"}`}>
                       Real-Time
                     </button>
-                    <button className="px-4 py-1.5 text-[10px] font-black rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all uppercase tracking-widest">
+                    <button onClick={() => setChartView("history")} className={`px-4 py-1.5 text-[10px] font-black rounded-lg uppercase tracking-widest transition-all ${chartView === "history" ? "bg-[var(--primary)] text-white shadow-lg" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"}`}>
                       History
                     </button>
                   </div>
@@ -417,7 +429,7 @@ const Dashboard = () => {
                 <div className="h-72 w-full relative -ml-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
-                      data={performanceData}
+                      data={chartView === "realtime" ? performanceData : historyData}
                       margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                     >
                       <defs>
@@ -722,9 +734,14 @@ const Dashboard = () => {
                         desc: "Decentralized nodes",
                         active: false,
                       },
-                    ].map((s) => (
+                    ].map((s, index) => (
                       <motion.button
                         key={s.name}
+                        onClick={() => {
+                          if (index === 0 || index === 2) {
+                            navigate("/simulation-details");
+                          }
+                        }}
                         whileHover={{ scale: 1.02, x: 2 }}
                         whileTap={{ scale: 0.98 }}
                         className={`w-full p-4 rounded-2xl border text-left flex items-center justify-between transition-all group ${
@@ -820,7 +837,7 @@ const Dashboard = () => {
           {/* Footer Area */}
           <footer className="mt-12 border-t border-[var(--border)] py-12 mt-auto">
             <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-              <Link to="/" className="text-[var(--text-main)] font-black tracking-tighter text-2xl font-manrope hover:opacity-80 transition-opacity">ShuttleCore</Link>
+              <Link to="/" className="flex items-center gap-2 text-[var(--text-main)] font-black tracking-tighter text-2xl font-manrope hover:opacity-80 transition-opacity"><span className="material-symbols-outlined text-xl">arrow_back</span> ShuttleCore</Link>
               <div className="flex flex-wrap justify-center gap-8">
                 {[{ label: "Services", to: "/services" }, { label: "FAQ", to: "/faq" }, { label: "Payments", to: "/payments" }, { label: "Privacy", to: "/privacy" }].map((l) => (
                   <Link key={l.label} to={l.to} className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors uppercase font-black tracking-[0.2em]">{l.label}</Link>

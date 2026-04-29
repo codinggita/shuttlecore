@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { Toaster } from 'react-hot-toast'
 import store from './store/store'
 import ErrorBoundary from './components/ErrorBoundary'
+import { SocketProvider } from './context/SocketContext'
 import App from './App.jsx'
 import './index.css'
 
@@ -13,8 +14,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Provider store={store}>
       <HelmetProvider>
         <ErrorBoundary>
-          <App />
-          <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+          <SocketProvider>
+            <App />
+            <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+          </SocketProvider>
         </ErrorBoundary>
       </HelmetProvider>
     </Provider>

@@ -17,6 +17,8 @@ const FAQPage = lazy(() => import('./pages/FAQPage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const PaymentMethodsPage = lazy(() => import('./pages/PaymentMethodsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ClusterDetailsPage = lazy(() => import("./pages/ClusterDetailsPage"));
+const SimulationDetailsPage = lazy(() => import("./pages/SimulationDetailsPage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -47,6 +49,8 @@ const AnimatedRoutes = () => {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/payments" element={<PaymentMethodsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/cluster-details" element={<ClusterDetailsPage />} />
+          <Route path="/simulation-details" element={<SimulationDetailsPage />} />
           <Route 
             path="/dashboard" 
             element={

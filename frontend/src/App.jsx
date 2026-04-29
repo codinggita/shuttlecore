@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './context/ThemeContext';
@@ -16,6 +16,16 @@ const DemandHeatmapsPage = lazy(() => import('./pages/DemandHeatmapsPage'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const PaymentMethodsPage = lazy(() => import('./pages/PaymentMethodsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+
+// Scroll to top on every route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+};
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -36,6 +46,7 @@ const AnimatedRoutes = () => {
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/payments" element={<PaymentMethodsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route 
             path="/dashboard" 
             element={
@@ -94,6 +105,7 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
+        <ScrollToTop />
         <AnimatedRoutes />
       </Router>
     </ThemeProvider>

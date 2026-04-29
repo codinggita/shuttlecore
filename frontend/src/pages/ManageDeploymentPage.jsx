@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -8,6 +8,86 @@ const ManageDeploymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+  const [isAlertResolved, setIsAlertResolved] = useState(false);
+  const [isSuspended, setIsSuspended] = useState(false);
+  const [snapshotBeforeSuspend, setSnapshotBeforeSuspend] = useState(null);
+
+  const [activeDeployments, setActiveDeployments] = useState([
+    { id: "SV-402", route: "Sector 7 → Alpha Grid", status: "En Route", progress: 65, color: "bg-emerald-500", text: "text-emerald-500" },
+    { id: "SV-881", route: "District 2 → North Hub", status: "Vectoring", progress: 20, color: "bg-amber-500", text: "text-amber-500" },
+    { id: "SV-209", route: "Terminal B → Maintenance", status: "Returning", progress: 90, color: "bg-rose-500", text: "text-rose-500" },
+    { id: "SV-553", route: "West Campus → South Hub", status: "En Route", progress: 45, color: "bg-emerald-500", text: "text-emerald-500" }
+  ]);
+
+  useEffect(() => {
+    if (location.state && location.state.newUnit) {
+      const unit = location.state.newUnit;
+      const mappedUnit = {
+        id: unit.unitId,
+        route: unit.route || "Deploying to Grid",
+        status: unit.status === "Active" ? "Initializing" : unit.status,
+        progress: 15,
+        color: unit.status === "Active" ? "bg-emerald-500" : (unit.status === "Standby" ? "bg-amber-500" : "bg-rose-500"),
+        text: unit.status === "Active" ? "text-emerald-500" : (unit.status === "Standby" ? "text-amber-500" : "text-rose-500")
+      };
+      
+      setActiveDeployments(prev => {
+        if (!prev.find(p => p.id === mappedUnit.id)) {
+          return [mappedUnit, ...prev];
+        }
+        return prev;
+      });
+    }
+  }, [location.state]);
+
+  const showToast = (title, desc, type) => {
+    setToastMessage({ title, desc, type });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleSuspendAll = () => {
+    if (isSuspended) {
+      // Resume — restore snapshot, keep emergency units at top
+      const emergencyUnits = activeDeployments.filter(u => u.isEmergency);
+      const restored = snapshotBeforeSuspend || [];
+      setActiveDeployments([...emergencyUnits, ...restored]);
+      setIsSuspended(false);
+      showToast("Deployments Resumed", "All units have been reactivated and are back on their routes.", "success");
+    } else {
+      // Suspend — save snapshot of non-emergency units only, halt them
+      const nonEmergency = activeDeployments.filter(u => !u.isEmergency);
+      const emergency = activeDeployments.filter(u => u.isEmergency);
+      setSnapshotBeforeSuspend(nonEmergency);
+      const suspended = nonEmergency.map(unit => ({
+        ...unit,
+        status: "Suspended",
+        progress: 0,
+        color: "bg-slate-500",
+        text: "text-slate-400"
+      }));
+      // Emergency units stay active at top
+      setActiveDeployments([...emergency, ...suspended]);
+      setIsSuspended(true);
+      showToast("Global Suspension Active", "All standard deployments halted. Emergency units remain active.", "error");
+    }
+  };
+
+  const handleResolveAlert = () => {
+    setIsAlertResolved(true);
+    showToast("Sector 4 Stabilized", "3 emergency units have been vectored to Sector 4.", "success");
+    // These units are always inserted as fresh En Route — ignore any suspension state
+    const newUnits = [
+      { id: "SV-991", route: "Central Hub → Sector 4", status: "En Route", progress: 5, color: "bg-emerald-500", text: "text-emerald-500", isEmergency: true },
+      { id: "SV-992", route: "Central Hub → Sector 4", status: "En Route", progress: 2, color: "bg-emerald-500", text: "text-emerald-500", isEmergency: true },
+      { id: "SV-993", route: "Central Hub → Sector 4", status: "En Route", progress: 1, color: "bg-emerald-500", text: "text-emerald-500", isEmergency: true }
+    ];
+    // Insert emergency units at top, keep rest of list as-is
+    setActiveDeployments(prev => {
+      const withoutDuplicates = prev.filter(u => !newUnits.find(n => n.id === u.id));
+      return [...newUnits, ...withoutDuplicates];
+    });
+  };
 
   const menuItems = [
     { id: "simulation", label: "Simulation", icon: "model_training", path: "/dashboard" },
@@ -29,6 +109,23 @@ const ManageDeploymentPage = () => {
 
   return (
     <div className="flex h-screen bg-[var(--background)] text-[var(--text-main)] overflow-hidden transition-colors duration-300 relative font-sans">
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className={`absolute top-6 left-1/2 -translate-x-1/2 z-[100] ${toastMessage.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/20 border-rose-500/30 text-rose-400'} px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md border`}
+          >
+            <span className="material-symbols-outlined">{toastMessage.type === 'success' ? 'check_circle' : 'warning'}</span>
+            <div>
+              <p className="font-black tracking-tight">{toastMessage.title}</p>
+              <p className="text-xs font-medium opacity-80">{toastMessage.desc}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -89,10 +186,20 @@ const ManageDeploymentPage = () => {
                 <p className="text-muted text-sm md:text-base font-medium">Global fleet distribution and active resource vectoring.</p>
               </div>
               <div className="flex gap-4">
-                <button className="btn-secondary !px-6 !py-3 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm">pause_circle</span> Suspend All
+                <button
+                  onClick={handleSuspendAll}
+                  className={`!px-6 !py-3 flex items-center gap-2 rounded-2xl border font-bold text-[11px] uppercase tracking-widest transition-all ${
+                    isSuspended
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                      : "btn-secondary"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    {isSuspended ? "play_circle" : "pause_circle"}
+                  </span>
+                  {isSuspended ? "Resume All" : "Suspend All"}
                 </button>
-                <button className="btn-primary !px-6 !py-3 flex items-center gap-2">
+                <button onClick={() => navigate("/add-unit")} className="btn-primary !px-6 !py-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-sm">add</span> Add Unit
                 </button>
               </div>
@@ -107,16 +214,17 @@ const ManageDeploymentPage = () => {
                     <span className="material-symbols-outlined text-[var(--primary)]">route</span>
                     Active Deployments
                   </h3>
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-500/20">Live Sync</span>
+                  <span className={`text-[10px] font-black uppercase tracking-[0.25em] px-3 py-1.5 rounded-lg border ${
+                    isSuspended
+                      ? "bg-rose-500/10 text-rose-400 border-rose-500/20 animate-pulse"
+                      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                  }`}>
+                    {isSuspended ? "⏸ Halted" : "Live Sync"}
+                  </span>
                 </div>
                 
                 <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                  {[
-                    { id: "SV-402", route: "Sector 7 → Alpha Grid", status: "En Route", progress: 65, color: "bg-emerald-500", text: "text-emerald-500" },
-                    { id: "SV-881", route: "District 2 → North Hub", status: "Vectoring", progress: 20, color: "bg-amber-500", text: "text-amber-500" },
-                    { id: "SV-209", route: "Terminal B → Maintenance", status: "Returning", progress: 90, color: "bg-rose-500", text: "text-rose-500" },
-                    { id: "SV-553", route: "West Campus → South Hub", status: "En Route", progress: 45, color: "bg-emerald-500", text: "text-emerald-500" }
-                  ].map((unit, i) => (
+                  {activeDeployments.map((unit, i) => (
                     <div key={i} className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] hover:border-[var(--primary)]/30 transition-all group">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-4">
@@ -161,14 +269,20 @@ const ManageDeploymentPage = () => {
 
                   <div className="pt-6 border-t border-[var(--border)]">
                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-4">Urgent Alerts</h4>
-                    <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl flex items-start gap-3">
-                      <span className="material-symbols-outlined text-rose-500 text-lg">warning</span>
-                      <div>
-                        <p className="text-xs font-bold text-rose-500 uppercase tracking-widest mb-1">Sector 4 Demand Spike</p>
-                        <p className="text-[10px] text-muted font-medium">3 units required to stabilize queue times.</p>
-                        <button className="mt-3 text-[10px] font-black uppercase tracking-widest text-main underline decoration-white/20 underline-offset-4 hover:text-[var(--primary)] transition-colors">Resolve Now</button>
+                    {!isAlertResolved ? (
+                      <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl flex items-start gap-3">
+                        <span className="material-symbols-outlined text-rose-500 text-lg">warning</span>
+                        <div>
+                          <p className="text-xs font-bold text-rose-500 uppercase tracking-widest mb-1">Sector 4 Demand Spike</p>
+                          <p className="text-[10px] text-muted font-medium">3 units required to stabilize queue times.</p>
+                          <button onClick={handleResolveAlert} className="mt-3 text-[10px] font-black uppercase tracking-widest text-main underline decoration-white/20 underline-offset-4 hover:text-[var(--primary)] transition-colors">Resolve Now</button>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-center justify-center text-center">
+                        <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-sm">check_circle</span> All Systems Nominal</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>

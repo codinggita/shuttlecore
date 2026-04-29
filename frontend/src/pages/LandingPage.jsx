@@ -79,12 +79,18 @@ const LandingPage = () => {
               >
                 AI Dispatch
               </a>
-              <a
+              <Link
                 className="text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all"
-                href="#engine"
+                to="/services"
               >
-                Route Engine
-              </a>
+                Services
+              </Link>
+              <Link
+                className="text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all"
+                to="/faq"
+              >
+                FAQ
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
@@ -533,29 +539,29 @@ const LandingPage = () => {
             </span>
           </div>
           <div className="flex flex-wrap justify-center gap-10">
-            <a
+            <Link
               className="text-[11px] text-[var(--text-muted)] hover:text-white transition-colors uppercase font-black tracking-[0.2em]"
-              href="#"
+              to="/services"
             >
-              Network Status
-            </a>
-            <a
+              Services
+            </Link>
+            <Link
               className="text-[11px] text-[var(--text-muted)] hover:text-white transition-colors uppercase font-black tracking-[0.2em]"
-              href="#"
+              to="/faq"
             >
-              Security Docs
-            </a>
+              FAQ
+            </Link>
+            <Link
+              className="text-[11px] text-[var(--text-muted)] hover:text-white transition-colors uppercase font-black tracking-[0.2em]"
+              to="/payments"
+            >
+              Payments
+            </Link>
             <a
               className="text-[11px] text-[var(--text-muted)] hover:text-white transition-colors uppercase font-black tracking-[0.2em]"
               href="#"
             >
               Privacy
-            </a>
-            <a
-              className="text-[11px] text-[var(--text-muted)] hover:text-white transition-colors uppercase font-black tracking-[0.2em]"
-              href="#"
-            >
-              API Support
             </a>
           </div>
           <span className="text-[11px] text-[var(--text-muted)] font-bold opacity-40">

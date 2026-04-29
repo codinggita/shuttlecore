@@ -13,6 +13,9 @@ const FleetPage = lazy(() => import('./pages/FleetPage'));
 const SafetySecurityPage = lazy(() => import('./pages/SafetySecurityPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const DemandHeatmapsPage = lazy(() => import('./pages/DemandHeatmapsPage'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const PaymentMethodsPage = lazy(() => import('./pages/PaymentMethodsPage'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -30,6 +33,9 @@ const AnimatedRoutes = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/payments" element={<PaymentMethodsPage />} />
           <Route 
             path="/dashboard" 
             element={

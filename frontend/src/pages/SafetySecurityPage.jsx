@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 
@@ -185,10 +185,10 @@ const SafetySecurityPage = () => {
       `}
       >
         <div className="p-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 mb-10"
+          <Link
+            to="/"
+            className="flex items-center gap-3 mb-10 hover:opacity-80 transition-opacity"
+            title="Back to Home"
           >
             <div className="w-9 h-9 bg-[var(--primary)] rounded-xl flex items-center justify-center border border-white/10 shadow-lg shadow-black/20 transition-all">
               <span className="material-symbols-outlined text-white text-xl">
@@ -199,7 +199,7 @@ const SafetySecurityPage = () => {
               SHUTTLE
               <span className="text-[var(--text-main)] opacity-70">CORE</span>
             </span>
-          </motion.div>
+          </Link>
 
           <nav className="space-y-1.5">
             <p className="px-4 text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 opacity-50">
@@ -722,20 +722,15 @@ const SafetySecurityPage = () => {
             </motion.div>
 
             {/* Footer Area */}
-            <footer className="mt-12 py-12 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-8 px-2">
-              <p className="text-[10px] font-black text-muted uppercase tracking-[0.3em] opacity-40">
-                © 2024 SHUTTLECORE LOGISTICS. SAFETY PROTOCOL L-9.
-              </p>
-              <div className="flex gap-10">
-                {["Telemetrics", "Compliance", "Ethics"].map((link) => (
-                  <a
-                    key={link}
-                    className="text-[10px] font-black text-muted hover:text-[var(--text-main)] transition-all uppercase tracking-[0.2em]"
-                    href="#"
-                  >
-                    {link}
-                  </a>
-                ))}
+            <footer className="mt-12 border-t border-[var(--border)] py-12 mt-auto">
+              <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <Link to="/" className="text-[var(--text-main)] font-black tracking-tighter text-2xl font-manrope hover:opacity-80 transition-opacity">ShuttleCore</Link>
+                <div className="flex flex-wrap justify-center gap-8">
+                  {[{ label: "Services", to: "/services" }, { label: "FAQ", to: "/faq" }, { label: "Payments", to: "/payments" }, { label: "Privacy", to: "/privacy" }].map((l) => (
+                    <Link key={l.label} to={l.to} className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors uppercase font-black tracking-[0.2em]">{l.label}</Link>
+                  ))}
+                </div>
+                <span className="text-[11px] text-[var(--text-muted)] font-bold opacity-40">© 2024 ShuttleCore Logistics Systems.</span>
               </div>
             </footer>
           </motion.div>

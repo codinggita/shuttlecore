@@ -41,7 +41,7 @@ const FleetPage = () => {
       label: "AI Dispatch",
       icon: "query_stats",
       path: "/ai-dispatch",
-    },
+    },                                                                                                                                                         
     {
       id: "heatmaps",
       label: "Demand Heatmaps",

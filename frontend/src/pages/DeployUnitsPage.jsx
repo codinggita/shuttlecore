@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 
-const SimulationDetailsPage = () => {
+const DeployUnitsPage = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [deploymentProgress, setDeploymentProgress] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDeploymentProgress((prev) => (prev < 100 ? prev + 1 : 100));
+    }, 50);
+    return () => clearInterval(timer);
+  }, []);
 
   const menuItems = [
     { id: "simulation", label: "Simulation", icon: "model_training", path: "/dashboard" },
@@ -24,7 +32,7 @@ const SimulationDetailsPage = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
   return (
@@ -82,70 +90,61 @@ const SimulationDetailsPage = () => {
             <motion.div variants={itemVariants} className="mb-10">
               <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-muted hover:text-main transition-colors mb-4 uppercase tracking-widest">
                 <span className="material-symbols-outlined text-sm">arrow_back</span>
-                Back to Dashboard
+                Back to Dispatch
               </button>
-              <h1 className="text-3xl md:text-5xl font-black text-main mb-2 tracking-tighter">Simulation Features</h1>
-              <p className="text-muted text-sm md:text-base font-medium">Advanced routing engine diagnostics and neural mesh telemetry.</p>
+              <h1 className="text-3xl md:text-5xl font-black text-main mb-2 tracking-tighter">Deployment Sequence</h1>
+              <p className="text-muted text-sm md:text-base font-medium">Authorizing 4 idle units for North Sector repositioning.</p>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
-              {/* Telemetry Logs */}
-              <motion.div variants={itemVariants} className="dashboard-card !p-8 border-[var(--border)] border shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)] flex flex-col">
-                <h3 className="text-xl font-black text-main tracking-tight mb-6 flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[var(--primary)]">radar</span>
-                  Neural Mesh Telemetry
-                </h3>
-                <div className="bg-[var(--background)] rounded-2xl p-5 font-mono text-[11px] space-y-4 flex-1 border border-[var(--border)] shadow-inner">
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:11</span><span className="text-emerald-400 font-bold">ROUTE_CALC: Node_Alpha_Active</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:14</span><span className="text-main">V2X_SYNC: Distributing payloads</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:18</span><span className="text-amber-400 font-bold">WARN: Vector_Path_Congested</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:22</span><span className="text-main">REROUTE: Executing Swarm Logic</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:25</span><span className="text-emerald-400 font-bold">OPTIMIZED: Latency reduced by 14%</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:30</span><span className="text-main animate-pulse">Awaiting next packet...</span></p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Deployment Status */}
+              <motion.div variants={itemVariants} className="lg:col-span-2 dashboard-card !p-8 flex flex-col relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--primary)] opacity-[0.03] rounded-bl-full pointer-events-none"></div>
+                <h3 className="text-xl font-black tracking-tight mb-8">Active Repositioning</h3>
+                
+                <div className="flex flex-col items-center justify-center py-10">
+                  <div className="relative w-48 h-48 mb-8 flex items-center justify-center">
+                    <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                      <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-[var(--border)]" />
+                      <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="552" strokeDashoffset={552 - (552 * deploymentProgress) / 100} className="text-[var(--primary)] transition-all duration-300" />
+                    </svg>
+                    <div className="text-center">
+                      <span className="text-4xl font-black tracking-tighter">{deploymentProgress}%</span>
+                      <p className="text-[10px] uppercase font-bold tracking-widest text-muted mt-1">Completion</p>
+                    </div>
+                  </div>
+                  <h4 className="text-lg font-black text-main mb-2">{deploymentProgress === 100 ? "Units Successfully Deployed" : "Routing Units to North Sector..."}</h4>
+                  <p className="text-sm text-muted text-center max-w-sm">
+                    {deploymentProgress === 100 
+                      ? "All 4 units have successfully established connection with the North Sector transponder grid. Ready for operation."
+                      : "Establishing secure V2X communication links and vectoring paths through dense zones."}
+                  </p>
                 </div>
               </motion.div>
 
-              {/* Engine Metrics */}
-              <motion.div variants={itemVariants} className="dashboard-card !p-8 border-[var(--border)] border shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)]">
-                <h3 className="text-xl font-black text-main tracking-tight mb-6 flex items-center gap-3">
-                  <span className="material-symbols-outlined text-amber-500">speed</span>
-                  Simulation Performance
-                </h3>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-2">
-                      <span className="text-muted">Throughput</span>
-                      <span className="text-main">98.4%</span>
+              {/* Units List */}
+              <motion.div variants={itemVariants} className="dashboard-card !p-6 flex flex-col">
+                <h3 className="text-sm font-black tracking-widest uppercase text-muted mb-6">Assigned Units</h3>
+                <div className="space-y-4">
+                  {[
+                    { id: "SV-402", eta: "1m 12s", status: "In Transit", color: "text-amber-500", bg: "bg-amber-500/10" },
+                    { id: "SV-405", eta: "Arrived", status: "Docked", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                    { id: "SV-408", eta: "2m 45s", status: "In Transit", color: "text-amber-500", bg: "bg-amber-500/10" },
+                    { id: "SV-412", eta: "Arrived", status: "Docked", color: "text-emerald-500", bg: "bg-emerald-500/10" }
+                  ].map((unit, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${unit.color} ${unit.bg}`}>
+                          {unit.id.split('-')[1]}
+                        </div>
+                        <div>
+                          <p className="font-black text-[13px]">{unit.id}</p>
+                          <p className={`text-[10px] uppercase tracking-wider font-bold ${unit.color}`}>{unit.status}</p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-black opacity-60">{unit.eta}</span>
                     </div>
-                    <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 w-[98.4%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-2">
-                      <span className="text-muted">Latency Offset</span>
-                      <span className="text-main">14ms</span>
-                    </div>
-                    <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-500 w-[20%] rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-2">
-                      <span className="text-muted">Packet Loss</span>
-                      <span className="text-main">0.01%</span>
-                    </div>
-                    <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 w-[5%] rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                    </div>
-                  </div>
-                  <div className="pt-6 mt-6 border-t border-[var(--border)] flex justify-between items-center">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest font-bold text-muted">Active Protocol</p>
-                      <p className="text-lg font-black text-main mt-1">SWARM-V4</p>
-                    </div>
-                    <button onClick={() => navigate("/dashboard")} className="btn-primary !py-2 !px-6 !text-[10px]">Return</button>
-                  </div>
+                  ))}
                 </div>
               </motion.div>
             </div>
@@ -170,4 +169,4 @@ const SimulationDetailsPage = () => {
   );
 };
 
-export default SimulationDetailsPage;
+export default DeployUnitsPage;

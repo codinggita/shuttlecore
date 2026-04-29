@@ -442,9 +442,9 @@ const DemandHeatmapsPage = () => {
                       <div
                         key={item.id}
                         onClick={() => {
-                          if (item.id === "#1" || item.id === "#3") {
-                            navigate("/cluster-details");
-                          }
+                          if (item.id === "#1") navigate("/cluster-north-plaza");
+                          if (item.id === "#2") navigate("/cluster-mission-hub");
+                          if (item.id === "#3") navigate("/cluster-sunset-terrace");
                         }}
                         className="bg-[var(--surface-muted)] p-4 rounded-2xl flex items-center justify-between border border-[var(--border)] hover:border-[var(--primary)]/30 hover:bg-[var(--surface-light)] transition-all cursor-pointer group"
                       >
@@ -491,7 +491,7 @@ const DemandHeatmapsPage = () => {
                       "Moving Cluster #2 40 meters North could reduce total
                       dwell time by 8%."
                     </p>
-                    <button className="w-full py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-xs font-black transition-all uppercase tracking-widest">
+                    <button onClick={() => navigate("/apply-recommendation")} className="w-full py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-xs font-black transition-all uppercase tracking-widest">
                       Apply Recommendation
                     </button>
                   </div>

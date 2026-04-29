@@ -18,7 +18,7 @@ const FleetPage = () => {
   };
 
   const handleFinalizeNoShow = () => {
-    alert("No-Show finalized for Marcus Thorne. Route recalculated.");
+    navigate("/finalize-no-show");
   };
 
   const handleAddWaitTime = () => {
@@ -81,11 +81,13 @@ const FleetPage = () => {
       icon: "schedule_send",
       title: "Notify Next Stop",
       desc: "Scheduled: 14:02 (T-5m)",
+      path: "/notify-next-stop",
     },
     {
       icon: "assignment_late",
       title: "Log incident report",
       desc: "Auto-queue for post-op",
+      path: "/incident-report",
     },
   ];
 
@@ -451,7 +453,7 @@ const FleetPage = () => {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setShowContactModal(true)}
+                      onClick={() => navigate("/rider-details")}
                       className="px-8 py-3.5 border border-[var(--border)] text-[var(--text-main)] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-[var(--surface-muted)] transition-all shadow-xl"
                     >
                       <span className="material-symbols-outlined text-lg">
@@ -642,6 +644,7 @@ const FleetPage = () => {
                     {downstreamActions.map((action, i) => (
                       <motion.div
                         key={i}
+                        onClick={() => navigate(action.path)}
                         whileHover={{
                           x: 4,
                           backgroundColor: "rgba(255,255,255,0.02)",

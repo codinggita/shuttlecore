@@ -17,10 +17,18 @@ const FAQPage = lazy(() => import('./pages/FAQPage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const PaymentMethodsPage = lazy(() => import('./pages/PaymentMethodsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
-const ClusterDetailsPage = lazy(() => import("./pages/ClusterDetailsPage"));
+const ClusterNorthPlazaPage = lazy(() => import("./pages/ClusterNorthPlazaPage"));
+const ClusterMissionHubPage = lazy(() => import("./pages/ClusterMissionHubPage"));
+const ClusterSunsetTerracePage = lazy(() => import("./pages/ClusterSunsetTerracePage"));
 const SimulationDetailsPage = lazy(() => import("./pages/SimulationDetailsPage"));
 const DeployUnitsPage = lazy(() => import("./pages/DeployUnitsPage"));
 const ManageDeploymentPage = lazy(() => import("./pages/ManageDeploymentPage"));
+const AddUnitPage = lazy(() => import("./pages/AddUnitPage"));
+const ApplyRecommendationPage = lazy(() => import("./pages/ApplyRecommendationPage"));
+const FinalizeNoShowPage = lazy(() => import("./pages/FinalizeNoShowPage"));
+const RiderDetailsPage = lazy(() => import("./pages/RiderDetailsPage"));
+const NotifyNextStopPage = lazy(() => import("./pages/NotifyNextStopPage"));
+const IncidentReportPage = lazy(() => import("./pages/IncidentReportPage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -51,10 +59,18 @@ const AnimatedRoutes = () => {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/payments" element={<PaymentMethodsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/cluster-details" element={<ClusterDetailsPage />} />
+          <Route path="/cluster-north-plaza" element={<ClusterNorthPlazaPage />} />
+          <Route path="/cluster-mission-hub" element={<ClusterMissionHubPage />} />
+          <Route path="/cluster-sunset-terrace" element={<ClusterSunsetTerracePage />} />
           <Route path="/simulation-details" element={<SimulationDetailsPage />} />
           <Route path="/deploy-units" element={<DeployUnitsPage />} />
           <Route path="/manage-deployment" element={<ManageDeploymentPage />} />
+          <Route path="/add-unit" element={<AddUnitPage />} />
+          <Route path="/apply-recommendation" element={<ApplyRecommendationPage />} />
+          <Route path="/finalize-no-show" element={<FinalizeNoShowPage />} />
+          <Route path="/rider-details" element={<RiderDetailsPage />} />
+          <Route path="/notify-next-stop" element={<NotifyNextStopPage />} />
+          <Route path="/incident-report" element={<IncidentReportPage />} />
           <Route 
             path="/dashboard" 
             element={

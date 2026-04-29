@@ -637,6 +637,7 @@ const Dashboard = () => {
                   ))}
                 </div>
                 <motion.button
+                  onClick={() => navigate("/manage-deployment")}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full mt-8 py-3.5 btn-secondary text-[10px] font-black uppercase tracking-[0.25em] !bg-[var(--surface-muted)] border-[var(--border)] hover:!bg-[var(--surface-light)]"
@@ -734,14 +735,10 @@ const Dashboard = () => {
                         desc: "Decentralized nodes",
                         active: false,
                       },
-                    ].map((s, index) => (
+                    ].map((s) => (
                       <motion.button
                         key={s.name}
-                        onClick={() => {
-                          if (index === 0 || index === 2) {
-                            navigate("/simulation-details");
-                          }
-                        }}
+                        onClick={() => navigate("/simulation-details")}
                         whileHover={{ scale: 1.02, x: 2 }}
                         whileTap={{ scale: 0.98 }}
                         className={`w-full p-4 rounded-2xl border text-left flex items-center justify-between transition-all group ${

@@ -67,7 +67,7 @@ const AIDispatchPage = () => {
   };
 
   const handleDeployUnits = () => {
-    alert("Deploying 4 idle units from District 2 to North Sector");
+    navigate("/deploy-units");
   };
 
   const menuItems = [

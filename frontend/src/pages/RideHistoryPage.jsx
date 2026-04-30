@@ -46,14 +46,18 @@ const RideHistoryPage = () => {
         
         // Transform bookings to match UI format
         const transformedBookings = bookingsData.map(b => ({
-          id: b._id,
-          pickupLocation: b.pickupLocation,
-          dropoffLocation: b.dropoffLocation,
-          vehicleType: b.vehicleType,
+          id: b.id,
+          pickupLocation: b.pickup,
+          dropoffLocation: b.dropoff,
+          vehicleType: b.vehicle?.type || 'Standard',
+          vehicleName: b.vehicle?.name || 'Standard Ride',
           status: b.status,
           price: b.price,
-          createdAt: b.createdAt,
-          bookingType: b.bookingType || 'standard'
+          paymentMethod: b.paymentMethod,
+          createdAt: b.timestamp,
+          bookingType: b.bookingType || 'now',
+          reserveDate: b.reserveDate,
+          reserveTime: b.reserveTime
         }));
         
         setBookings(transformedBookings);

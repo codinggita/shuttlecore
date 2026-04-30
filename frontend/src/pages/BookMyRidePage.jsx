@@ -58,12 +58,12 @@ const BookMyRidePage = () => {
     setIsLoading(true);
     try {
       const response = await api.post('/bookings', {
-        pickupLocation,
-        dropoffLocation,
-        vehicle: selectedVehicle._id,
-        vehicleType: selectedVehicle.type,
-        status: 'pending',
-        discountCode: selectedDiscount?.code
+        vehicleId: selectedVehicle._id,
+        pickup: pickupLocation,
+        dropoff: dropoffLocation,
+        paymentMethod: selectedPayment,
+        discountCode: selectedDiscount?.code,
+        bookingType: 'now'
       });
       
       navigate('/booking-confirmation', { state: { booking: response.data.booking } });

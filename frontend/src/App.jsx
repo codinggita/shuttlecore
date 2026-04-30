@@ -6,6 +6,7 @@ import EmergencyNotification from './components/EmergencyNotification';
 import './index.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -254,6 +255,14 @@ const AnimatedRoutes = () => {
             element={
               <ProtectedRoute>
                 <ReserveRidePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             } 
           />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -8,6 +8,22 @@ const DemandHeatmapsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [user, setUser] = useState({
+    firstName: "Cmdr.",
+    lastName: "Operative",
+    email: "operative@shuttlecore.ai",
+    organization: "Systems Command",
+    role: "Systems Lead",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
+  });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userProfile");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const [efficiency, setEfficiency] = useState(94);
   const [walkDistance, setWalkDistance] = useState(180);
   const [fleetLoad, setFleetLoad] = useState(82);
@@ -95,10 +111,19 @@ const DemandHeatmapsPage = () => {
             ))}
           </nav>
         </div>
-        <div className="mt-auto p-6">
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleLogout} className="w-full py-3 flex items-center justify-center gap-2 text-[10px] font-black text-muted hover:text-rose-400 transition-colors uppercase tracking-widest border border-[var(--border)] rounded-xl bg-[var(--surface-muted)]">
-            <span className="material-symbols-outlined text-xs">logout</span> Terminate Session
+        <div className="mt-auto p-6 space-y-4">
+          <motion.button whileHover={{ scale: 1.02 }} onClick={() => navigate("/emergency-stop")} className="w-full py-3.5 flex items-center justify-center gap-3 text-[11px] font-black text-rose-500 border-2 border-rose-500/30 rounded-2xl transition-all uppercase tracking-[0.2em] bg-rose-500/5">
+            <span className="material-symbols-outlined text-lg animate-pulse">emergency_home</span> Emergency Stop
           </motion.button>
+          <div className="dashboard-card !p-4 !rounded-2xl bg-[var(--surface-muted)] border border-[var(--primary)]/20 hover:border-[var(--primary)]/40 transition-colors group/sidebar-profile">
+            <Link to="/profile" className="flex items-center gap-3 mb-4 group/pcard">
+              <img src={user.avatar} alt="Profile" className="w-10 h-10 rounded-full border border-white/20 group-hover/pcard:border-[var(--primary)] transition-all" />
+              <div><p className="text-[13px] font-black text-main leading-tight group-hover/pcard:text-[var(--primary)] transition-colors">{user.firstName} {user.lastName}</p><p className="text-[10px] text-muted uppercase font-bold tracking-wider">{user.role}</p></div>
+            </Link>
+            <motion.button onClick={handleLogout} className="w-full py-2 flex items-center justify-center gap-2 text-[10px] font-black text-muted hover:text-rose-400 transition-colors uppercase tracking-widest border border-[var(--border)] rounded-lg">
+              <span className="material-symbols-outlined text-xs">logout</span> Terminate Session
+            </motion.button>
+          </div>
         </div>
       </aside>
 

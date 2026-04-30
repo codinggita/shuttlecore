@@ -10,6 +10,22 @@ const RideHistoryPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [bookings, setBookings] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [user, setUser] = useState({
+    firstName: "Cmdr.",
+    lastName: "Operative",
+    email: "operative@shuttlecore.ai",
+    organization: "Systems Command",
+    role: "Systems Lead",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
+  });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userProfile");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
 
   useEffect(() => {
     const savedBookings = JSON.parse(localStorage.getItem("bookings") || "[]");

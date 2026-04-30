@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import { useSocket } from "../context/SocketContext";
 import {
   AreaChart,
   Area,
@@ -11,9 +12,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import api from "../services/api";
 
 const Dashboard = () => {
   const { theme, toggleTheme } = useTheme();
+  const { emergencyAlert, urgentAlert, clearEmergencyAlert, clearUrgentAlert, fleetLocations } = useSocket();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -28,41 +31,20 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-  
-  // Emergency notification state
-  const [emergencyAlert, setEmergencyAlert] = useState(null);
-  
-  // Check for active emergency
-  useEffect(() => {
-    const checkEmergency = () => {
-      const isEmergency = localStorage.getItem("emergencyActive");
-      const emergencyCount = localStorage.getItem("emergencyCount");
-      const emergencyTime = localStorage.getItem("emergencyTime");
-      
-      if (isEmergency === "true") {
-        setEmergencyAlert({
-          count: emergencyCount || "4",
-          time: emergencyTime,
-        });
-      } else {
-        setEmergencyAlert(null);
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
       }
     };
     
-    checkEmergency();
-    const interval = setInterval(checkEmergency, 5000);
-    const handleStorage = () => checkEmergency();
-    window.addEventListener("storage", handleStorage);
-    
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("storage", handleStorage);
-    };
+    fetchUserProfile();
   }, []);
 
   const handleLogout = () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const SafetySecurityPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -26,10 +27,20 @@ const SafetySecurityPage = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    
+    fetchUserProfile();
   }, []);
 
   

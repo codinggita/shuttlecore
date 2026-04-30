@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const ProfilePage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -31,12 +32,24 @@ const ProfilePage = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      setUser(parsed);
-      setEditForm(parsed);
-    }
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        const userData = response.data.user;
+        setUser(userData);
+        setEditForm(userData);
+        localStorage.setItem("userProfile", JSON.stringify(userData));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          setUser(parsed);
+          setEditForm(parsed);
+        }
+      }
+    };
+    
+    fetchUserProfile();
   }, []);
 
   const handleSaveProfile = () => {

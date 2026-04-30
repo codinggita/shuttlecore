@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import { useSocket } from "../context/SocketContext";
+import api from "../services/api";
 
 const DemandHeatmapsPage = () => {
   const { theme, toggleTheme } = useTheme();
+  const { liveMapData, fleetLocations, isConnected } = useSocket();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,10 +21,20 @@ const DemandHeatmapsPage = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    
+    fetchUserProfile();
   }, []);
 
   const [efficiency, setEfficiency] = useState(94);
@@ -29,11 +42,40 @@ const DemandHeatmapsPage = () => {
   const [fleetLoad, setFleetLoad] = useState(82);
   const [avgWait, setAvgWait] = useState(4.2);
   const [predictionTime, setPredictionTime] = useState(1035); // 17:15 in minutes
-  const [clusters, setClusters] = useState([
-    { id: "#1", name: "North Financial Plaza", sub: "12 Passengers • 1 Shuttle Assigned", count: 12, color: "bg-emerald-500", text: "text-emerald-500" },
-    { id: "#2", name: "The Mission Hub", sub: "28 Passengers • 3 Shuttles Assigned", count: 28, color: "bg-[#5C5C3D]", text: "text-[#5C5C3D]" },
-    { id: "#3", name: "Sunset Terrace", sub: "Pending optimization...", count: 8, color: "bg-slate-500", text: "text-slate-500", status: "pending" },
-  ]);
+  const [clusters, setClusters] = useState([]);
+
+  // Fetch clusters on mount
+  useEffect(() => {
+    const fetchClusters = async () => {
+      try {
+        const response = await api.get('/clusters');
+        const clustersData = response.data.clusters || [];
+        
+        // Transform clusters to match UI format
+        const transformedClusters = clustersData.map((c, index) => ({
+          id: `#${index + 1}`,
+          name: c.name || `Cluster ${index + 1}`,
+          sub: `${c.passengers || 0} Passengers • ${c.shuttlesAssigned || 0} Shuttles Assigned`,
+          count: c.passengers || 0,
+          color: c.status === 'active' ? "bg-emerald-500" : c.status === 'pending' ? "bg-slate-500" : "bg-[#5C5C3D]",
+          text: c.status === 'active' ? "text-emerald-500" : c.status === 'pending' ? "text-slate-500" : "text-[#5C5C3D]",
+          status: c.status
+        }));
+        
+        setClusters(transformedClusters);
+      } catch (error) {
+        console.error("Error fetching clusters:", error);
+        // Fallback to default clusters if API fails
+        setClusters([
+          { id: "#1", name: "North Financial Plaza", sub: "12 Passengers • 1 Shuttle Assigned", count: 12, color: "bg-emerald-500", text: "text-emerald-500" },
+          { id: "#2", name: "The Mission Hub", sub: "28 Passengers • 3 Shuttles Assigned", count: 28, color: "bg-[#5C5C3D]", text: "text-[#5C5C3D]" },
+          { id: "#3", name: "Sunset Terrace", sub: "Pending optimization...", count: 8, color: "bg-slate-500", text: "text-slate-500", status: "pending" },
+        ]);
+      }
+    };
+    
+    fetchClusters();
+  }, []);
 
   // Real-time update simulation
   React.useEffect(() => {

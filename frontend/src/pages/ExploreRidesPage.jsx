@@ -1,93 +1,67 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const ExploreRidesPage = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [rideOptions, setRideOptions] = useState([
-    {
-      id: "ride",
-      title: "Standard Ride",
-      description: "Fast, reliable rides for your everyday travel needs across the city.",
-      icon: "directions_car",
-      image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800",
-      price: "From ₹89",
-      basePrice: 89,
-      features: ["2 min pickup", "Verified drivers", "Live tracking"],
-      color: "text-blue-400",
-      available: true,
-      demand: "High"
-    },
-    {
-      id: "xl",
-      title: "Shuttle XL",
-      description: "Spacious SUVs and vans for groups up to 6 people or extra luggage.",
-      icon: "airport_shuttle",
-      image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800",
-      price: "From ₹195",
-      basePrice: 195,
-      features: ["Extra legroom", "Group travel", "Safe & clean"],
-      color: "text-purple-400",
-      available: true,
-      demand: "Medium"
-    },
-    {
-      id: "bike",
-      title: "Quick Bike",
-      description: "The fastest way to beat the traffic. Perfect for solo travelers.",
-      icon: "two_wheeler",
-      image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800",
-      price: "From ₹45",
-      basePrice: 45,
-      features: ["Traffic-proof", "Pocket-friendly", "Helmet provided"],
-      color: "text-orange-400",
-      available: true,
-      demand: "High"
-    },
-    {
-      id: "rentals",
-      title: "Flex Rentals",
-      description: "Book a car by the hour. Make as many stops as you need.",
-      icon: "schedule",
-      image: "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800",
-      price: "From ₹350/hr",
-      basePrice: 350,
-      features: ["Hourly bookings", "Unlimited stops", "Chauffeur included"],
-      color: "text-emerald-400",
-      available: true,
-      demand: "Low"
-    },
-    {
-      id: "intercity",
-      title: "Intercity Plus",
-      description: "Travel comfortably between cities with our top-rated outstation fleet.",
-      icon: "commute",
-      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800",
-      price: "From ₹2500",
-      basePrice: 2500,
-      features: ["One-way/Round trip", "Top-tier sedans", "Roadside assistance"],
-      color: "text-sky-400",
-      available: true,
-      demand: "Medium"
-    },
-    {
-      id: "parcel",
-      title: "Parcel Express",
-      description: "Secure, same-day delivery for your items and packages.",
-      icon: "local_shipping",
-      image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800",
-      price: "From ₹60",
-      basePrice: 60,
-      features: ["Doorstep pickup", "Insured delivery", "Proof of delivery"],
-      color: "text-rose-400",
-      available: true,
-      demand: "High"
-    }
-  ]);
+  const [rideOptions, setRideOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch vehicles on mount
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/vehicles');
+        const vehicles = response.data.vehicles || [];
+        
+        // Transform vehicles to ride options format
+        const transformedOptions = vehicles.map(v => ({
+          id: v._id,
+          title: v.name,
+          description: v.description || "Comfortable ride for your journey",
+          icon: v.type === 'bike' ? 'two_wheeler' : v.type === 'xl' ? 'airport_shuttle' : 'directions_car',
+          image: v.image || "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800",
+          price: `From ₹${v.basePrice || 89}`,
+          basePrice: v.basePrice || 89,
+          features: ["Verified drivers", "Live tracking", "Safe & clean"],
+          color: v.type === 'bike' ? 'text-orange-400' : v.type === 'xl' ? 'text-purple-400' : 'text-blue-400',
+          available: v.status === 'available',
+          demand: v.demand || 'Medium'
+        }));
+        
+        setRideOptions(transformedOptions);
+      } catch (error) {
+        console.error("Error fetching vehicles:", error);
+        // Fallback to default options if API fails
+        setRideOptions([
+          {
+            id: "ride",
+            title: "Standard Ride",
+            description: "Fast, reliable rides for your everyday travel needs across the city.",
+            icon: "directions_car",
+            image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800",
+            price: "From ₹89",
+            basePrice: 89,
+            features: ["2 min pickup", "Verified drivers", "Live tracking"],
+            color: "text-blue-400",
+            available: true,
+            demand: "High"
+          }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchVehicles();
+  }, []);
 
   // Real-time updates every second
   useEffect(() => {

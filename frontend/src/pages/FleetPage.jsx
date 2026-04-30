@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import { useSocket } from "../context/SocketContext";
+import api from "../services/api";
 
 const FleetPage = () => {
   const { theme, toggleTheme } = useTheme();
+  const { fleetLocations, isConnected } = useSocket();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,10 +24,20 @@ const FleetPage = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    
+    fetchUserProfile();
   }, []);
 
   
@@ -43,6 +56,26 @@ const FleetPage = () => {
     timeSaved: 494, // 08:14 in seconds
     efficiency: 12.4
   });
+  const [vehicles, setVehicles] = useState([]);
+  const [deployments, setDeployments] = useState([]);
+
+  // Fetch vehicles and deployments on mount
+  useEffect(() => {
+    const fetchFleetData = async () => {
+      try {
+        const [vehiclesRes, deploymentsRes] = await Promise.all([
+          api.get('/vehicles'),
+          api.get('/deployments')
+        ]);
+        setVehicles(vehiclesRes.data.vehicles || []);
+        setDeployments(deploymentsRes.data.deployments || []);
+      } catch (error) {
+        console.error("Error fetching fleet data:", error);
+      }
+    };
+    
+    fetchFleetData();
+  }, []);
 
   // Real-time update simulation
   React.useEffect(() => {

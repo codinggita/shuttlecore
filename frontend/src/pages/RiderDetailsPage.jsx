@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const RiderDetailsPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -10,6 +11,38 @@ const RiderDetailsPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [contactStep, setContactStep] = useState("details"); // "details" | "calling" | "done"
+  const [rider, setRider] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch rider data on mount
+  useEffect(() => {
+    const fetchRiderData = async () => {
+      setIsLoading(true);
+      try {
+        // Get rider ID from URL params or location state
+        const riderId = location.state?.riderId;
+        if (riderId) {
+          const response = await api.get(`/riders/${riderId}`);
+          setRider(response.data.rider);
+        }
+      } catch (error) {
+        console.error("Error fetching rider data:", error);
+        // Fallback to mock data if API fails
+        setRider({
+          name: "Marcus Thorne",
+          phone: "+1 (555) 123-4567",
+          email: "marcus.thorne@email.com",
+          rating: 4.8,
+          totalRides: 42,
+          status: "active"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchRiderData();
+  }, [location.state]);
 
   const showToast = (title, desc, type = "success") => {
     setToast({ title, desc, type });

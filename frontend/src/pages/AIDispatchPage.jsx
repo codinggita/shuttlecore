@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const AIDispatchPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -18,56 +19,74 @@ const AIDispatchPage = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    
+    fetchUserProfile();
   }, []);
 
-  const [dispatchQueue, setDispatchQueue] = useState([
-    {
-      id: "TX-9012",
-      passenger: "Marcus Thorne",
-      origin: "LHR-T5",
-      destination: "Central Hub",
-      priority: "URGENT",
-      autoAssign: "SV-201",
-      status: "pending",
-    },
-    {
-      id: "TX-9013",
-      passenger: "Elena Vance",
-      origin: "District 4",
-      destination: "Skyline Dr",
-      priority: "ROUTINE",
-      autoAssign: null,
-      status: "waitlist",
-    },
-    {
-      id: "TX-9014",
-      passenger: "James Chen",
-      origin: "Tech Park",
-      destination: "Airport T2",
-      priority: "URGENT",
-      autoAssign: "SV-305",
-      status: "pending",
-    },
-    {
-      id: "TX-9015",
-      passenger: "Sarah Miller",
-      origin: "Downtown",
-      destination: "West End",
-      priority: "ROUTINE",
-      autoAssign: null,
-      status: "waitlist",
-    },
-  ]);
+  const [dispatchQueue, setDispatchQueue] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [vehicles, setVehicles] = useState([
-    { id: "SV-402", eta: "4m 12s", x: 33, y: 50, status: "active", rawEta: 252 },
-    { id: "SV-201", eta: "2m 45s", x: 45, y: 35, status: "active", rawEta: 165 },
-    { id: "SV-305", eta: "6m 20s", x: 60, y: 55, status: "active", rawEta: 380 },
-  ]);
+  // Fetch dispatch queue and vehicles on mount
+  useEffect(() => {
+    const fetchDispatchData = async () => {
+      setIsLoading(true);
+      try {
+        const [dispatchRes, vehiclesRes] = await Promise.all([
+          api.get('/dispatch'),
+          api.get('/vehicles')
+        ]);
+        
+        const dispatchData = dispatchRes.data.dispatch || [];
+        const vehiclesData = vehiclesRes.data.vehicles || [];
+        
+        // Transform dispatch queue to match UI format
+        const transformedDispatch = dispatchData.map(d => ({
+          id: d._id,
+          passenger: d.passengerName || "Unknown",
+          origin: d.origin || "Unknown",
+          destination: d.destination || "Unknown",
+          priority: d.priority || "ROUTINE",
+          autoAssign: d.assignedVehicle || null,
+          status: d.status || "pending"
+        }));
+        
+        // Transform vehicles to match UI format
+        const transformedVehicles = vehiclesData.map(v => ({
+          id: v._id,
+          eta: `${Math.floor(Math.random() * 10)}m ${Math.floor(Math.random() * 60)}s`,
+          x: v.location?.coordinates?.[0] || 50,
+          y: v.location?.coordinates?.[1] || 50,
+          status: v.status || "active",
+          rawEta: Math.floor(Math.random() * 600)
+        }));
+        
+        setDispatchQueue(transformedDispatch);
+        setVehicles(transformedVehicles);
+      } catch (error) {
+        console.error("Error fetching dispatch data:", error);
+        // Fallback to empty arrays if API fails
+        setDispatchQueue([]);
+        setVehicles([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDispatchData();
+  }, []);
 
   const [pendingRequests, setPendingRequests] = useState(124);
   const [liveFleets, setLiveFleets] = useState(86);

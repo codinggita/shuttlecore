@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const DeployUnitsPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -9,6 +10,26 @@ const DeployUnitsPage = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [deploymentProgress, setDeploymentProgress] = useState(0);
+  const [deployments, setDeployments] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch deployments on mount
+  useEffect(() => {
+    const fetchDeployments = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/deployments');
+        setDeployments(response.data.deployments || []);
+      } catch (error) {
+        console.error("Error fetching deployments:", error);
+        setDeployments([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDeployments();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {

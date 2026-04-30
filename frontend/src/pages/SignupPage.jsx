@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const SignupPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -12,7 +13,8 @@ const SignupPage = () => {
     firstName: "",
     lastName: "",
     email: "",
-    organization: ""
+    organization: "",
+    password: ""
   });
 
   const handleChange = (e) => {
@@ -20,21 +22,28 @@ const SignupPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Store user data in localStorage for profile persistence
-    localStorage.setItem("userProfile", JSON.stringify({
-      ...formData,
-      role: "Systems Lead",
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
-    }));
-
-    setTimeout(() => {
+    try {
+      const response = await api.post('/auth/register', {
+        ...formData,
+        role: "user"
+      });
+      
+      const { token, user } = response.data;
+      
+      localStorage.setItem("token", token);
+      localStorage.setItem("userProfile", JSON.stringify(user));
+      
       navigate("/login");
-    }, 1500);
+    } catch (error) {
+      console.error("Registration failed:", error.response?.data?.message || error.message);
+      alert(error.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const containerVariants = {
@@ -259,6 +268,25 @@ const SignupPage = () => {
                     className="w-full bg-white/[0.03] border border-[var(--border)] focus:border-white/30 text-[var(--text-main)] pl-12 p-4 rounded-2xl transition-all focus:outline-none font-bold placeholder:text-muted/20"
                     placeholder="Global Transit Systems"
                     type="text"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[var(--text-muted)] tracking-[0.25em] uppercase px-1">
+                  Password
+                </label>
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-xl group-focus-within:text-white transition-colors">
+                    lock
+                  </span>
+                  <input
+                    required
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full bg-white/[0.03] border border-[var(--border)] focus:border-white/30 text-[var(--text-main)] pl-12 p-4 rounded-2xl transition-all focus:outline-none font-bold placeholder:text-muted/20"
+                    placeholder="••••••••••••"
+                    type="password"
                   />
                 </div>
               </div>

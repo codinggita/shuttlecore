@@ -202,7 +202,7 @@ const ServicesPage = () => {
             <h2 className="text-4xl font-black text-[var(--text-main)] mb-4">Ready to Launch?</h2>
             <p className="text-[var(--text-muted)] text-lg mb-10 font-medium">Book a live demo and see ShuttleCore in action with your fleet data.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/signup" className="btn-primary !px-10 !py-4">Request Demo</Link>
+              <Link to="/login" className="btn-primary !px-10 !py-4">Request Demo</Link>
               <Link to="/faq" className="btn-secondary !px-10 !py-4">Read FAQ</Link>
             </div>
           </motion.div>

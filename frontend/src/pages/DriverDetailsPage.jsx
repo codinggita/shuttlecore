@@ -600,7 +600,7 @@ const DriverDetailsPage = () => {
     },
   };
 
-  const driver = passedDriver 
+  const driverData = passedDriver 
     ? { ...defaultDriverData, ...passedDriver }
     : (driverProfiles[driverName] || driverProfiles["marcus-vance"]);
 
@@ -620,11 +620,11 @@ const DriverDetailsPage = () => {
   ];
 
   const incidentTypes = [
-    { name: "Harsh Braking", value: driver.safetyMetrics.harshBraking, color: "#f43f5e" },
-    { name: "Speeding", value: driver.safetyMetrics.speeding, color: "#f59e0b" },
-    { name: "Lane Departure", value: driver.safetyMetrics.laneDeparture, color: "#3b82f6" },
-    { name: "Collision Warn", value: driver.safetyMetrics.collisionWarning, color: "#8b5cf6" },
-    { name: "Fatigue Alert", value: driver.safetyMetrics.fatigueAlert, color: "#10b981" },
+    { name: "Harsh Braking", value: driverData.safetyMetrics.harshBraking, color: "#f43f5e" },
+    { name: "Speeding", value: driverData.safetyMetrics.speeding, color: "#f59e0b" },
+    { name: "Lane Departure", value: driverData.safetyMetrics.laneDeparture, color: "#3b82f6" },
+    { name: "Collision Warn", value: driverData.safetyMetrics.collisionWarning, color: "#8b5cf6" },
+    { name: "Fatigue Alert", value: driverData.safetyMetrics.fatigueAlert, color: "#10b981" },
   ];
 
   const COLORS = ["#f43f5e", "#f59e0b", "#3b82f6", "#8b5cf6", "#10b981"];
@@ -732,7 +732,7 @@ const DriverDetailsPage = () => {
             </button>
             <div>
               <h1 className="text-xl font-black text-main tracking-tighter">Operator Profile</h1>
-              <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Fleet ID: {driver.employeeId}</p>
+              <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Fleet ID: {driverData.employeeId}</p>
             </div>
           </div>
 
@@ -761,30 +761,30 @@ const DriverDetailsPage = () => {
               <div className="relative flex flex-col lg:flex-row items-start lg:items-center gap-8">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-[var(--surface-light)] shadow-xl">
-                    <img src={driver.img} alt={driver.name} className="w-full h-full object-cover" />
+                    <img src={driverData.img} alt={driverData.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black ${driver.score >= 95 ? "bg-emerald-500 text-white" : driver.score >= 90 ? "bg-blue-500 text-white" : "bg-amber-500 text-white"}`}>
-                    {driver.rank}
+                  <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black ${driverData.score >= 95 ? "bg-emerald-500 text-white" : driverData.score >= 90 ? "bg-blue-500 text-white" : "bg-amber-500 text-white"}`}>
+                    {driverData.rank}
                   </div>
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mb-4">
                     <div>
-                      <h2 className="text-2xl font-black text-main tracking-tight">{driver.name}</h2>
-                      <p className="text-[13px] text-muted font-medium">{driver.division} • {driver.license}</p>
+                      <h2 className="text-2xl font-black text-main tracking-tight">{driverData.name}</h2>
+                      <p className="text-[13px] text-muted font-medium">{driverData.division} • {driverData.license}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${driver.status.includes("Active") ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
-                        {driver.status}
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${driverData.status.includes("Active") ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                        {driverData.status}
                       </span>
                     </div>
                   </div>
-                  <p className="text-[13px] text-muted leading-relaxed max-w-2xl">{driver.bio}</p>
+                  <p className="text-[13px] text-muted leading-relaxed max-w-2xl">{driverData.bio}</p>
                 </div>
                 <div className="flex flex-col gap-3">
                   <div className="text-center">
                     <p className="text-[10px] font-black text-muted uppercase tracking-wider mb-1">Safety Score</p>
-                    <p className={`text-4xl font-black ${driver.score >= 95 ? "text-emerald-400" : driver.score >= 90 ? "text-blue-400" : "text-amber-400"}`}>{driver.score}</p>
+                    <p className={`text-4xl font-black ${driverData.score >= 95 ? "text-emerald-400" : driverData.score >= 90 ? "text-blue-400" : "text-amber-400"}`}>{driverData.score}</p>
                   </div>
                 </div>
               </div>
@@ -793,12 +793,12 @@ const DriverDetailsPage = () => {
             {/* Quick Stats Row */}
             <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
               {[
-                { icon: "calendar_today", label: "Joined", value: driver.joined },
-                { icon: "local_shipping", label: "Current Vehicle", value: driver.vehicle },
-                { icon: "schedule", label: "Shift", value: driver.shift },
-                { icon: "speed", label: "Monthly Miles", value: driver.miles },
-                { icon: "verified", label: "Certifications", value: driver.certifications.length.toString() },
-                { icon: "supervisor_account", label: "Supervisor", value: driver.supervisor.split(" ").pop() },
+                { icon: "calendar_today", label: "Joined", value: driverData.joined },
+                { icon: "local_shipping", label: "Current Vehicle", value: driverData.vehicle },
+                { icon: "schedule", label: "Shift", value: driverData.shift },
+                { icon: "speed", label: "Monthly Miles", value: driverData.miles },
+                { icon: "verified", label: "Certifications", value: driverData.certifications.length.toString() },
+                { icon: "supervisor_account", label: "Supervisor", value: driverData.supervisor.split(" ").pop() },
               ].map((stat, i) => (
                 <div key={i} className="dashboard-card !p-4 text-center">
                   <span className="material-symbols-outlined text-[var(--primary)] text-lg mb-2">{stat.icon}</span>
@@ -839,7 +839,7 @@ const DriverDetailsPage = () => {
                     </h3>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={driver.efficiencyHistory}>
+                        <AreaChart data={driverData.efficiencyHistory}>
                           <defs>
                             <linearGradient id="efficiencyGradient" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
@@ -869,7 +869,7 @@ const DriverDetailsPage = () => {
                       Certifications
                     </h3>
                     <div className="space-y-3">
-                      {driver.certifications.map((cert, i) => (
+                      {driverData.certifications.map((cert, i) => (
                         <div key={i} className="flex items-center gap-4 p-4 bg-[var(--surface-muted)] rounded-xl border border-[var(--border)]">
                           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
                             <span className="material-symbols-outlined text-emerald-400">check_circle</span>
@@ -887,7 +887,7 @@ const DriverDetailsPage = () => {
                           <span className="material-symbols-outlined text-[var(--primary)]">badge</span>
                         </div>
                         <div>
-                          <p className="text-[13px] font-black text-main">{driver.license}</p>
+                          <p className="text-[13px] font-black text-main">{driverData.license}</p>
                           <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Active License</p>
                         </div>
                       </div>
@@ -901,10 +901,10 @@ const DriverDetailsPage = () => {
                   {/* Safety Summary Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {[
-                      { label: "Total Incidents", value: Object.values(driver.safetyMetrics).reduce((a, b) => a + b, 0), color: "text-rose-400" },
-                      { label: "Safety Score", value: `${driver.score}%`, color: driver.score >= 95 ? "text-emerald-400" : driver.score >= 90 ? "text-blue-400" : "text-amber-400" },
-                      { label: "Alerts This Month", value: driver.alerts, color: driver.alerts === 0 ? "text-emerald-400" : driver.alerts <= 2 ? "text-blue-400" : "text-amber-400" },
-                      { label: "Miles Driven", value: driver.miles, color: "text-[var(--primary)]" },
+                      { label: "Total Incidents", value: Object.values(driverData.safetyMetrics).reduce((a, b) => a + b, 0), color: "text-rose-400" },
+                      { label: "Safety Score", value: `${driverData.score}%`, color: driverData.score >= 95 ? "text-emerald-400" : driverData.score >= 90 ? "text-blue-400" : "text-amber-400" },
+                      { label: "Alerts This Month", value: driverData.alerts, color: driverData.alerts === 0 ? "text-emerald-400" : driverData.alerts <= 2 ? "text-blue-400" : "text-amber-400" },
+                      { label: "Miles Driven", value: driverData.miles, color: "text-[var(--primary)]" },
                     ].map((stat, i) => (
                       <motion.div key={i} variants={itemVariants} className="dashboard-card !p-4 text-center">
                         <p className="text-[9px] font-black text-muted uppercase tracking-wider mb-2">{stat.label}</p>
@@ -962,7 +962,7 @@ const DriverDetailsPage = () => {
                     </h3>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => ({ day, hours: driver.weeklyHours[i] }))}>
+                        <BarChart data={["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => ({ day, hours: driverData.weeklyHours[i] }))}>
                           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
                           <XAxis dataKey="day" stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} />
                           <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} />
@@ -979,7 +979,7 @@ const DriverDetailsPage = () => {
                     </div>
                     <div className="mt-4 flex justify-between items-center pt-4 border-t border-[var(--border)]">
                       <span className="text-[10px] text-muted uppercase font-black tracking-wider">Total Hours This Week</span>
-                      <span className="text-xl font-black text-[var(--primary)]">{driver.weeklyHours.reduce((a, b) => a + b, 0)}h</span>
+                      <span className="text-xl font-black text-[var(--primary)]">{driverData.weeklyHours.reduce((a, b) => a + b, 0)}h</span>
                     </div>
                   </motion.div>
 
@@ -1021,10 +1021,10 @@ const DriverDetailsPage = () => {
                   {/* Trip Summary Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {[
-                      { label: "Total Trips", value: driver.recentTrips.length, icon: "route", color: "text-[var(--primary)]" },
-                      { label: "Completed", value: driver.recentTrips.filter(t => t.status === "Completed").length, icon: "check_circle", color: "text-emerald-400" },
-                      { label: "Delayed", value: driver.recentTrips.filter(t => t.status === "Delayed").length, icon: "schedule", color: "text-rose-400" },
-                      { label: "In Progress", value: driver.recentTrips.filter(t => t.status === "In Progress").length, icon: "pending", color: "text-amber-400" },
+                      { label: "Total Trips", value: driverData.recentTrips.length, icon: "route", color: "text-[var(--primary)]" },
+                      { label: "Completed", value: driverData.recentTrips.filter(t => t.status === "Completed").length, icon: "check_circle", color: "text-emerald-400" },
+                      { label: "Delayed", value: driverData.recentTrips.filter(t => t.status === "Delayed").length, icon: "schedule", color: "text-rose-400" },
+                      { label: "In Progress", value: driverData.recentTrips.filter(t => t.status === "In Progress").length, icon: "pending", color: "text-amber-400" },
                     ].map((stat, i) => (
                       <motion.div key={i} variants={itemVariants} className="dashboard-card !p-4 text-center">
                         <span className={`material-symbols-outlined ${stat.color} text-lg mb-2`}>{stat.icon}</span>
@@ -1057,7 +1057,7 @@ const DriverDetailsPage = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {driver.recentTrips.map((trip, i) => (
+                          {driverData.recentTrips.map((trip, i) => (
                             <motion.tr key={trip.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.1 }} className="border-b border-[var(--border)]/50 hover:bg-[var(--surface-muted)] transition-colors">
                               <td className="py-4 px-4">
                                 <span className="text-[11px] font-mono text-muted">{trip.id}</span>
@@ -1088,7 +1088,7 @@ const DriverDetailsPage = () => {
                           ))}
                         </tbody>
                       </table>
-                      {driver.recentTrips.length === 0 && (
+                      {driverData.recentTrips.length === 0 && (
                         <div className="text-center py-12">
                           <span className="material-symbols-outlined text-4xl text-muted opacity-30 mb-4">local_shipping</span>
                           <p className="text-[13px] font-bold text-muted">No recent trips recorded</p>
@@ -1105,8 +1105,8 @@ const DriverDetailsPage = () => {
                   {/* Achievement Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {[
-                      { label: "Total Badges", value: driver.achievements.length, icon: "emoji_events", color: "text-[var(--primary)]" },
-                      { label: "Earned This Month", value: driver.achievements.filter(a => a.earnedRecently).length || 2, icon: "stars", color: "text-amber-400" },
+                      { label: "Total Badges", value: driverData.achievements.length, icon: "emoji_events", color: "text-[var(--primary)]" },
+                      { label: "Earned This Month", value: driverData.achievements.filter(a => a.earnedRecently).length || 2, icon: "stars", color: "text-amber-400" },
                       { label: "Current Streak", value: "12 days", icon: "local_fire_department", color: "text-rose-400" },
                       { label: "Rank Progress", value: "84%", icon: "trending_up", color: "text-emerald-400" },
                     ].map((stat, i) => (
@@ -1119,15 +1119,15 @@ const DriverDetailsPage = () => {
                   </div>
 
                   {/* Achievement Cards */}
-                  <div className={driver.achievements.length > 0 ? "grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" : ""}>
-                  {driver.achievements.length === 0 && (
+                  <div className={driverData.achievements.length > 0 ? "grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" : ""}>
+                  {driverData.achievements.length === 0 && (
                     <div className="text-center py-12 dashboard-card mb-6">
                       <span className="material-symbols-outlined text-4xl text-muted opacity-30 mb-4">emoji_events</span>
                       <p className="text-[13px] font-bold text-muted">No achievements yet</p>
                       <p className="text-[11px] text-muted opacity-60 mt-1">Complete milestones to earn badges</p>
                     </div>
                   )}
-                  {driver.achievements.map((achievement, i) => (
+                  {driverData.achievements.map((achievement, i) => (
                     <motion.div
                       key={i}
                       variants={itemVariants}
@@ -1158,21 +1158,21 @@ const DriverDetailsPage = () => {
                   <span className="material-symbols-outlined text-muted">email</span>
                   <div>
                     <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Email</p>
-                    <p className="text-[13px] font-bold text-main">{driver.email}</p>
+                    <p className="text-[13px] font-bold text-main">{driverData.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-[var(--surface-muted)] rounded-xl border border-[var(--border)]">
                   <span className="material-symbols-outlined text-muted">phone</span>
                   <div>
                     <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Phone</p>
-                    <p className="text-[13px] font-bold text-main">{driver.phone}</p>
+                    <p className="text-[13px] font-bold text-main">{driverData.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-[var(--surface-muted)] rounded-xl border border-[var(--border)]">
                   <span className="material-symbols-outlined text-muted">person</span>
                   <div>
                     <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Supervisor</p>
-                    <p className="text-[13px] font-bold text-main">{driver.supervisor}</p>
+                    <p className="text-[13px] font-bold text-main">{driverData.supervisor}</p>
                   </div>
                 </div>
               </div>

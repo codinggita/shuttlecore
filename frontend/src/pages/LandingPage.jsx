@@ -262,12 +262,12 @@ const LandingPage = () => {
                   rocket_launch
                 </span>
               </Link>
-              <button className="btn-secondary !px-12 !py-5 flex items-center justify-center gap-3 text-lg group border-2">
+              <Link to="/services" className="btn-secondary !px-12 !py-5 flex items-center justify-center gap-3 text-lg group border-2">
                 <span>View Operational Specs</span>
                 <span className="material-symbols-outlined text-2xl group-hover:translate-y-0.5 transition-transform">
                   description
                 </span>
-              </button>
+              </Link>
             </motion.div>
           </motion.div>
         </section>

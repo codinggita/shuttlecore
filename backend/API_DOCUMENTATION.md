@@ -666,6 +666,241 @@ Content-Type: application/json
 }
 ```
 
+### Dispatch (AI Dispatch Queue)
+
+#### Get All Dispatch Items (Admin/Operator only)
+```http
+GET /api/dispatch?status=pending&priority=URGENT
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "dispatchQueue": [
+    {
+      "id": "TX-9012",
+      "passenger": "Marcus Thorne",
+      "origin": "LHR-T5",
+      "destination": "Central Hub",
+      "priority": "URGENT",
+      "autoAssign": "SV-201",
+      "status": "pending",
+      "vehicle": {
+        "id": "vehicle_id",
+        "unitId": "SH-402",
+        "name": "Standard Ride"
+      },
+      "driver": {
+        "id": "driver_id",
+        "name": "Michael Johnson"
+      },
+      "estimatedTime": 8,
+      "distance": 12
+    }
+  ]
+}
+```
+
+#### Get Single Dispatch Item
+```http
+GET /api/dispatch/:id
+Authorization: Bearer <token>
+```
+
+#### Create Dispatch Item (Admin/Operator only)
+```http
+POST /api/dispatch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "passenger": "Marcus Thorne",
+  "origin": "LHR-T5",
+  "destination": "Central Hub",
+  "priority": "URGENT",
+  "estimatedTime": 8,
+  "distance": 12
+}
+```
+
+#### Update Dispatch Item (Admin/Operator only)
+```http
+PUT /api/dispatch/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "status": "assigned",
+  "autoAssign": "SV-201",
+  "vehicle": "vehicle_id",
+  "driver": "driver_id",
+  "estimatedTime": 8
+}
+```
+
+#### Auto-Assign Vehicle (Admin/Operator only)
+```http
+PUT /api/dispatch/:id/assign
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "vehicleId": "vehicle_id",
+  "driverId": "driver_id"
+}
+```
+
+### Safety Events
+
+#### Get All Safety Events (Admin/Operator only)
+```http
+GET /api/safety-events?type=Harsh%20Braking&severity=high&limit=50
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "events": [
+    {
+      "id": "event_id",
+      "unit": "Unit #8421",
+      "type": "Harsh Braking",
+      "icon": "emergency_home",
+      "color": "red",
+      "time": "2M AGO",
+      "description": "Impact force: 0.85g at 45mph. Driver identified.",
+      "severity": "high",
+      "driver": {
+        "id": "driver_id",
+        "name": "Michael Johnson"
+      },
+      "location": { "lat": 37.7749, "lng": -122.4194 },
+      "impactForce": 0.85,
+      "speed": 45,
+      "speedLimit": 45,
+      "timestamp": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+#### Get Safety Statistics (Admin/Operator only)
+```http
+GET /api/safety-events/stats
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "stats": {
+    "totalEvents": 150,
+    "criticalEvents": 5,
+    "highEvents": 12,
+    "speedViolations": 45,
+    "brakingEvents": 38,
+    "safetyScore": 85.5
+  }
+}
+```
+
+#### Create Safety Event (Admin only)
+```http
+POST /api/safety-events
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "unit": "Unit #8421",
+  "type": "Harsh Braking",
+  "icon": "emergency_home",
+  "color": "red",
+  "time": "2M AGO",
+  "description": "Impact force: 0.85g at 45mph.",
+  "severity": "high",
+  "driver": "driver_id",
+  "impactForce": 0.85,
+  "speed": 45,
+  "speedLimit": 45
+}
+```
+
+### Riders
+
+#### Get All Riders (Admin/Operator only)
+```http
+GET /api/riders
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "riders": [
+    {
+      "id": "rider_id",
+      "name": "John Doe",
+      "phone": "+1-555-0123",
+      "email": "john@example.com",
+      "rating": 4.8,
+      "totalRides": 45,
+      "preferredVehicle": "standard",
+      "homeLocation": "123 Main St, Downtown",
+      "workLocation": "456 Business Ave, Financial District",
+      "isVerified": true,
+      "notes": "Prefers quiet rides",
+      "user": {
+        "id": "user_id",
+        "email": "john@example.com"
+      }
+    }
+  ]
+}
+```
+
+#### Get Single Rider
+```http
+GET /api/riders/:id
+Authorization: Bearer <token>
+```
+
+#### Create Rider (Admin only)
+```http
+POST /api/riders
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "user": "user_id",
+  "name": "John Doe",
+  "phone": "+1-555-0123",
+  "email": "john@example.com",
+  "preferredVehicle": "standard",
+  "homeLocation": "123 Main St",
+  "workLocation": "456 Business Ave"
+}
+```
+
+#### Update Rider (Admin/Operator only)
+```http
+PUT /api/riders/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "rating": 4.9,
+  "totalRides": 46,
+  "preferredVehicle": "xl",
+  "notes": "Updated notes"
+}
+```
+
 ## WebSocket Events
 
 ### Client → Server
@@ -845,3 +1080,21 @@ npm run dev
 - eventType, title, description
 - severity, relatedId, metadata
 - source
+
+### Dispatch
+- id, passenger, origin, destination
+- priority, autoAssign, status
+- vehicle (reference), driver (reference)
+- estimatedTime, distance
+
+### SafetyEvent
+- unit, type, icon, color
+- time, description, severity
+- driver (reference), location
+- impactForce, speed, speedLimit
+
+### Rider
+- user (reference), name, phone, email
+- rating, totalRides, preferredVehicle
+- homeLocation, workLocation
+- isVerified, notes

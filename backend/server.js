@@ -17,6 +17,9 @@ const notificationRoutes = require('./src/routes/notifications');
 const deploymentRoutes = require('./src/routes/deployments');
 const paymentRoutes = require('./src/routes/payments');
 const eventLogRoutes = require('./src/routes/eventLogs');
+const dispatchRoutes = require('./src/routes/dispatch');
+const safetyEventRoutes = require('./src/routes/safetyEvents');
+const riderRoutes = require('./src/routes/riders');
 
 const app = express();
 
@@ -39,6 +42,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/deployments', deploymentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/event-logs', eventLogRoutes);
+app.use('/api/dispatch', dispatchRoutes);
+app.use('/api/safety-events', safetyEventRoutes);
+app.use('/api/riders', riderRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => res.status(200).json({ status: "OK", service: "ShuttleCore API" }));

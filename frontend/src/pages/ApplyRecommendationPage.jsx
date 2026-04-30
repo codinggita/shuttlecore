@@ -15,6 +15,25 @@ const ApplyRecommendationPage = () => {
     fleetRebalanced: false,
     signalSync: false,
   });
+  const [impacts, setImpacts] = useState({
+    dwellTime: -8.0,
+    routingLatency: -14.0,
+    fleetCoverage: 22.0,
+    queueWait: -6.0
+  });
+
+  // Real-time update simulation
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setImpacts(prev => ({
+        dwellTime: prev.dwellTime + (Math.random() * 0.2 - 0.1),
+        routingLatency: prev.routingLatency + (Math.random() * 0.4 - 0.2),
+        fleetCoverage: prev.fleetCoverage + (Math.random() * 0.6 - 0.3),
+        queueWait: prev.queueWait + (Math.random() * 0.2 - 0.1)
+      }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const showToast = (title, desc, type = "success") => {
     setToast({ title, desc, type });
@@ -54,7 +73,6 @@ const ApplyRecommendationPage = () => {
       bg: "bg-[var(--primary)]/10",
       border: "border-[var(--primary)]/30",
       title: "Reposition Cluster #2",
-      impact: "−8% Dwell Time",
       desc: "Move Cluster #2 pickup point 40 meters North to align with peak pedestrian footfall patterns from the university corridor.",
       btnLabel: "Execute Reposition",
       onApply: () => handleAction("clusterMoved", "Cluster #2 Repositioned", "Pickup point moved 40m North. Dwell time reducing."),
@@ -66,7 +84,6 @@ const ApplyRecommendationPage = () => {
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/30",
       title: "Optimize Route Vector",
-      impact: "−14% Latency",
       desc: "Switch Sector 7 routing from Fixed Corridors to Neural Mesh. Algorithm predicts 14% improvement in delivery latency.",
       btnLabel: "Switch to Neural Mesh",
       onApply: () => handleAction("routeOptimized", "Route Vector Updated", "Sector 7 now running on Neural Mesh protocol."),
@@ -78,7 +95,6 @@ const ApplyRecommendationPage = () => {
       bg: "bg-amber-500/10",
       border: "border-amber-500/30",
       title: "Rebalance Fleet Density",
-      impact: "+22% Coverage",
       desc: "Redistribute 3 idle units from low-demand West Campus to high-demand North Financial Plaza to improve coverage.",
       btnLabel: "Rebalance Fleet",
       onApply: () => handleAction("fleetRebalanced", "Fleet Rebalanced", "3 units redirected to North Financial Plaza."),
@@ -90,7 +106,6 @@ const ApplyRecommendationPage = () => {
       bg: "bg-rose-500/10",
       border: "border-rose-500/30",
       title: "Sync Traffic Signal API",
-      impact: "−6% Queue Wait",
       desc: "Enable V2X signal priority for designated shuttle lanes on District 2 arterials to reduce intersection hold times.",
       btnLabel: "Enable V2X Sync",
       onApply: () => handleAction("signalSync", "V2X Signal Sync Active", "Shuttle lanes now have traffic signal priority."),
@@ -194,10 +209,10 @@ const ApplyRecommendationPage = () => {
             <motion.div variants={itemVariants} className="dashboard-card !p-6 mb-8 border border-[var(--primary)]/20 shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-[var(--border)]">
                 {[
-                  { label: "Dwell Time Reduction", value: "−8%", icon: "timer", color: "text-[var(--primary)]" },
-                  { label: "Routing Latency", value: "−14%", icon: "speed", color: "text-emerald-400" },
-                  { label: "Fleet Coverage", value: "+22%", icon: "airport_shuttle", color: "text-amber-400" },
-                  { label: "Queue Wait", value: "−6%", icon: "queue", color: "text-rose-400" },
+                  { label: "Dwell Time Reduction", value: `${impacts.dwellTime.toFixed(1)}%`, icon: "timer", color: "text-[var(--primary)]" },
+                  { label: "Routing Latency", value: `${impacts.routingLatency.toFixed(1)}%`, icon: "speed", color: "text-emerald-400" },
+                  { label: "Fleet Coverage", value: `+${impacts.fleetCoverage.toFixed(1)}%`, icon: "airport_shuttle", color: "text-amber-400" },
+                  { label: "Queue Wait", value: `${impacts.queueWait.toFixed(1)}%`, icon: "queue", color: "text-rose-400" },
                 ].map((stat, i) => (
                   <div key={i} className="text-center px-4">
                     <span className={`material-symbols-outlined text-2xl mb-2 block ${stat.color}`}>{stat.icon}</span>
@@ -209,34 +224,53 @@ const ApplyRecommendationPage = () => {
             </motion.div>
 
             {/* Recommendation Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {recommendations.map((rec) => (
-                <motion.div key={rec.key} variants={itemVariants} className={`dashboard-card !p-8 border ${rec.border} relative overflow-hidden transition-all`}>
-                  <div className={`absolute top-0 right-0 w-40 h-40 ${rec.bg} opacity-30 rounded-bl-full pointer-events-none`}></div>
-                  <div className="flex justify-between items-start mb-6 relative z-10">
-                    <div className={`w-12 h-12 rounded-2xl ${rec.bg} border ${rec.border} flex items-center justify-center`}>
-                      <span className={`material-symbols-outlined ${rec.color} text-2xl`}>{rec.icon}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {recommendations.map((rec) => {
+                const isApplied = status[rec.key];
+                
+                // Get the live impact value based on the key
+                let liveImpact = "";
+                if (rec.key === "clusterMoved") liveImpact = `${impacts.dwellTime.toFixed(1)}% Dwell Time`;
+                if (rec.key === "routeOptimized") liveImpact = `${impacts.routingLatency.toFixed(1)}% Latency`;
+                if (rec.key === "fleetRebalanced") liveImpact = `${impacts.fleetCoverage.toFixed(1)}% Coverage`;
+                if (rec.key === "signalSync") liveImpact = `${impacts.queueWait.toFixed(1)}% Queue Wait`;
+
+                return (
+                  <motion.div
+                    key={rec.key}
+                    variants={itemVariants}
+                    className={`dashboard-card !p-8 border ${rec.border} relative overflow-hidden group`}
+                  >
+                    <div className={`absolute top-0 right-0 p-6 ${rec.color} font-black text-[10px] uppercase tracking-widest bg-[var(--background)]/40 backdrop-blur-md rounded-bl-2xl border-l border-b ${rec.border}`}>
+                      {liveImpact}
                     </div>
-                    <span className={`text-[11px] font-black uppercase tracking-widest ${rec.bg} ${rec.color} px-3 py-1.5 rounded-lg border ${rec.border}`}>{rec.impact}</span>
-                  </div>
-                  <h3 className="text-lg font-black text-main tracking-tight mb-2">{rec.title}</h3>
-                  <p className="text-sm text-muted leading-relaxed mb-6">{rec.desc}</p>
-                  {status[rec.key] ? (
-                    <div className="flex items-center gap-2 text-emerald-500 text-[11px] font-black uppercase tracking-widest">
-                      <span className="material-symbols-outlined text-sm">check_circle</span> Applied Successfully
+                    
+                    <div className="flex items-start gap-6 mb-8">
+                      <div className={`w-14 h-14 ${rec.bg} ${rec.color} rounded-2xl flex items-center justify-center border ${rec.border} group-hover:scale-110 transition-transform duration-500`}>
+                        <span className="material-symbols-outlined text-2xl">{rec.icon}</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-black text-main mb-2 tracking-tight">{rec.title}</h3>
+                        <p className="text-sm text-muted leading-relaxed font-medium">{rec.desc}</p>
+                      </div>
                     </div>
-                  ) : (
+
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
+                      whileHover={{ scale: isApplied ? 1 : 1.02 }}
+                      whileTap={{ scale: isApplied ? 1 : 0.98 }}
                       onClick={rec.onApply}
-                      className={`w-full py-3 rounded-2xl border ${rec.border} ${rec.bg} ${rec.color} font-black text-[11px] uppercase tracking-widest transition-all hover:brightness-125`}
+                      disabled={isApplied}
+                      className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
+                        isApplied 
+                        ? "bg-white/5 border-white/10 text-muted opacity-50 cursor-not-allowed" 
+                        : `${rec.bg} ${rec.color} ${rec.border} hover:opacity-80`
+                      }`}
                     >
-                      {rec.btnLabel}
+                      {isApplied ? "Already Applied" : rec.btnLabel}
                     </motion.button>
-                  )}
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </div>
 
             <footer className="mt-12 border-t border-[var(--border)] py-12">

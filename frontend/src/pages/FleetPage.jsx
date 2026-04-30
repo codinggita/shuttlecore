@@ -8,9 +8,74 @@ const FleetPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [waitTimer, setWaitTimer] = useState("03:42");
+  const [waitTimer, setWaitTimer] = useState(222); // 03:42 in seconds
   const [showContactModal, setShowContactModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  
+  const [detectionMatrix, setDetectionMatrix] = useState([
+    { label: "Lidar Confirm", value: "NO_HUMAN_DETECTED", color: "text-emerald-400" },
+    { label: "Mobile Signal", value: "STATIONARY_200M_OFFSET", color: "text-rose-400" },
+    { label: "Last Contact", value: "12 mins ago", color: "text-[var(--text-main)]" },
+  ]);
+
+  const [impactMatrix, setImpactMatrix] = useState([
+    { label: "Fleet Saturation", val: "88%", progress: 88, color: "bg-white/40" },
+    { label: "Delay Ripple", val: "Minimal (2m)", progress: 15, color: "bg-amber-500" },
+  ]);
+
+  const [deploymentPath, setDeploymentPath] = useState({
+    timeSaved: 494, // 08:14 in seconds
+    efficiency: 12.4
+  });
+
+  // Real-time update simulation
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      // Decrement wait timer
+      setWaitTimer(prev => Math.max(0, prev - 1));
+      
+      // Slightly fluctuate impact data
+      setImpactMatrix(prev => prev.map(m => {
+        const variance = Math.random() * 2 - 1;
+        const newProg = Math.min(100, Math.max(10, m.progress + variance));
+        return { ...m, progress: newProg, val: m.label === "Fleet Saturation" ? `${newProg.toFixed(0)}%` : m.val };
+      }));
+
+      // Fluctuate deployment path stats
+      setDeploymentPath(prev => ({
+        timeSaved: Math.max(300, prev.timeSaved + (Math.random() > 0.5 ? 1 : -1)),
+        efficiency: Math.max(5, Math.min(25, prev.efficiency + (Math.random() * 0.4 - 0.2)))
+      }));
+
+      // Randomly update detection data
+      setDetectionMatrix(prev => prev.map(d => {
+        if (d.label === "Last Contact") {
+          const rand = Math.random();
+          if (rand > 0.9) return { ...d, value: "Just Now", color: "text-emerald-400" };
+          if (rand > 0.8) return { ...d, value: "1s ago", color: "text-emerald-400" };
+          return d;
+        }
+        if (d.label === "Mobile Signal" && Math.random() > 0.9) {
+          const offset = Math.floor(Math.random() * 50 + 150);
+          return { ...d, value: `STATIONARY_${offset}M_OFFSET` };
+        }
+        return d;
+      }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatSecondsToClock = (totalSeconds) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -74,19 +139,7 @@ const FleetPage = () => {
     },
   ];
 
-  const detectionData = [
-    {
-      label: "Lidar Confirm",
-      value: "NO_HUMAN_DETECTED",
-      color: "text-emerald-400",
-    },
-    {
-      label: "Mobile Signal",
-      value: "STATIONARY_200M_OFFSET",
-      color: "text-rose-400",
-    },
-    { label: "Last Contact", value: "12 mins ago", color: "text-[var(--text-main)]" },
-  ];
+  // Moving detection data to state above
 
   const downstreamActions = [
     {
@@ -435,7 +488,7 @@ const FleetPage = () => {
                         Wait Duration
                       </p>
                       <p className="text-2xl text-rose-400 font-black tracking-tighter">
-                        {waitTimer}
+                        {formatTime(waitTimer)}
                       </p>
                     </div>
                   </div>
@@ -447,7 +500,7 @@ const FleetPage = () => {
                         Detection Matrix
                       </h4>
                       <div className="space-y-4">
-                        {detectionData.map((item, i) => (
+                        {detectionMatrix.map((item, i) => (
                           <div
                             key={i}
                             className="flex justify-between items-center text-xs pb-4 border-b border-[var(--border)]"
@@ -570,19 +623,19 @@ const FleetPage = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-4">
-                      {[
-                        {
-                          label: "Time Saved",
-                          val: "-08:14",
-                          color: "text-white",
-                        },
-                        {
-                          label: "Efficiency",
-                          val: "+12.4%",
-                          color: "text-amber-400",
-                        },
-                      ].map((stat, i) => (
+                      <div className="flex gap-4">
+                        {[
+                          {
+                            label: "Time Saved",
+                            val: `-${formatSecondsToClock(deploymentPath.timeSaved)}`,
+                            color: "text-white",
+                          },
+                          {
+                            label: "Efficiency",
+                            val: `+${deploymentPath.efficiency.toFixed(1)}%`,
+                            color: "text-amber-400",
+                          },
+                        ].map((stat, i) => (
                         <div
                           key={i}
                           className="text-center bg-[var(--surface-muted)] p-6 rounded-[24px] border border-[var(--border)] min-w-[140px] shadow-2xl"
@@ -641,20 +694,7 @@ const FleetPage = () => {
                     Impact Matrix
                   </h4>
                   <div className="space-y-8">
-                    {[
-                      {
-                        label: "Fleet Saturation",
-                        val: "88%",
-                        progress: 88,
-                        color: "bg-white/40",
-                      },
-                      {
-                        label: "Delay Ripple",
-                        val: "Minimal (2m)",
-                        progress: 15,
-                        color: "bg-amber-500",
-                      },
-                    ].map((m, i) => (
+                    {impactMatrix.map((m, i) => (
                       <div key={i}>
                         <div className="flex justify-between text-[10px] mb-3 uppercase font-black tracking-widest">
                           <span className="text-muted opacity-60">

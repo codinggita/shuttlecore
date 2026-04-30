@@ -20,6 +20,37 @@ const ManageDeploymentPage = () => {
     { id: "SV-553", route: "West Campus → South Hub", status: "En Route", progress: 45, color: "bg-emerald-500", text: "text-emerald-500" }
   ]);
 
+  const [availableUnits, setAvailableUnits] = useState(24);
+  const [resourceSplit, setResourceSplit] = useState({ active: 48, maintenance: 12, offline: 40 });
+
+  // Real-time update simulation
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isSuspended) {
+        // Update deployment progress
+        setActiveDeployments(prev => prev.map(unit => {
+          let newProg = unit.progress + (Math.random() * 2);
+          if (newProg >= 100) newProg = 0; // Loop for simulation
+          return { ...unit, progress: newProg };
+        }));
+
+        // Fluctuate available units
+        setAvailableUnits(prev => Math.max(10, Math.min(50, prev + (Math.random() > 0.5 ? 1 : -1))));
+
+        // Fluctuate resource split
+        setResourceSplit(prev => {
+          const shift = (Math.random() * 2 - 1);
+          return {
+            active: Math.max(10, Math.min(80, prev.active + shift)),
+            maintenance: Math.max(5, Math.min(30, prev.maintenance - (shift/2))),
+            offline: Math.max(5, Math.min(50, prev.offline - (shift/2)))
+          };
+        });
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isSuspended]);
+
   useEffect(() => {
     if (location.state && location.state.newUnit) {
       const unit = location.state.newUnit;
@@ -255,15 +286,15 @@ const ManageDeploymentPage = () => {
                   <div>
                     <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-2">
                       <span className="text-muted">Available Units</span>
-                      <span className="text-main">24 / 50</span>
+                      <span className="text-main">{availableUnits} / 50</span>
                     </div>
-                    <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden flex">
-                      <div className="h-full bg-emerald-500 w-[48%]"></div>
-                      <div className="h-full bg-amber-500 w-[12%]"></div>
-                      <div className="h-full bg-rose-500 w-[40%]"></div>
+                    <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden flex transition-all duration-1000">
+                      <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${resourceSplit.active}%` }}></div>
+                      <div className="h-full bg-amber-500 transition-all duration-1000" style={{ width: `${resourceSplit.maintenance}%` }}></div>
+                      <div className="h-full bg-rose-500 transition-all duration-1000" style={{ width: `${resourceSplit.offline}%` }}></div>
                     </div>
                     <div className="flex justify-between mt-3 text-[10px] font-bold uppercase tracking-widest">
-                      <span className="text-emerald-500 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Active</span>
+                      <span className="text-emerald-500 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active</span>
                       <span className="text-amber-500 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Maintenance</span>
                       <span className="text-rose-500 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500"></span> Offline</span>
                     </div>

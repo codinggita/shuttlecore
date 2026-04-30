@@ -8,6 +8,38 @@ const ClusterNorthPlazaPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [waitlist, setWaitlist] = useState(12);
+  const [avgWait, setAvgWait] = useState(250); // 4m 10s in seconds
+  const [throughput, setThroughput] = useState([
+    { time: "08:00 AM", load: 80, color: "bg-emerald-500" },
+    { time: "09:00 AM", load: 95, color: "bg-emerald-500" },
+    { time: "10:00 AM", load: 45, color: "bg-emerald-500" },
+    { time: "11:00 AM", load: 20, color: "bg-[var(--primary)]" }
+  ]);
+
+  // Real-time update simulation
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      // Fluctuate waitlist
+      setWaitlist(prev => Math.max(2, prev + (Math.random() > 0.85 ? (Math.random() > 0.5 ? 1 : -1) : 0)));
+      
+      // Decrement wait time
+      setAvgWait(prev => Math.max(120, prev + (Math.random() > 0.5 ? 1 : -1)));
+
+      // Fluctuate throughput
+      setThroughput(prev => prev.map(item => ({
+        ...item,
+        load: Math.min(100, Math.max(10, item.load + (Math.random() * 2 - 1)))
+      })));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+  };
 
   const menuItems = [
     { id: "simulation", label: "Simulation", icon: "model_training", path: "/dashboard" },
@@ -87,12 +119,12 @@ const ClusterNorthPlazaPage = () => {
                   <div className="w-px h-12 bg-[var(--border)]"></div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-muted mb-1">Active Waitlist</p>
-                    <p className="text-3xl font-black text-main">12</p>
+                    <p className="text-3xl font-black text-main">{waitlist}</p>
                   </div>
                   <div className="w-px h-12 bg-[var(--border)]"></div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-muted mb-1">Avg Wait Time</p>
-                    <p className="text-3xl font-black text-main">4m 10s</p>
+                    <p className="text-3xl font-black text-main">{formatTime(avgWait)}</p>
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -109,16 +141,17 @@ const ClusterNorthPlazaPage = () => {
               <motion.div variants={itemVariants} className="dashboard-card !p-8 border border-[var(--border)]">
                 <h3 className="text-lg font-black tracking-tight mb-6 flex items-center gap-2"><span className="material-symbols-outlined text-muted">moving</span> Throughput Trend</h3>
                 <div className="flex-1 flex flex-col justify-end space-y-4">
-                  {[
-                    { time: "08:00 AM", load: 80, color: "bg-emerald-500" },
-                    { time: "09:00 AM", load: 95, color: "bg-emerald-500" },
-                    { time: "10:00 AM", load: 45, color: "bg-emerald-500" },
-                    { time: "11:00 AM", load: 20, color: "bg-[var(--primary)]" }
-                  ].map((stat, i) => (
+                  {throughput.map((stat, i) => (
                     <div key={i}>
-                      <div className="flex justify-between text-[10px] font-bold uppercase text-muted mb-1"><span>{stat.time}</span><span>{stat.load}%</span></div>
-                      <div className="h-2 w-full bg-[var(--surface-light)] rounded-full overflow-hidden">
-                        <div className={`h-full ${stat.color} w-[${stat.load}%] rounded-full`} style={{ width: `${stat.load}%` }}></div>
+                      <div className="flex justify-between text-[10px] font-bold uppercase text-muted mb-1">
+                        <span>{stat.time}</span>
+                        <span>{stat.load.toFixed(0)}%</span>
+                      </div>
+                      <div className="h-2 w-full bg-[var(--surface-light)] rounded-full overflow-hidden transition-all duration-1000">
+                        <div 
+                          className={`h-full ${stat.color} rounded-full transition-all duration-1000`} 
+                          style={{ width: `${stat.load}%` }}
+                        ></div>
                       </div>
                     </div>
                   ))}

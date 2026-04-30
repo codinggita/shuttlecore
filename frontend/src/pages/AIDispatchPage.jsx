@@ -48,10 +48,112 @@ const AIDispatchPage = () => {
   ]);
 
   const [vehicles, setVehicles] = useState([
-    { id: "SV-402", eta: "4m 12s", x: 33, y: 50, status: "active" },
-    { id: "SV-201", eta: "2m 45s", x: 45, y: 35, status: "active" },
-    { id: "SV-305", eta: "6m 20s", x: 60, y: 55, status: "active" },
+    { id: "SV-402", eta: "4m 12s", x: 33, y: 50, status: "active", rawEta: 252 },
+    { id: "SV-201", eta: "2m 45s", x: 45, y: 35, status: "active", rawEta: 165 },
+    { id: "SV-305", eta: "6m 20s", x: 60, y: 55, status: "active", rawEta: 380 },
   ]);
+
+  const [pendingRequests, setPendingRequests] = useState(124);
+  const [liveFleets, setLiveFleets] = useState(86);
+  const [efficiency, setEfficiency] = useState(98.4);
+  const [networkHealth, setNetworkHealth] = useState({
+    bandwidth: 42,
+    uplink: "Stable",
+    latency: 14
+  });
+  const [operators, setOperators] = useState([
+    { id: "104", status: "bg-rose-500", active: true },
+    { id: "208", status: "bg-emerald-500", active: true }
+  ]);
+
+  // Real-time update simulation
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      // Update vehicle positions and ETAs
+      setVehicles(prev => prev.map(v => {
+        const newRaw = Math.max(0, v.rawEta - 1);
+        const mins = Math.floor(newRaw / 60);
+        const secs = newRaw % 60;
+        return { 
+          ...v, 
+          rawEta: newRaw, 
+          eta: `${mins}m ${secs}s`,
+          x: v.x + (Math.random() * 0.2 - 0.1),
+          y: v.y + (Math.random() * 0.2 - 0.1)
+        };
+      }));
+
+      // Fluctuate efficiency
+      setEfficiency(prev => Math.min(100, Math.max(95, prev + (Math.random() * 0.2 - 0.1))));
+
+      // Fluctuate pending requests
+      setPendingRequests(prev => Math.max(100, prev + (Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0)));
+
+      // Fluctuate live fleets
+      setLiveFleets(prev => Math.max(80, Math.min(92, prev + (Math.random() > 0.9 ? (Math.random() > 0.5 ? 1 : -1) : 0))));
+
+      // Update network health
+      setNetworkHealth(prev => ({
+        bandwidth: Math.min(100, Math.max(10, prev.bandwidth + (Math.random() * 4 - 2))),
+        uplink: Math.random() > 0.95 ? "Syncing..." : "Stable",
+        latency: Math.max(5, Math.min(50, prev.latency + (Math.random() > 0.5 ? 1 : -1)))
+      }));
+
+      // Update operators
+      if (Math.random() > 0.9) {
+        setOperators(prev => prev.map(o => ({
+          ...o,
+          status: Math.random() > 0.8 ? (o.status === "bg-rose-500" ? "bg-emerald-500" : "bg-rose-500") : o.status
+        })));
+      }
+
+      // Update dispatch queue
+      setDispatchQueue(prev => {
+        // Randomly "confirm" a pending order
+        let nextQueue = prev.map(item => {
+          if (item.status === "pending" && Math.random() > 0.98) {
+            return { ...item, status: "confirmed" };
+          }
+          return item;
+        });
+
+        // Randomly remove a confirmed order and add a new waitlist one
+        if (Math.random() > 0.95) {
+          const names = ["Aria Smith", "Liam J.", "Sophia W.", "Noah K.", "Olivia R.", "Ethan B."];
+          const hubs = ["Sector 4", "East Plaza", "Port Alpha", "Nexus Prime", "District 9"];
+          const newOrder = {
+            id: `TX-${Math.floor(Math.random() * 9000 + 1000)}`,
+            passenger: names[Math.floor(Math.random() * names.length)],
+            origin: hubs[Math.floor(Math.random() * hubs.length)],
+            destination: hubs[Math.floor(Math.random() * hubs.length)],
+            priority: Math.random() > 0.7 ? "URGENT" : "ROUTINE",
+            autoAssign: Math.random() > 0.5 ? `SV-${Math.floor(Math.random() * 900 + 100)}` : null,
+            status: "waitlist"
+          };
+          
+          // Remove first confirmed if exists
+          const confirmedIndex = nextQueue.findIndex(i => i.status === "confirmed");
+          if (confirmedIndex !== -1) {
+            nextQueue = [...nextQueue.slice(0, confirmedIndex), ...nextQueue.slice(confirmedIndex + 1), newOrder];
+          } else if (nextQueue.length < 6) {
+            nextQueue = [...nextQueue, newOrder];
+          }
+        }
+
+        // Shift waitlist to pending
+        nextQueue = nextQueue.map(item => {
+          if (item.status === "waitlist" && Math.random() > 0.9) {
+            return { ...item, status: "pending", autoAssign: item.autoAssign || `SV-${Math.floor(Math.random() * 900 + 100)}` };
+          }
+          return item;
+        });
+
+        return nextQueue;
+      });
+
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -118,22 +220,22 @@ const AIDispatchPage = () => {
   const stats = [
     {
       label: "Pending Requests",
-      value: "124",
+      value: pendingRequests.toString(),
       trend: "+12%",
       icon: "pending_actions",
       color: "text-gray-400",
     },
     {
       label: "Live Fleets",
-      value: "86",
+      value: liveFleets.toString(),
       total: "92",
-      subtext: "94% Deployment",
+      subtext: `${((liveFleets / 92) * 100).toFixed(0)}% Deployment`,
       icon: "electric_car",
       color: "text-gray-400",
     },
     {
       label: "Efficiency Core",
-      value: "98.2%",
+      value: `${efficiency.toFixed(1)}%`,
       subtext: "Optimal Route",
       icon: "speed",
       color: "text-gray-400",
@@ -691,21 +793,21 @@ const AIDispatchPage = () => {
                   {[
                     {
                       label: "Bandwidth Load",
-                      value: "42%",
+                      value: `${networkHealth.bandwidth.toFixed(0)}%`,
                       color: "bg-white/40",
-                      progress: 42,
+                      progress: networkHealth.bandwidth,
                     },
                     {
                       label: "Satellite Uplink",
-                      value: "Stable",
-                      color: "bg-emerald-500",
-                      progress: 98,
+                      value: networkHealth.uplink,
+                      color: networkHealth.uplink === "Stable" ? "bg-emerald-500" : "bg-amber-500 animate-pulse",
+                      progress: networkHealth.uplink === "Stable" ? 100 : 50,
                     },
                     {
                       label: "Compute Latency",
-                      value: "14ms",
+                      value: `${networkHealth.latency}ms`,
                       color: "bg-white/20",
-                      progress: 14,
+                      progress: (networkHealth.latency / 50) * 100,
                     },
                   ].map((tele, i) => (
                     <div key={i}>
@@ -714,12 +816,10 @@ const AIDispatchPage = () => {
                         <span className="text-main">{tele.value}</span>
                       </div>
                       <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${tele.progress}%` }}
-                          viewport={{ once: true }}
-                          className={`h-full ${tele.color} rounded-full`}
-                        ></motion.div>
+                        <div
+                          className={`h-full ${tele.color} rounded-full transition-all duration-1000`}
+                          style={{ width: `${tele.progress}%` }}
+                        ></div>
                       </div>
                     </div>
                   ))}
@@ -740,34 +840,35 @@ const AIDispatchPage = () => {
                   {[
                     {
                       id: "104",
-                      status: "bg-rose-500",
                       img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBHb63VKEQkFcvUDOzRo9br8wzOCHG9ADdsJLU-ev5TODsXOOsMu_vqvhq8OnGt3yS_U-uyo89DglzV7EwDZ-dIXmlRpOZoh9o6E4ya0n2ZojOXrGiG2jvBDrYdKd2lAjac4ETxfoMbqrdcWOy0XxJjcDFfL3aqRnqADkjFgx9_81dY549j8bYLzO87yh8cKrp5070S-hvpkBIPpVV-CLkk1Bqpf6WIGz8mtFdiiXFTlMFjDzY8jsPvecwAiNA2P3rumO_eoYCYZII",
                     },
                     {
                       id: "208",
-                      status: "bg-emerald-500",
                       img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVG2zv74HfVcALoQrNxSMfuT3it3bp7GiX3jl-T3U157Ghf3bjocy1r5DcJsmKsN7KcLv8PTARQkP90BGonEKUWhz-dof2aNmbPwRS7BANqZmfYs7MZKqNZZrHUohZYttsFaa3M981oSPO-2qTHDwHvI2HC1gBlag0phkdxEaO3u9XjAjVWzFFAeGaC1ii_G2CON8HHU-OgomROhNx0UZUG1r8TPpDsmRjDr6lW_wERFfRegLVULw88K1eiGhDbBfWVMjuvTC6G7M",
                     },
-                  ].map((feed, i) => (
-                    <div
-                      key={i}
-                      className="aspect-video bg-black rounded-xl relative overflow-hidden border border-white/10 group cursor-pointer"
-                    >
-                      <img
-                        src={feed.img}
-                        alt={`Unit ${feed.id}`}
-                        className="w-full h-full object-cover opacity-50 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
-                      />
-                      <div className="absolute top-2 left-2 flex items-center gap-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
-                        <div
-                          className={`h-1.5 w-1.5 rounded-full ${feed.status} animate-pulse`}
-                        ></div>
-                        <span className="text-[8px] font-black text-white uppercase tracking-widest">
-                          UNIT {feed.id}
-                        </span>
+                  ].map((feed, i) => {
+                    const opState = operators.find(o => o.id === feed.id);
+                    return (
+                      <div
+                        key={i}
+                        className="aspect-video bg-black rounded-xl relative overflow-hidden border border-white/10 group cursor-pointer"
+                      >
+                        <img
+                          src={feed.img}
+                          alt={`Unit ${feed.id}`}
+                          className="w-full h-full object-cover opacity-50 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
+                        />
+                        <div className="absolute top-2 left-2 flex items-center gap-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
+                          <div
+                            className={`h-1.5 w-1.5 rounded-full ${opState?.status} animate-pulse`}
+                          ></div>
+                          <span className="text-[8px] font-black text-white uppercase tracking-widest">
+                            UNIT {feed.id}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="p-6 pt-2">
                   <motion.button

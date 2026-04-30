@@ -4,6 +4,12 @@ const User = require('../models/User');
 const Vehicle = require('../models/Vehicle');
 const Incident = require('../models/Incident');
 const Discount = require('../models/Discount');
+const Driver = require('../models/Driver');
+const Cluster = require('../models/Cluster');
+const Notification = require('../models/Notification');
+const Deployment = require('../models/Deployment');
+const Payment = require('../models/Payment');
+const EventLog = require('../models/EventLog');
 const connectDB = require('../config/database');
 
 connectDB();
@@ -15,6 +21,12 @@ const seedData = async () => {
     await Vehicle.deleteMany();
     await Incident.deleteMany();
     await Discount.deleteMany();
+    await Driver.deleteMany();
+    await Cluster.deleteMany();
+    await Notification.deleteMany();
+    await Deployment.deleteMany();
+    await Payment.deleteMany();
+    await EventLog.deleteMany();
 
     console.log('🗑️  Cleared existing data');
 
@@ -224,6 +236,217 @@ const seedData = async () => {
     ]);
 
     console.log('✅ Created discounts');
+
+    // Create drivers
+    const drivers = await Driver.create([
+      {
+        driverId: 'DRV-001',
+        name: 'Michael Johnson',
+        email: 'michael.j@shuttlecore.ai',
+        phone: '+1-555-0101',
+        status: 'available',
+        rating: 4.8,
+        totalTrips: 1250,
+        currentLocation: { lat: 37.7749, lng: -122.4194 },
+        earnings: 45000,
+        isVerified: true
+      },
+      {
+        driverId: 'DRV-002',
+        name: 'Sarah Williams',
+        email: 'sarah.w@shuttlecore.ai',
+        phone: '+1-555-0102',
+        status: 'on_trip',
+        rating: 4.9,
+        totalTrips: 980,
+        currentLocation: { lat: 37.7849, lng: -122.4094 },
+        earnings: 38000,
+        isVerified: true
+      },
+      {
+        driverId: 'DRV-003',
+        name: 'David Chen',
+        email: 'david.c@shuttlecore.ai',
+        phone: '+1-555-0103',
+        status: 'available',
+        rating: 4.7,
+        totalTrips: 750,
+        currentLocation: { lat: 37.7649, lng: -122.4294 },
+        earnings: 29000,
+        isVerified: true
+      }
+    ]);
+
+    console.log('✅ Created drivers');
+
+    // Create clusters
+    const clusters = await Cluster.create([
+      {
+        id: '#1',
+        name: 'North Financial Plaza',
+        location: 'Downtown Financial District',
+        coordinates: { lat: 37.7949, lng: -122.3994 },
+        passengers: 12,
+        shuttlesAssigned: 1,
+        status: 'active',
+        color: 'bg-emerald-500',
+        demand: 'High'
+      },
+      {
+        id: '#2',
+        name: 'The Mission Hub',
+        location: 'Mission District',
+        coordinates: { lat: 37.7649, lng: -122.4194 },
+        passengers: 28,
+        shuttlesAssigned: 3,
+        status: 'active',
+        color: 'bg-[#5C5C3D]',
+        demand: 'High'
+      },
+      {
+        id: '#3',
+        name: 'Sunset Terrace',
+        location: 'Sunset District',
+        coordinates: { lat: 37.7549, lng: -122.4394 },
+        passengers: 8,
+        shuttlesAssigned: 0,
+        status: 'pending',
+        color: 'bg-slate-500',
+        demand: 'Medium'
+      }
+    ]);
+
+    console.log('✅ Created clusters');
+
+    // Create notifications
+    const notifications = await Notification.create([
+      {
+        user: users[0]._id,
+        title: 'Ride Confirmed',
+        message: 'Your ride to Downtown has been confirmed. Driver will arrive in 5 minutes.',
+        type: 'success',
+        isRead: false,
+        actionUrl: '/ride-history'
+      },
+      {
+        user: users[0]._id,
+        title: 'Emergency Alert',
+        message: 'Emergency incident reported in your area. Please avoid Downtown Core.',
+        type: 'emergency',
+        isRead: false,
+        actionUrl: '/emergency-stop'
+      },
+      {
+        user: users[1]._id,
+        title: 'Payment Successful',
+        message: 'Your payment of $89.00 has been processed successfully.',
+        type: 'success',
+        isRead: true,
+        actionUrl: '/ride-history'
+      }
+    ]);
+
+    console.log('✅ Created notifications');
+
+    // Create deployments
+    const deployments = await Deployment.create([
+      {
+        id: 'DP-001',
+        name: 'Morning Rush Deployment',
+        location: 'Downtown Core',
+        coordinates: { lat: 37.7749, lng: -122.4194 },
+        units: [vehicles[0]._id, vehicles[1]._id],
+        status: 'completed',
+        timeSaved: 494,
+        efficiency: 12.4,
+        startTime: new Date(Date.now() - 8 * 60 * 60 * 1000),
+        endTime: new Date(Date.now() - 2 * 60 * 60 * 1000)
+      },
+      {
+        id: 'DP-002',
+        name: 'Evening Commute Deployment',
+        location: 'Financial District',
+        coordinates: { lat: 37.7849, lng: -122.4094 },
+        units: [vehicles[2]._id, vehicles[3]._id],
+        status: 'active',
+        timeSaved: 320,
+        efficiency: 10.8,
+        startTime: new Date(Date.now() - 1 * 60 * 60 * 1000)
+      }
+    ]);
+
+    console.log('✅ Created deployments');
+
+    // Create payment methods
+    const payments = await Payment.create([
+      {
+        user: users[0]._id,
+        type: 'card',
+        provider: 'Visa',
+        lastFour: '4242',
+        expiryMonth: 12,
+        expiryYear: 2025,
+        isDefault: true
+      },
+      {
+        user: users[0]._id,
+        type: 'card',
+        provider: 'Mastercard',
+        lastFour: '5555',
+        expiryMonth: 8,
+        expiryYear: 2024,
+        isDefault: false
+      },
+      {
+        user: users[1]._id,
+        type: 'card',
+        provider: 'Visa',
+        lastFour: '1234',
+        expiryMonth: 6,
+        expiryYear: 2025,
+        isDefault: true
+      }
+    ]);
+
+    console.log('✅ Created payment methods');
+
+    // Create event logs
+    const eventLogs = await EventLog.create([
+      {
+        eventType: 'booking',
+        title: 'New Booking Created',
+        description: 'User created a new booking from Downtown to Airport',
+        severity: 'info',
+        relatedId: 'BK-1234567890',
+        source: 'system'
+      },
+      {
+        eventType: 'incident',
+        title: 'Emergency Incident Reported',
+        description: 'Brake system failure reported for Shuttle-402',
+        severity: 'critical',
+        relatedId: 'EM-402',
+        source: 'system'
+      },
+      {
+        eventType: 'deployment',
+        title: 'Deployment Initiated',
+        description: 'Morning rush deployment started with 2 units',
+        severity: 'info',
+        relatedId: 'DP-001',
+        source: 'operator'
+      },
+      {
+        eventType: 'vehicle',
+        title: 'Vehicle Status Change',
+        description: 'Vehicle SH-402 changed status to in_transit',
+        severity: 'info',
+        relatedId: 'SH-402',
+        source: 'system'
+      }
+    ]);
+
+    console.log('✅ Created event logs');
 
     console.log('🎉 Seeding completed successfully!');
     process.exit();

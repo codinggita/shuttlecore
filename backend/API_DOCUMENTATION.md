@@ -315,6 +315,357 @@ Content-Type: application/json
 }
 ```
 
+### Drivers
+
+#### Get All Drivers (Admin/Operator only)
+```http
+GET /api/drivers
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "drivers": [
+    {
+      "id": "driver_id",
+      "driverId": "DRV-001",
+      "name": "Michael Johnson",
+      "email": "michael.j@shuttlecore.ai",
+      "phone": "+1-555-0101",
+      "vehicle": {
+        "id": "vehicle_id",
+        "unitId": "SH-402",
+        "name": "Standard Ride",
+        "type": "standard"
+      },
+      "status": "available",
+      "rating": 4.8,
+      "totalTrips": 1250,
+      "currentLocation": { "lat": 37.7749, "lng": -122.4194 },
+      "earnings": 45000,
+      "isVerified": true
+    }
+  ]
+}
+```
+
+#### Get Single Driver
+```http
+GET /api/drivers/:id
+Authorization: Bearer <token>
+```
+
+#### Update Driver Status (Admin/Operator only)
+```http
+PUT /api/drivers/:id/status
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "status": "on_trip",
+  "currentLocation": { "lat": 37.7749, "lng": -122.4194 }
+}
+```
+
+#### Create Driver (Admin only)
+```http
+POST /api/drivers
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "driverId": "DRV-004",
+  "name": "New Driver",
+  "email": "driver@shuttlecore.ai",
+  "phone": "+1-555-0104"
+}
+```
+
+### Clusters
+
+#### Get All Clusters
+```http
+GET /api/clusters
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "clusters": [
+    {
+      "id": "#1",
+      "name": "North Financial Plaza",
+      "location": "Downtown Financial District",
+      "coordinates": { "lat": 37.7949, "lng": -122.3994 },
+      "passengers": 12,
+      "shuttlesAssigned": 1,
+      "status": "active",
+      "color": "bg-emerald-500",
+      "demand": "High",
+      "lastUpdate": "Just now"
+    }
+  ]
+}
+```
+
+#### Get Single Cluster
+```http
+GET /api/clusters/:id
+Authorization: Bearer <token>
+```
+
+#### Update Cluster (Admin/Operator only)
+```http
+PUT /api/clusters/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "passengers": 15,
+  "shuttlesAssigned": 2,
+  "demand": "High",
+  "status": "active"
+}
+```
+
+#### Create Cluster (Admin only)
+```http
+POST /api/clusters
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "New Cluster",
+  "location": "Downtown",
+  "coordinates": { "lat": 37.7749, "lng": -122.4194 },
+  "passengers": 10
+}
+```
+
+### Notifications
+
+#### Get All Notifications
+```http
+GET /api/notifications
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "notifications": [
+    {
+      "id": "notif_id",
+      "title": "Ride Confirmed",
+      "message": "Your ride to Downtown has been confirmed.",
+      "type": "success",
+      "isRead": false,
+      "actionUrl": "/ride-history",
+      "metadata": {},
+      "timestamp": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+#### Mark Notification as Read
+```http
+PUT /api/notifications/:id/read
+Authorization: Bearer <token>
+```
+
+#### Mark All Notifications as Read
+```http
+PUT /api/notifications/read-all
+Authorization: Bearer <token>
+```
+
+#### Create Notification (Admin only)
+```http
+POST /api/notifications
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "user": "user_id",
+  "title": "Alert",
+  "message": "Notification message",
+  "type": "warning"
+}
+```
+
+### Deployments
+
+#### Get All Deployments (Admin/Operator only)
+```http
+GET /api/deployments
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "deployments": [
+    {
+      "id": "DP-001",
+      "name": "Morning Rush Deployment",
+      "location": "Downtown Core",
+      "coordinates": { "lat": 37.7749, "lng": -122.4194 },
+      "units": [
+        {
+          "id": "vehicle_id",
+          "unitId": "SH-402",
+          "name": "Standard Ride",
+          "type": "standard"
+        }
+      ],
+      "status": "completed",
+      "timeSaved": 494,
+      "efficiency": 12.4,
+      "startTime": "2024-01-15T08:00:00.000Z",
+      "endTime": "2024-01-15T14:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### Get Single Deployment
+```http
+GET /api/deployments/:id
+Authorization: Bearer <token>
+```
+
+#### Create Deployment (Admin/Operator only)
+```http
+POST /api/deployments
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "New Deployment",
+  "location": "Downtown",
+  "coordinates": { "lat": 37.7749, "lng": -122.4194 },
+  "unitIds": ["vehicle_id_1", "vehicle_id_2"]
+}
+```
+
+#### Update Deployment (Admin/Operator only)
+```http
+PUT /api/deployments/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "status": "completed",
+  "timeSaved": 500,
+  "efficiency": 13.0,
+  "endTime": "2024-01-15T14:00:00.000Z"
+}
+```
+
+### Payments
+
+#### Get All Payment Methods
+```http
+GET /api/payments
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "payments": [
+    {
+      "id": "payment_id",
+      "type": "card",
+      "provider": "Visa",
+      "lastFour": "4242",
+      "expiryMonth": 12,
+      "expiryYear": 2025,
+      "isDefault": true
+    }
+  ]
+}
+```
+
+#### Add Payment Method
+```http
+POST /api/payments
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "type": "card",
+  "provider": "Visa",
+  "lastFour": "4242",
+  "expiryMonth": 12,
+  "expiryYear": 2025,
+  "isDefault": false
+}
+```
+
+#### Set Default Payment Method
+```http
+PUT /api/payments/:id/default
+Authorization: Bearer <token>
+```
+
+#### Delete Payment Method
+```http
+DELETE /api/payments/:id
+Authorization: Bearer <token>
+```
+
+### Event Logs
+
+#### Get All Event Logs (Admin/Operator only)
+```http
+GET /api/event-logs?eventType=booking&severity=info&limit=100
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "logs": [
+    {
+      "id": "log_id",
+      "eventType": "booking",
+      "title": "New Booking Created",
+      "description": "User created a new booking from Downtown to Airport",
+      "severity": "info",
+      "relatedId": "BK-1234567890",
+      "metadata": {},
+      "source": "system",
+      "timestamp": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+#### Create Event Log (Admin only)
+```http
+POST /api/event-logs
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "eventType": "booking",
+  "title": "Event Title",
+  "description": "Event description",
+  "severity": "info",
+  "relatedId": "BK-1234567890"
+}
+```
+
 ## WebSocket Events
 
 ### Client → Server
@@ -339,7 +690,21 @@ socket.on('connection_established', (data) => {
 #### Fleet Location Update (every 2 seconds)
 ```javascript
 socket.on('fleet_location_update', (data) => {
-  // { unit: "TX-402", lat: "...", lng: "...", velocity: 45, timestamp: "..." }
+  // { unit: "TX-402", lat: "...", lng: "...", velocity: 45, heading: "Northbound", battery: 85, timestamp: "..." }
+});
+```
+
+#### Live Map Update (every 1 second) - **NEW**
+```javascript
+socket.on('live_map_update', (data) => {
+  // {
+  //   vehicles: [
+  //     { unitId: "SH-402", lat: "...", lng: "...", status: "in_transit", speed: 25, heading: "Northbound", battery: 85, timestamp: "..." },
+  //     { unitId: "SH-881", lat: "...", lng: "...", status: "available", speed: 0, heading: "N/A", battery: 90, timestamp: "..." }
+  //   ],
+  //   center: { lat: 37.7749, lng: -122.4194 },
+  //   zoom: 13
+  // }
 });
 ```
 
@@ -446,3 +811,37 @@ npm run dev
 - maxDiscount, minOrder
 - validFrom, validUntil
 - isActive, usageCount, maxUsage
+
+### Driver
+- driverId, name, email, phone
+- vehicle (reference)
+- status, rating, totalTrips
+- currentLocation, earnings
+- isVerified
+
+### Cluster
+- id, name, location
+- coordinates, passengers
+- shuttlesAssigned, status
+- color, demand, lastUpdate
+
+### Notification
+- user (reference), title, message
+- type, isRead, actionUrl
+- metadata
+
+### Deployment
+- id, name, location
+- coordinates, units (array of vehicle references)
+- status, timeSaved, efficiency
+- startTime, endTime
+
+### Payment
+- user (reference), type, provider
+- lastFour, expiryMonth, expiryYear
+- isDefault, isActive
+
+### EventLog
+- eventType, title, description
+- severity, relatedId, metadata
+- source

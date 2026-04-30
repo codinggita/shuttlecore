@@ -37,6 +37,14 @@ const AllDriversPage = lazy(() => import("./pages/AllDriversPage"));
 const FleetAdjustmentPage = lazy(() => import("./pages/FleetAdjustmentPage"));
 const EmergencyStopPage = lazy(() => import("./pages/EmergencyStopPage"));
 const BookMyRidePage = lazy(() => import("./pages/BookMyRidePage"));
+const VehicleSelectionPage = lazy(() => import("./pages/VehicleSelectionPage"));
+const VehicleDetailPage = lazy(() => import("./pages/VehicleDetailPage"));
+const BookingConfirmationPage = lazy(() => import("./pages/BookingConfirmationPage"));
+const RideHistoryPage = lazy(() => import("./pages/RideHistoryPage"));
+const RideOptionDetailPage = lazy(() => import("./pages/RideOptionDetailPage"));
+const ExploreRidesPage = lazy(() => import("./pages/ExploreRidesPage"));
+const AirportRidesPage = lazy(() => import("./pages/AirportRidesPage"));
+const ReserveRidePage = lazy(() => import("./pages/ReserveRidePage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -64,6 +72,8 @@ const AnimatedRoutes = () => {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/faq" element={<FAQPage />} />
+          <Route path="/airport-rides" element={<AirportRidesPage />} />
+          <Route path="/reserve-ride" element={<ReserveRidePage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/payments" element={<PaymentMethodsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
@@ -180,6 +190,70 @@ const AnimatedRoutes = () => {
             element={
               <ProtectedRoute>
                 <BookMyRidePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/vehicle-selection" 
+            element={
+              <ProtectedRoute>
+                <VehicleSelectionPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/vehicle/:vehicleId" 
+            element={
+              <ProtectedRoute>
+                <VehicleDetailPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/booking-confirmation" 
+            element={
+              <ProtectedRoute>
+                <BookingConfirmationPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/ride-history" 
+            element={
+              <ProtectedRoute>
+                <RideHistoryPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/ride-option/:rideId" 
+            element={
+              <ProtectedRoute>
+                <RideOptionDetailPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/explore-rides" 
+            element={
+              <ProtectedRoute>
+                <ExploreRidesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/airport-rides" 
+            element={
+              <ProtectedRoute>
+                <AirportRidesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/reserve-ride" 
+            element={
+              <ProtectedRoute>
+                <ReserveRidePage />
               </ProtectedRoute>
             } 
           />

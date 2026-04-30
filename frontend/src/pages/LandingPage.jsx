@@ -153,25 +153,32 @@ const LandingPage = () => {
               <nav className="flex flex-col gap-10">
                 <a
                   className="text-4xl font-bold text-[var(--text-main)] hover:translate-x-2 transition-transform"
-                  href="#"
+                  href="#fleet"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Fleet Overview
                 </a>
                 <a
                   className="text-4xl font-bold text-[var(--text-main)] hover:translate-x-2 transition-transform"
-                  href="#"
+                  href="#ai"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   AI Dispatch
                 </a>
-                <a
+                <Link
                   className="text-4xl font-bold text-[var(--text-main)] hover:translate-x-2 transition-transform"
-                  href="#"
+                  to="/services"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Route Engine
-                </a>
+                  Services
+                </Link>
+                <Link
+                  className="text-4xl font-bold text-[var(--text-main)] hover:translate-x-2 transition-transform"
+                  to="/faq"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  FAQ
+                </Link>
                 <hr className="border-[var(--border)] my-4" />
                 <Link
                   to="/login"
@@ -247,7 +254,7 @@ const LandingPage = () => {
               className="flex flex-col sm:flex-row gap-5 justify-center"
             >
               <Link
-                to="/dashboard"
+                to="/login"
                 className="btn-primary !px-12 !py-5 flex items-center justify-center gap-3 text-lg group"
               >
                 <span>Launch Command Center</span>
@@ -426,6 +433,7 @@ const LandingPage = () => {
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               <motion.div
+                id="ai"
                 initial={{ opacity: 0, x: -40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -509,13 +517,12 @@ const LandingPage = () => {
               future.
             </p>
             <div className="flex flex-wrap justify-center gap-8">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="btn-primary !px-12 !py-6 !text-xl"
+              <Link
+                to="/signup"
+                className="btn-primary !px-12 !py-6 !text-xl flex items-center justify-center"
               >
                 Request System Demo
-              </motion.button>
+              </Link>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

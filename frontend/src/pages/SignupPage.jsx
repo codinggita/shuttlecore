@@ -12,7 +12,7 @@ const SignupPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setTimeout(() => {
-      navigate("/dashboard");
+      navigate("/login");
     }, 1500);
   };
 

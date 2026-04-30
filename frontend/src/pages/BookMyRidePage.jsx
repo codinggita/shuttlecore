@@ -14,6 +14,13 @@ const BookMyRidePage = () => {
   const [selectedRide, setSelectedRide] = useState(null);
   const [showPrices, setShowPrices] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [reserveDate, setReserveDate] = useState("");
+  const [reserveTime, setReserveTime] = useState("");
+  const [showRideOptions, setShowRideOptions] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState("card");
+  const [selectedDiscount, setSelectedDiscount] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -23,6 +30,7 @@ const BookMyRidePage = () => {
   const menuItems = [
     { id: "simulation", label: "Simulation", icon: "model_training", path: "/dashboard" },
     { id: "bookride", label: "Book My Ride", icon: "local_taxi", path: "/book-ride" },
+    { id: "ridehistory", label: "Ride History", icon: "history", path: "/ride-history" },
     { id: "analytics", label: "AI Dispatch", icon: "query_stats", path: "/ai-dispatch" },
     { id: "heatmaps", label: "Demand Heatmaps", icon: "local_fire_department", path: "/demand-heatmaps" },
     { id: "fleet", label: "Fleet Management", icon: "airport_shuttle", path: "/fleet" },
@@ -31,8 +39,6 @@ const BookMyRidePage = () => {
 
   const topNavItems = [
     { id: "request", label: "Request a ride", icon: "local_taxi" },
-    { id: "reserve", label: "Reserve a ride", icon: "event" },
-    { id: "prices", label: "See prices", icon: "payments" },
     { id: "explore", label: "Explore ride options", icon: "explore" },
     { id: "airport", label: "Airport rides", icon: "flight" },
   ];
@@ -122,23 +128,104 @@ const BookMyRidePage = () => {
     },
   ];
 
+  // Vehicle options for pricing
+  const vehicleOptions = [
+    {
+      id: "bike",
+      name: "Bike",
+      description: "Fast & affordable",
+      capacity: "1 passenger",
+      price: 45,
+      originalPrice: 55,
+      time: "3 min",
+      icon: "two_wheeler",
+      color: "text-orange-400",
+    },
+    {
+      id: "auto",
+      name: "Auto",
+      description: "No bargaining, doorstep pickup",
+      capacity: "3 passengers",
+      price: 89,
+      originalPrice: 110,
+      time: "5 min",
+      icon: "local_taxi",
+      color: "text-yellow-400",
+    },
+    {
+      id: "sedan",
+      name: "Sedan",
+      description: "Comfortable sedans, top drivers",
+      capacity: "4 passengers",
+      price: 125,
+      originalPrice: 150,
+      time: "2 min",
+      icon: "directions_car",
+      color: "text-blue-400",
+    },
+    {
+      id: "xl",
+      name: "XL",
+      description: "Spacious SUVs & vans",
+      capacity: "6 passengers",
+      price: 195,
+      originalPrice: 240,
+      time: "8 min",
+      icon: "airport_shuttle",
+      color: "text-purple-400",
+    },
+  ];
+
+  // Payment methods
+  const paymentMethods = [
+    { id: "card", name: "Credit/Debit Card", icon: "credit_card", last4: "4242" },
+    { id: "upi", name: "UPI", icon: "smartphone", last4: "google@okaxis" },
+    { id: "cash", name: "Cash", icon: "payments" },
+    { id: "wallet", name: "ShuttleCore Wallet", icon: "account_balance_wallet", balance: "₹250" },
+  ];
+
+  // Discount offers
+  const discountOffers = [
+    { id: "new50", code: "NEW50", description: "50% off for new users", discount: 50, maxDiscount: 100 },
+    { id: "ride20", code: "RIDE20", description: "20% off on all rides", discount: 20, maxDiscount: 50 },
+    { id: "cashback", code: "CASHBACK", description: "₹50 cashback", discount: 0, cashback: 50 },
+  ];
+
   const handleSeePrices = () => {
     if (pickupLocation && dropoffLocation) {
-      setShowPrices(true);
+      navigate("/vehicle-selection", {
+        state: {
+          pickup: pickupLocation,
+          dropoff: dropoffLocation,
+        },
+      });
     } else {
       alert("Please enter both pickup and dropoff locations");
     }
   };
 
+  const handleVehicleSelect = (vehicleId) => {
+    setSelectedVehicle(vehicleId);
+    setShowPayment(true);
+  };
+
   const handleRideSelect = (rideId) => {
     setSelectedRide(rideId);
-    navigate(`/ride-details/${rideId}`, { 
+    navigate(`/ride-option/${rideId}`, { 
       state: { 
-        ride: rideOptions.find(r => r.id === rideId),
-        pickup: pickupLocation,
-        dropoff: dropoffLocation
+        rideOption: rideOptions.find(r => r.id === rideId),
       } 
     });
+  };
+
+  const getDiscountedPrice = (price) => {
+    if (!selectedDiscount) return price;
+    const offer = discountOffers.find(o => o.id === selectedDiscount);
+    if (offer.discount > 0) {
+      const discountAmount = Math.min((price * offer.discount) / 100, offer.maxDiscount);
+      return price - discountAmount;
+    }
+    return price;
   };
 
   const containerVariants = {
@@ -279,7 +366,11 @@ const BookMyRidePage = () => {
               {topNavItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    if (item.id === "explore") navigate("/explore-rides");
+                    else if (item.id === "airport") navigate("/airport-rides");
+                    else setActiveTab(item.id);
+                  }}
                   className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
                     activeTab === item.id 
                       ? "bg-[var(--primary)] text-white" 
@@ -369,6 +460,188 @@ const BookMyRidePage = () => {
               </div>
             </motion.div>
 
+            {/* Ride Options with Prices */}
+            <AnimatePresence>
+              {showRideOptions && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="mb-8"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-black text-main tracking-tighter">
+                      Choose your ride
+                    </h2>
+                    <button 
+                      onClick={() => setShowRideOptions(false)}
+                      className="text-[11px] text-muted hover:text-main"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {vehicleOptions.map((vehicle) => (
+                      <motion.div
+                        key={vehicle.id}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => handleVehicleSelect(vehicle.id)}
+                        className={`dashboard-card !p-4 cursor-pointer transition-all ${
+                          selectedVehicle === vehicle.id 
+                            ? "border-[var(--primary)] bg-[var(--primary)]/5" 
+                            : "hover:border-[var(--primary)]/50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-14 h-14 rounded-xl bg-[var(--surface-muted)] flex items-center justify-center ${vehicle.color}`}>
+                            <span className="material-symbols-outlined text-3xl">{vehicle.icon}</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <h3 className="text-[16px] font-black text-main">{vehicle.name}</h3>
+                              <div className="text-right">
+                                <p className="text-[18px] font-black text-main">₹{getDiscountedPrice(vehicle.price)}</p>
+                                {selectedDiscount && (
+                                  <p className="text-[11px] text-muted line-through">₹{vehicle.price}</p>
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-[12px] text-muted">{vehicle.description}</p>
+                            <div className="flex items-center gap-4 mt-2">
+                              <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                                <span className="material-symbols-outlined text-sm">schedule</span>
+                                {vehicle.time}
+                              </span>
+                              <span className="text-[11px] text-muted">{vehicle.capacity}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Payment & Discounts Section */}
+            <AnimatePresence>
+              {showPayment && selectedVehicle && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="mb-8"
+                >
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Payment Methods */}
+                    <div className="dashboard-card !p-6">
+                      <h3 className="text-lg font-black text-main mb-4">Payment Method</h3>
+                      <div className="space-y-3">
+                        {paymentMethods.map((method) => (
+                          <button
+                            key={method.id}
+                            onClick={() => setSelectedPayment(method.id)}
+                            className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                              selectedPayment === method.id
+                                ? "border-[var(--primary)] bg-[var(--primary)]/5"
+                                : "border-[var(--border)] hover:border-[var(--primary)]/50"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-[var(--primary)]">{method.icon}</span>
+                            <div className="flex-1 text-left">
+                              <p className="text-[13px] font-bold text-main">{method.name}</p>
+                              {method.last4 && (
+                                <p className="text-[11px] text-muted">•••• {method.last4}</p>
+                              )}
+                              {method.balance && (
+                                <p className="text-[11px] text-emerald-400">{method.balance}</p>
+                              )}
+                            </div>
+                            {selectedPayment === method.id && (
+                              <span className="material-symbols-outlined text-[var(--primary)]">check_circle</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Discounts & Offers */}
+                    <div className="dashboard-card !p-6">
+                      <h3 className="text-lg font-black text-main mb-4">Offers & Discounts</h3>
+                      <div className="space-y-3">
+                        {discountOffers.map((offer) => (
+                          <button
+                            key={offer.id}
+                            onClick={() => setSelectedDiscount(selectedDiscount === offer.id ? null : offer.id)}
+                            className={`w-full p-4 rounded-xl border transition-all text-left ${
+                              selectedDiscount === offer.id
+                                ? "border-[var(--primary)] bg-[var(--primary)]/5"
+                                : "border-[var(--border)] hover:border-[var(--primary)]/50"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="px-2 py-1 bg-[var(--primary)]/10 text-[var(--primary)] text-[11px] font-black rounded">
+                                {offer.code}
+                              </span>
+                              {selectedDiscount === offer.id && (
+                                <span className="material-symbols-outlined text-[var(--primary)] text-sm">check_circle</span>
+                              )}
+                            </div>
+                            <p className="text-[13px] font-bold text-main mt-2">{offer.description}</p>
+                            {offer.discount > 0 && (
+                              <p className="text-[11px] text-emerald-400">Save up to ₹{offer.maxDiscount}</p>
+                            )}
+                            {offer.cashback && (
+                              <p className="text-[11px] text-emerald-400">Get ₹{offer.cashback} cashback</p>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Price Summary */}
+                      <div className="mt-6 pt-6 border-t border-[var(--border)]">
+                        {selectedVehicle && (
+                          <>
+                            <div className="flex justify-between mb-2">
+                              <span className="text-[13px] text-muted">Ride fare</span>
+                              <span className="text-[13px] text-main">
+                                ₹{vehicleOptions.find(v => v.id === selectedVehicle)?.price}
+                              </span>
+                            </div>
+                            {selectedDiscount && (
+                              <div className="flex justify-between mb-2 text-emerald-400">
+                                <span className="text-[13px]">Discount</span>
+                                <span className="text-[13px] font-bold">
+                                  -₹{vehicleOptions.find(v => v.id === selectedVehicle)?.price - getDiscountedPrice(vehicleOptions.find(v => v.id === selectedVehicle)?.price)}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex justify-between pt-2 border-t border-[var(--border)]">
+                              <span className="text-[16px] font-black text-main">Total</span>
+                              <span className="text-[16px] font-black text-main">
+                                ₹{getDiscountedPrice(vehicleOptions.find(v => v.id === selectedVehicle)?.price)}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Confirm Button */}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full mt-6 py-4 bg-[var(--primary)] text-white rounded-xl text-[13px] font-black uppercase tracking-wider hover:opacity-90 transition-all"
+                      >
+                        Confirm Booking
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Ride Options Grid */}
             <motion.div variants={itemVariants} className="mb-12">
               <h2 className="text-2xl font-black text-main mb-6 tracking-tighter">
@@ -422,29 +695,32 @@ const BookMyRidePage = () => {
                   <p className="text-[13px] text-muted mb-6">Choose date and time</p>
                   
                   <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted">calendar_today</span>
+                    <div className="relative group">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 z-10 pointer-events-none">calendar_month</span>
                       <input
-                        type="text"
-                        placeholder="Date"
-                        className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold"
+                        type="date"
+                        value={reserveDate}
+                        onChange={(e) => setReserveDate(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold relative z-0"
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
                       />
                     </div>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted">schedule</span>
-                      <select className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold appearance-none">
-                        <option>Time</option>
-                        <option>08:00 AM</option>
-                        <option>09:00 AM</option>
-                        <option>10:00 AM</option>
-                        <option>11:00 AM</option>
-                      </select>
+                    <div className="relative group">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 z-10 pointer-events-none">schedule</span>
+                      <input
+                        type="time"
+                        value={reserveTime}
+                        onChange={(e) => setReserveTime(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold relative z-0"
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                      />
                     </div>
                   </div>
 
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={() => navigate("/reserve-ride", { state: { date: reserveDate, time: reserveTime } })}
                     className="w-full py-3 bg-[var(--text-main)] text-[var(--background)] rounded-lg text-[12px] font-black uppercase tracking-wider"
                   >
                     Next

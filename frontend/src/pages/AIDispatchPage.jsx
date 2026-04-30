@@ -78,6 +78,18 @@ const AIDispatchPage = () => {
       path: "/dashboard",
     },
     {
+      id: "bookride",
+      label: "Book My Ride",
+      icon: "local_taxi",
+      path: "/book-ride",
+    },
+    {
+      id: "ridehistory",
+      label: "Ride History",
+      icon: "history",
+      path: "/ride-history",
+    },
+    {
       id: "analytics",
       label: "AI Dispatch",
       icon: "query_stats",
@@ -355,11 +367,39 @@ const AIDispatchPage = () => {
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="max-w-[1600px] mx-auto grid grid-cols-12 gap-6"
+            className="max-w-[1600px] mx-auto"
           >
-            {/* Hero Status: Active Orders */}
-            <section className="col-span-12 lg:col-span-8 space-y-6">
-              {/* Stats Cards */}
+            {/* Book My Ride Feature Card */}
+            <motion.div 
+              variants={itemVariants} 
+              className="mb-8 dashboard-card !p-6 bg-gradient-to-r from-[var(--primary)]/10 to-[var(--primary)]/5 border-[var(--primary)]/20"
+            >
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-[var(--primary)]/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[var(--primary)] text-3xl">history</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-main mb-1">Ride History</h3>
+                    <p className="text-[13px] text-muted">View all your past and upcoming bookings</p>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate("/ride-history")}
+                  className="px-6 py-3 bg-[var(--primary)] text-white rounded-xl text-[12px] font-black uppercase tracking-wider hover:opacity-90 transition-all flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  View History
+                </motion.button>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Hero Status: Active Orders */}
+              <section className="col-span-12 lg:col-span-8 space-y-6">
+                {/* Stats Cards */}
               <motion.div
                 variants={containerVariants}
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
@@ -739,6 +779,7 @@ const AIDispatchPage = () => {
                 </div>
               </motion.div>
             </aside>
+            </div>
           </motion.div>
 
           {/* Footer Area */}

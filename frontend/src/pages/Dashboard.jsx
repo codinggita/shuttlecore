@@ -60,59 +60,80 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  const stats = [
-    {
-      label: "Nodes Online",
-      value: "99.8%",
-      icon: "lan",
-      trend: "+0.2%",
-      color: "text-emerald-400",
-    },
-    {
-      label: "Fleet Health",
-      value: "Nominal",
-      icon: "health_and_safety",
-      trend: "Stable",
-      color: "text-emerald-400",
-    },
-    {
-      label: "Avg Speed",
-      value: "24.5 mph",
-      icon: "speed",
-      trend: "+1.2%",
-      color: "text-amber-400",
-    },
-    {
-      label: "Security Level",
-      value: "L-7 SYNC",
-      icon: "security",
-      trend: "Active",
-      color: "text-gray-400",
-    },
-  ];
+  const [stats, setStats] = useState([
+    { label: "Nodes Online", value: "99.8%", icon: "lan", trend: "+0.2%", color: "text-emerald-400" },
+    { label: "Fleet Health", value: "Nominal", icon: "health_and_safety", trend: "Stable", color: "text-emerald-400" },
+    { label: "Avg Speed", value: "24.5 mph", icon: "speed", trend: "+1.2%", color: "text-amber-400" },
+    { label: "Security Level", value: "L-7 SYNC", icon: "security", trend: "Active", color: "text-gray-400" },
+  ]);
 
-  const performanceData = [
-    { time: "00:00", load: 40 },
-    { time: "01:00", load: 65 },
-    { time: "02:00", load: 45 },
-    { time: "03:00", load: 85 },
-    { time: "04:00", load: 55 },
-    { time: "05:00", load: 95 },
-    { time: "06:00", load: 70 },
-    { time: "07:00", load: 80 },
-    { time: "08:00", load: 50 },
-    { time: "09:00", load: 60 },
-    { time: "10:00", load: 45 },
-    { time: "11:00", load: 75 },
-    { time: "12:00", load: 90 },
-    { time: "13:00", load: 65 },
-    { time: "14:00", load: 85 },
-    { time: "15:00", load: 60 },
-    { time: "16:00", load: 40 },
-    { time: "17:00", load: 70 },
-    { time: "18:00", load: 95 },
-    { time: "19:00", load: 80 },
-  ];
+  const [performanceData, setPerformanceData] = useState([
+    { time: "00:00", load: 40 }, { time: "01:00", load: 65 }, { time: "02:00", load: 45 }, { time: "03:00", load: 85 },
+    { time: "04:00", load: 55 }, { time: "05:00", load: 95 }, { time: "06:00", load: 70 }, { time: "07:00", load: 80 },
+    { time: "08:00", load: 50 }, { time: "09:00", load: 60 }, { time: "10:00", load: 45 }, { time: "11:00", load: 75 },
+    { time: "12:00", load: 90 }, { time: "13:00", load: 65 }, { time: "14:00", load: 85 }, { time: "15:00", load: 60 },
+    { time: "16:00", load: 40 }, { time: "17:00", load: 70 }, { time: "18:00", load: 95 }, { time: "19:00", load: 80 },
+  ]);
+
+  const [queue, setQueue] = useState([
+    { id: "TX-402", status: "Transit", time: "4m rem", color: "bg-emerald-500", progress: 75 },
+    { id: "NY-881", status: "Charging", time: "12m rem", color: "bg-amber-500", progress: 40 },
+    { id: "SF-103", status: "Standby", time: "Ready", color: "bg-emerald-500", progress: 100 },
+    { id: "LA-229", status: "Transit", time: "15m rem", color: "bg-emerald-500", progress: 20 },
+    { id: "LD-904", status: "Docking", time: "2m rem", color: "bg-sky-500", progress: 90 },
+  ]);
+
+  const [impactMetrics, setImpactMetrics] = useState({
+    peakOptimization: 95.2,
+    fleetConsumption: 0.82,
+    meshLatency: 12
+  });
+
+  // Real-time data update simulation
+  useEffect(() => {
+    const timer = setInterval(() => {
+      // Update stats
+      setStats(prev => prev.map(s => {
+        if (s.label === "Avg Speed") {
+          const newVal = (24.5 + (Math.random() * 2 - 1)).toFixed(1);
+          return { ...s, value: `${newVal} mph` };
+        }
+        if (s.label === "Nodes Online") {
+          const newVal = (99.5 + (Math.random() * 0.4)).toFixed(1);
+          return { ...s, value: `${newVal}%` };
+        }
+        return s;
+      }));
+
+      // Update impact metrics
+      setImpactMetrics(prev => ({
+        peakOptimization: Math.min(100, Math.max(90, prev.peakOptimization + (Math.random() * 0.4 - 0.2))),
+        fleetConsumption: Math.max(0.7, prev.fleetConsumption + (Math.random() * 0.04 - 0.02)),
+        meshLatency: Math.max(8, Math.min(25, prev.meshLatency + (Math.random() > 0.5 ? 1 : -1)))
+      }));
+
+      // Update chart data
+      setPerformanceData(prev => {
+        const newData = [...prev.slice(1), { 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 
+          load: Math.floor(40 + Math.random() * 55) 
+        }];
+        return newData;
+      });
+
+      // Update queue progress
+      setQueue(prev => prev.map(q => {
+        if (q.progress < 100) {
+          const newProg = Math.min(100, q.progress + Math.random() * 2);
+          const newTime = newProg === 100 ? "Ready" : `${Math.ceil((100 - newProg) / 10)}m rem`;
+          return { ...q, progress: newProg, time: newTime, status: newProg === 100 ? "Standby" : q.status };
+        }
+        return q;
+      }));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const historyData = [
     { time: "Mon", load: 60 },
@@ -607,7 +628,7 @@ const Dashboard = () => {
                       Peak Optimization
                     </p>
                     <p className="text-2xl font-black text-main tracking-tighter">
-                      95.2%
+                      {impactMetrics.peakOptimization.toFixed(1)}%
                     </p>
                   </div>
                   <div>
@@ -615,7 +636,7 @@ const Dashboard = () => {
                       Fleet Consumption
                     </p>
                     <p className="text-2xl font-black text-main tracking-tighter">
-                      0.82{" "}
+                      {impactMetrics.fleetConsumption.toFixed(2)}{" "}
                       <span className="text-sm font-bold text-muted">
                         kWh/m
                       </span>
@@ -626,7 +647,7 @@ const Dashboard = () => {
                       Mesh Latency
                     </p>
                     <p className="text-2xl font-black text-main tracking-tighter">
-                      12<span className="text-sm font-bold text-muted">ms</span>
+                      {impactMetrics.meshLatency}<span className="text-sm font-bold text-muted">ms</span>
                     </p>
                   </div>
                 </div>
@@ -646,43 +667,7 @@ const Dashboard = () => {
                   </span>
                 </div>
                 <div className="space-y-3.5 flex-1 overflow-y-auto custom-scrollbar pr-1">
-                  {[
-                    {
-                      id: "TX-402",
-                      status: "Transit",
-                      time: "4m rem",
-                      color: "bg-emerald-500",
-                      progress: 75,
-                    },
-                    {
-                      id: "NY-881",
-                      status: "Charging",
-                      time: "12m rem",
-                      color: "bg-amber-500",
-                      progress: 40,
-                    },
-                    {
-                      id: "SF-103",
-                      status: "Standby",
-                      time: "Ready",
-                      color: "bg-emerald-500",
-                      progress: 100,
-                    },
-                    {
-                      id: "LA-229",
-                      status: "Transit",
-                      time: "15m rem",
-                      color: "bg-emerald-500",
-                      progress: 20,
-                    },
-                    {
-                      id: "LD-904",
-                      status: "Docking",
-                      time: "2m rem",
-                      color: "bg-sky-500",
-                      progress: 90,
-                    },
-                  ].map((task, i) => (
+                  {queue.map((task, i) => (
                     <motion.div
                       key={i}
                       whileHover={{

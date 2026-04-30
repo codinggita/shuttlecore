@@ -8,6 +8,49 @@ const SimulationDetailsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [performance, setPerformance] = useState({
+    throughput: 98.4,
+    latency: 14,
+    packetLoss: 0.01
+  });
+  const [logs, setLogs] = useState([
+    { time: "14:02:11", msg: "ROUTE_CALC: Node_Alpha_Active", color: "text-emerald-400" },
+    { time: "14:02:14", msg: "V2X_SYNC: Distributing payloads", color: "text-main" },
+    { time: "14:02:18", msg: "WARN: Vector_Path_Congested", color: "text-amber-400" },
+    { time: "14:02:22", msg: "REROUTE: Executing Swarm Logic", color: "text-main" },
+    { time: "14:02:25", msg: "OPTIMIZED: Latency reduced by 14%", color: "text-emerald-400" },
+  ]);
+
+  // Real-time update simulation
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      // Fluctuate performance
+      setPerformance(prev => ({
+        throughput: Math.min(100, Math.max(95, prev.throughput + (Math.random() * 0.4 - 0.2))),
+        latency: Math.max(8, Math.min(25, prev.latency + (Math.random() > 0.5 ? 1 : -1))),
+        packetLoss: Math.max(0.001, Math.min(0.05, prev.packetLoss + (Math.random() * 0.002 - 0.001)))
+      }));
+
+      // Update logs
+      setLogs(prev => {
+        const lastTime = prev[prev.length - 1].time;
+        const [h, m, s] = lastTime.split(':').map(Number);
+        const nextDate = new Date();
+        nextDate.setHours(h, m, s + Math.floor(Math.random() * 5 + 1));
+        const newTime = nextDate.toLocaleTimeString([], { hour12: false });
+        
+        const possibleMsgs = [
+          { msg: "SYNC: Mesh_Node_Handshake", color: "text-main" },
+          { msg: "OPTIMIZED: Vector_Cache_Flush", color: "text-emerald-400" },
+          { msg: "INFO: Swarm_Expansion_Ready", color: "text-main" },
+          { msg: "WARN: Uplink_Jitter_Detected", color: "text-amber-400" }
+        ];
+        const randomMsg = possibleMsgs[Math.floor(Math.random() * possibleMsgs.length)];
+        return [...prev.slice(1), { time: newTime, ...randomMsg }];
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const menuItems = [
     { id: "simulation", label: "Simulation", icon: "model_training", path: "/dashboard" },
@@ -98,12 +141,13 @@ const SimulationDetailsPage = () => {
                   Neural Mesh Telemetry
                 </h3>
                 <div className="bg-[var(--background)] rounded-2xl p-5 font-mono text-[11px] space-y-4 flex-1 border border-[var(--border)] shadow-inner">
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:11</span><span className="text-emerald-400 font-bold">ROUTE_CALC: Node_Alpha_Active</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:14</span><span className="text-main">V2X_SYNC: Distributing payloads</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:18</span><span className="text-amber-400 font-bold">WARN: Vector_Path_Congested</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:22</span><span className="text-main">REROUTE: Executing Swarm Logic</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:25</span><span className="text-emerald-400 font-bold">OPTIMIZED: Latency reduced by 14%</span></p>
-                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">14:02:30</span><span className="text-main animate-pulse">Awaiting next packet...</span></p>
+                  {logs.map((log, i) => (
+                    <p key={i} className="flex gap-4">
+                      <span className="text-[var(--text-muted)] opacity-50 w-16">{log.time}</span>
+                      <span className={`${log.color} font-bold`}>{log.msg}</span>
+                    </p>
+                  ))}
+                  <p className="flex gap-4"><span className="text-[var(--text-muted)] opacity-50 w-16">LIVE</span><span className="text-main animate-pulse">Awaiting next packet...</span></p>
                 </div>
               </motion.div>
 
@@ -117,28 +161,28 @@ const SimulationDetailsPage = () => {
                   <div>
                     <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-2">
                       <span className="text-muted">Throughput</span>
-                      <span className="text-main">98.4%</span>
+                      <span className="text-main">{performance.throughput.toFixed(1)}%</span>
                     </div>
                     <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 w-[98.4%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                      <div className="h-full bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-all duration-1000" style={{ width: `${performance.throughput}%` }}></div>
                     </div>
                   </div>
                   <div>
                     <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-2">
                       <span className="text-muted">Latency Offset</span>
-                      <span className="text-main">14ms</span>
+                      <span className="text-main">{performance.latency}ms</span>
                     </div>
                     <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-500 w-[20%] rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+                      <div className="h-full bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)] transition-all duration-1000" style={{ width: `${(performance.latency/30)*100}%` }}></div>
                     </div>
                   </div>
                   <div>
                     <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-2">
                       <span className="text-muted">Packet Loss</span>
-                      <span className="text-main">0.01%</span>
+                      <span className="text-main">{performance.packetLoss.toFixed(2)}%</span>
                     </div>
                     <div className="h-2 w-full bg-[var(--surface)] rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 w-[5%] rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                      <div className="h-full bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)] transition-all duration-1000" style={{ width: `${Math.min(100, performance.packetLoss*1000)}%` }}></div>
                     </div>
                   </div>
                   <div className="pt-6 mt-6 border-t border-[var(--border)] flex justify-between items-center">

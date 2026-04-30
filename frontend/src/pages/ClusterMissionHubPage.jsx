@@ -8,6 +8,41 @@ const ClusterMissionHubPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [waitlist, setWaitlist] = useState(28);
+  const [avgWait, setAvgWait] = useState(525); // 8m 45s in seconds
+  const [units, setUnits] = useState([
+    { id: "SV-112", status: "Boarding", color: "text-[#c2c286]", bg: "bg-[#5C5C3D]/20" },
+    { id: "SV-309", status: "En Route (2m)", color: "text-amber-500", bg: "bg-amber-500/10", rawEta: 120 },
+    { id: "SV-201", status: "En Route (4m)", color: "text-amber-500", bg: "bg-amber-500/10", rawEta: 240 }
+  ]);
+
+  // Real-time update simulation
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      // Fluctuate waitlist
+      setWaitlist(prev => Math.max(5, prev + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0)));
+      
+      // Decrement wait time
+      setAvgWait(prev => Math.max(300, prev + (Math.random() > 0.5 ? 1 : -1)));
+
+      // Update en route units
+      setUnits(prev => prev.map(u => {
+        if (u.rawEta > 0) {
+          const newEta = u.rawEta - 1;
+          const mins = Math.ceil(newEta / 60);
+          return { ...u, rawEta: newEta, status: newEta <= 0 ? "Boarding" : `En Route (${mins}m)` };
+        }
+        return u;
+      }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+  };
 
   const menuItems = [
     { id: "simulation", label: "Simulation", icon: "model_training", path: "/dashboard" },
@@ -87,20 +122,16 @@ const ClusterMissionHubPage = () => {
                   <div className="w-px h-12 bg-[var(--border)]"></div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-muted mb-1">Active Waitlist</p>
-                    <p className="text-3xl font-black text-main">28</p>
+                    <p className="text-3xl font-black text-main">{waitlist}</p>
                   </div>
                   <div className="w-px h-12 bg-[var(--border)]"></div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-muted mb-1">Avg Wait Time</p>
-                    <p className="text-3xl font-black text-rose-500">8m 45s</p>
+                    <p className="text-3xl font-black text-rose-500">{formatTime(avgWait)}</p>
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {[
-                    { id: "SV-112", status: "Boarding", color: "text-[#c2c286]", bg: "bg-[#5C5C3D]/20" },
-                    { id: "SV-309", status: "En Route (2m)", color: "text-amber-500", bg: "bg-amber-500/10" },
-                    { id: "SV-201", status: "En Route (4m)", color: "text-amber-500", bg: "bg-amber-500/10" }
-                  ].map((unit, i) => (
+                  {units.map((unit, i) => (
                     <div key={i} className="flex justify-between items-center p-4 bg-[var(--background)] rounded-xl border border-[var(--border)]">
                       <div className="flex items-center gap-3">
                         <span className="material-symbols-outlined text-muted text-sm">airport_shuttle</span>

@@ -35,12 +35,13 @@ const EmergencyNotification = () => {
       const visitedAt = localStorage.getItem("emergencyVisitedAt");
       
       // Check if user has already dismissed or visited in this cycle
-      const dismissed = dismissedAt && (Date.now() - parseInt(dismissedAt)) < 2 * 1000;
-      const visited = visitedAt && (Date.now() - parseInt(visitedAt)) < 2 * 1000;
+      // Changed to 24 hours to honor the "stop when I click cross" request
+      const dismissed = dismissedAt && (Date.now() - parseInt(dismissedAt)) < 24 * 60 * 60 * 1000;
+      const visited = visitedAt && (Date.now() - parseInt(visitedAt)) < 24 * 60 * 60 * 1000;
       
       if (isEmergency === "true" && !dismissed && !visited) {
-        // Check if 2 seconds have passed since last shown
-        const canShow = !lastShownTime.current || (Date.now() - lastShownTime.current) >= 2 * 1000;
+        // Show suddenly if not dismissed
+        const canShow = true; 
         
         if (canShow && location.pathname !== "/emergency") {
           setShowNotification(true);
@@ -133,8 +134,8 @@ const EmergencyNotification = () => {
         initial={{ opacity: 0, x: 100, scale: 0.9 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
         exit={{ opacity: 0, x: 100, scale: 0.9 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="fixed top-24 right-4 z-[9999] max-w-sm w-full"
+        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        className="fixed top-24 right-6 z-[9999] max-w-sm w-full"
       >
         <div 
           className="bg-[var(--surface)] border-2 border-rose-500/50 rounded-2xl shadow-2xl shadow-rose-500/30 overflow-hidden hover:border-rose-500 transition-all hover:shadow-rose-500/50"

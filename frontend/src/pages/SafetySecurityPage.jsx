@@ -72,32 +72,30 @@ const SafetySecurityPage = () => {
     },
   ];
 
-  const harshEvents = [
-    {
-      unit: "Unit #8421",
-      type: "Harsh Braking",
-      icon: "emergency_home",
-      color: "red",
-      time: "2M AGO",
-      desc: "Impact force: 0.85g at 45mph. Driver identified.",
-    },
-    {
-      unit: "Unit #9031",
-      type: "Speed Limit +15",
-      icon: "speed",
-      color: "orange",
-      time: "14M AGO",
-      desc: "Observed speed 70mph in a 55mph construction zone.",
-    },
-    {
-      unit: "Unit #1105",
-      type: "Aggressive Turn",
-      icon: "turn_right",
-      color: "slate",
-      time: "42M AGO",
-      desc: "Lateral g-force exceeded safety threshold on exit 14B.",
-    },
-  ];
+  const [harshEvents, setHarshEvents] = useState([
+    { unit: "Unit #8421", type: "Harsh Braking", icon: "emergency_home", color: "red", time: "2M AGO", desc: "Impact force: 0.85g at 45mph. Driver identified." },
+    { unit: "Unit #9031", type: "Speed Limit +15", icon: "speed", color: "orange", time: "14M AGO", desc: "Observed speed 70mph in a 55mph construction zone." },
+    { unit: "Unit #1105", type: "Aggressive Turn", icon: "turn_right", color: "slate", time: "42M AGO", desc: "Lateral g-force exceeded safety threshold on exit 14B." },
+  ]);
+
+  const [safetyScore, setSafetyScore] = useState(92);
+
+  // Real-time update simulation
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      // Small fluctuation in safety score
+      setSafetyScore(prev => Math.min(100, Math.max(85, prev + (Math.random() > 0.5 ? 0.1 : -0.1))));
+      
+      // Update event times slightly
+      setHarshEvents(prev => prev.map(e => {
+        if (Math.random() > 0.95) { // Randomly add a new recent event
+          return { ...e, time: "JUST NOW" };
+        }
+        return e;
+      }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const driverRankings = [
     {
@@ -568,7 +566,7 @@ const SafetySecurityPage = () => {
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-6xl font-black text-main tracking-tighter">
-                      92
+                      {safetyScore.toFixed(0)}
                     </span>
                     <span className="text-muted text-sm font-bold opacity-30">
                       / 100

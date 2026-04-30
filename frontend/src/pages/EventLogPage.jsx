@@ -12,6 +12,25 @@ const EventLogPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 10;
 
+  const [stats, setStats] = useState({
+    totalEvents: 1247,
+    highSeverity: 23,
+    pendingReview: 18,
+    resolvedToday: 45
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStats(prev => ({
+        totalEvents: prev.totalEvents + (Math.random() > 0.7 ? 1 : 0),
+        highSeverity: Math.max(0, prev.highSeverity + (Math.random() > 0.9 ? (Math.random() > 0.5 ? 1 : -1) : 0)),
+        pendingReview: Math.max(0, prev.pendingReview + (Math.random() > 0.95 ? (Math.random() > 0.5 ? 1 : -1) : 0)),
+        resolvedToday: prev.resolvedToday + (Math.random() > 0.8 ? 1 : 0)
+      }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Reset to page 1 when filter changes
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
@@ -583,10 +602,10 @@ const EventLogPage = () => {
             {/* Stats Row */}
             <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { label: "Total Events", value: "1,247", change: "+12 today", color: "text-[var(--primary)]" },
-                { label: "High Severity", value: "23", change: "-3 vs yesterday", color: "text-rose-400" },
-                { label: "Pending Review", value: "18", change: "Action needed", color: "text-amber-400" },
-                { label: "Resolved Today", value: "45", change: "100% clearance", color: "text-emerald-400" },
+                { label: "Total Events", value: stats.totalEvents.toLocaleString(), change: "+12 today", color: "text-[var(--primary)]" },
+                { label: "High Severity", value: stats.highSeverity, change: "-3 vs yesterday", color: "text-rose-400" },
+                { label: "Pending Review", value: stats.pendingReview, change: "Action needed", color: "text-amber-400" },
+                { label: "Resolved Today", value: stats.resolvedToday, change: "100% clearance", color: "text-emerald-400" },
               ].map((stat, i) => (
                 <div key={i} className="dashboard-card !p-5">
                   <p className="text-[10px] font-black text-muted uppercase tracking-[0.15em] mb-2 opacity-60">{stat.label}</p>

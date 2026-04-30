@@ -12,6 +12,10 @@ const SafetySecurityPage = () => {
 
   const [safetyScore, setSafetyScore] = useState(92.4);
   const [violations, setViolations] = useState({ speed: 12, braking: 8, activeUnits: 144 });
+  const [safetyStats, setSafetyStats] = useState({
+    inTraining: 2,
+    avgScore: 86.3
+  });
   const [user, setUser] = useState({
     firstName: "Cmdr.",
     lastName: "Operative",
@@ -71,6 +75,11 @@ const SafetySecurityPage = () => {
         };
         setHarshEvents(prev => [newEvent, ...prev.slice(0, 2)]);
       }
+      // Update safety stats
+      setSafetyStats(prev => ({
+        inTraining: Math.random() > 0.98 ? (Math.random() > 0.5 ? prev.inTraining + 1 : Math.max(0, prev.inTraining - 1)) : prev.inTraining,
+        avgScore: Math.min(100, Math.max(70, prev.avgScore + (Math.random() * 0.4 - 0.2)))
+      }));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -225,7 +234,7 @@ const SafetySecurityPage = () => {
           <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-[1600px] mx-auto">
             <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
               <div>
-                <h1 className="text-4xl font-black text-main mb-2 tracking-tighter uppercase">Safety Analytics</h1>
+                <h1 className="text-3xl font-black text-main mb-2 tracking-tighter uppercase">Safety Analytics</h1>
                 <p className="text-sm text-muted font-medium opacity-70">Real-time AI behavioral monitoring and high-frequency risk scoring matrix.</p>
               </div>
               <div className="flex gap-3">
@@ -247,25 +256,40 @@ const SafetySecurityPage = () => {
                   ))}
                 </div>
               </motion.div>
+            </div>
 
-              <motion.div variants={itemVariants} className="md:col-span-8 dashboard-card !p-0 rounded-[40px] overflow-hidden relative group shadow-2xl border border-[var(--border)]">
-                <img className="w-full h-full object-cover opacity-20 grayscale group-hover:scale-105 transition-transform duration-[20s]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANypopLvMRsIxtsuDu3SvHPuA7c8r21d60FKqN2JpBh_sTKxAj-EjVnAT7AbpS53QJZtPtsM4VKnVzInzr4b0amJuZkjuEQGo9FdJG3xGhvGmOCk4zMsHIO0ZF8h7-j4daIghJPqhtx8taYQCCe08iXRGwxJC2rCbAufMGViWGjLqkKMwwWs3P5IqAjyI4kqYsQ4lnlhyuGgDlDX8krVfvS-1GBcFfOz4EwtTYwd6W8yJNcdztSYPstw94kHhfuEm4G5QgehyVDRo" alt="Map" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] to-transparent opacity-80" />
-                <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
-                  <div className="bg-black/60 backdrop-blur-2xl p-8 rounded-[32px] border border-white/5 flex gap-12 shadow-2xl">
-                    {[
-                      {label: "Speed Violations", val: violations.speed, color: "text-amber-400", icon: "speed"},
-                      {label: "Harsh Braking", val: violations.braking, color: "text-rose-400", icon: "emergency_home"},
-                      {label: "Active Units", val: violations.activeUnits, color: "text-white", icon: "airport_shuttle"}
-                    ].map((m, i) => (
-                      <div key={i} className="flex flex-col gap-1">
-                        <p className="text-[9px] uppercase tracking-[0.3em] text-muted font-black opacity-50 flex items-center gap-2"><span className={`material-symbols-outlined text-xs ${m.color}`}>{m.icon}</span> {m.label}</p>
-                        <p className={`text-4xl font-black ${m.color} tracking-tighter transition-all duration-1000`}>{m.val}</p>
-                      </div>
-                    ))}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
+               <motion.div variants={itemVariants} className="md:col-span-6 dashboard-card p-8 rounded-[32px] border border-[var(--border)] relative overflow-hidden">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted opacity-50 mb-6">In Training</p>
+                  <div className="flex items-center gap-4">
+                    <span className="material-symbols-outlined text-amber-500 text-3xl">school</span>
+                    <span className="text-6xl font-black text-main tracking-tighter">{safetyStats.inTraining}</span>
                   </div>
-                </div>
-              </motion.div>
+               </motion.div>
+
+               <motion.div variants={itemVariants} className="md:col-span-6 dashboard-card p-8 rounded-[32px] border border-[var(--border)] relative overflow-hidden">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted opacity-50 mb-6">Avg Score</p>
+                  <div className="flex items-center gap-4">
+                    <span className="material-symbols-outlined text-blue-500 text-3xl">trending_up</span>
+                    <span className="text-6xl font-black text-main tracking-tighter">{safetyStats.avgScore.toFixed(1)}%</span>
+                  </div>
+               </motion.div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+               {[
+                 {label: "Speed Violations", val: violations.speed, color: "text-amber-400", icon: "speed"},
+                 {label: "Harsh Braking", val: violations.braking, color: "text-rose-400", icon: "emergency_home"},
+                 {label: "Active Units", val: violations.activeUnits, color: "text-white", icon: "airport_shuttle"}
+               ].map((m, i) => (
+                 <motion.div key={i} variants={itemVariants} className="dashboard-card p-8 rounded-[32px] border border-[var(--border)] relative overflow-hidden group hover:border-[var(--primary)]/30 transition-all">
+                    <div className="flex justify-between items-start mb-6">
+                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted opacity-50">{m.label}</p>
+                       <span className={`material-symbols-outlined ${m.color} group-hover:scale-110 transition-transform`}>{m.icon}</span>
+                    </div>
+                    <p className={`text-5xl font-black ${m.color} tracking-tighter transition-all duration-1000`}>{m.val}</p>
+                 </motion.div>
+               ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">

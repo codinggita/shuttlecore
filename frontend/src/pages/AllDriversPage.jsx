@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -11,453 +11,91 @@ const AllDriversPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDivision, setFilterDivision] = useState("all");
 
-  // All 9 drivers data
-  const allDrivers = [
-    {
-      rank: "01",
-      name: "Marcus Vance",
-      division: "Heavy Haul Div.",
-      miles: "1,244 mi",
-      alerts: 0,
-      score: 98,
-      scoreColor: "green",
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBBw7z2R0KH4HAZsobWRb4qGmGVYYjd-k0Dcm_PoYHQoUjLloqkYz3uL6Dj_iAvjjcCHTPOR4w8svAie85uoZaIqMZsvLnGOYKISvT2yZesD0Q4GuLvMfP3AckWIZFjXdzeU6cWSOopx8qlZ8ataQmtJk3GjJ127zpnuNzZhNfIPH1XlnY4cro6dmvlDPuqp5ZTbPTB26Cd0WNMnWn9-L-a19Tsi1krTB5N002-pXP90kHxUypgkg7YRQxwhltEKueNImZNXi01bwY",
-      status: "Top Performer",
-    },
-    {
-      rank: "02",
-      name: "Sarah Chen",
-      division: "Regional Express",
-      miles: "982 mi",
-      alerts: 2,
-      score: 94,
-      scoreColor: "cyan",
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDkPtYBkrZ1lh4wsjxLGQ5CgWDU2vCTb-sVLnpPYFG6uHymmU7QPwgtCKlHwn0UH5ij6vb8wgvVFVjGH00WRha2mJFeQdBfhJ-qnXwLx7sB63znEJpaQJVbzD0LDobfMK-D74qhY5V949XSk-uF741quEhLNOe8RynMF7FthVA238WUvFJC6wFjV8jKeh93B_ab0y8_IUb1IedudkbQH28cxoq9bVXg1lD6EWGOHeas-td8dWvUWkoX2RXc_gDSzctB-RS5oMcB0ok",
-      status: "Rising Star",
-    },
-    {
-      rank: "03",
-      name: "David Miller",
-      division: "Last Mile",
-      miles: "2,105 mi",
-      alerts: 5,
-      score: 91,
-      scoreColor: "cyan",
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqJ-cs0VYoIQd5_LibrD7tr9DGOxbFSyXXVLs_OVWLZKgD1AHXEDn0JeLdA35ZE0lJgHtS5B6xcsQKrNWF_iPzWimDxn6TPUA_S3iy03L-Jgt4Jjwpt_utu96mCN5unFoBwJea7wEGldUhIoBk5cV3EyiIkO60vjSW7jEQ2eOWEjDfzdYZ7xqGfOzzc9wRzKJsdURU2hHxvvacBh1kvb4-fgH8f58Em4Yp3MwWdxL0wN7atSC5GL7AeHiEhe-AI2wCgn6cLj_JZy0",
-      status: "High Volume",
-    },
-    {
-      rank: "04",
-      name: "Jennifer Park",
-      division: "Regional Express",
-      miles: "876 mi",
-      alerts: 3,
-      score: 89,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=jennifer.park@shuttlecore.com",
-      status: "Airport Expert",
-    },
-    {
-      rank: "05",
-      name: "Michael Torres",
-      division: "Heavy Haul Div.",
-      miles: "1,156 mi",
-      alerts: 4,
-      score: 87,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=michael.torres@shuttlecore.com",
-      status: "Hazmat Certified",
-    },
-    {
-      rank: "06",
-      name: "Lisa Wong",
-      division: "Last Mile",
-      miles: "1,945 mi",
-      alerts: 6,
-      score: 85,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=lisa.wong@shuttlecore.com",
-      status: "EV Specialist",
-    },
-    {
-      rank: "07",
-      name: "James Wilson",
-      division: "Regional Express",
-      miles: "743 mi",
-      alerts: 4,
-      score: 84,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=james.wilson@shuttlecore.com",
-      status: "ADA Certified",
-    },
-    {
-      rank: "08",
-      name: "Emma Davis",
-      division: "Last Mile",
-      miles: "1,678 mi",
-      alerts: 7,
-      score: 82,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=emma.davis@shuttlecore.com",
-      status: "In Training",
-    },
-    {
-      rank: "09",
-      name: "Alex Johnson",
-      division: "Heavy Haul Div.",
-      miles: "1,089 mi",
-      alerts: 5,
-      score: 80,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=alex.johnson@shuttlecore.com",
-      status: "Oversized Load",
-    },
-    {
-      rank: "10",
-      name: "Chris Martinez",
-      division: "Regional Express",
-      miles: "923 mi",
-      alerts: 2,
-      score: 88,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=chris.martinez@shuttlecore.com",
-      status: "Express Driver",
-    },
-    {
-      rank: "11",
-      name: "Patricia Brown",
-      division: "Last Mile",
-      miles: "1,834 mi",
-      alerts: 6,
-      score: 86,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=patricia.brown@shuttlecore.com",
-      status: "High Efficiency",
-    },
-    {
-      rank: "12",
-      name: "Robert Taylor",
-      division: "Heavy Haul Div.",
-      miles: "1,245 mi",
-      alerts: 3,
-      score: 87,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=robert.taylor@shuttlecore.com",
-      status: "Long Haul Pro",
-    },
-    {
-      rank: "13",
-      name: "Amanda White",
-      division: "Regional Express",
-      miles: "756 mi",
-      alerts: 2,
-      score: 89,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=amanda.white@shuttlecore.com",
-      status: "Customer Favorite",
-    },
-    {
-      rank: "14",
-      name: "Kevin Lee",
-      division: "Last Mile",
-      miles: "2,012 mi",
-      alerts: 7,
-      score: 83,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=kevin.lee@shuttlecore.com",
-      status: "Volume Driver",
-    },
-    {
-      rank: "15",
-      name: "Sandra Garcia",
-      division: "Heavy Haul Div.",
-      miles: "1,378 mi",
-      alerts: 4,
-      score: 85,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=sandra.garcia@shuttlecore.com",
-      status: "Equipment Spec",
-    },
-    {
-      rank: "16",
-      name: "Daniel Kim",
-      division: "Regional Express",
-      miles: "892 mi",
-      alerts: 3,
-      score: 86,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=daniel.kim@shuttlecore.com",
-      status: "Route Expert",
-    },
-    {
-      rank: "17",
-      name: "Michelle Ross",
-      division: "Last Mile",
-      miles: "1,756 mi",
-      alerts: 5,
-      score: 84,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=michelle.ross@shuttlecore.com",
-      status: "Fast Delivery",
-    },
-    {
-      rank: "18",
-      name: "Jason Clark",
-      division: "Heavy Haul Div.",
-      miles: "1,543 mi",
-      alerts: 4,
-      score: 85,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=jason.clark@shuttlecore.com",
-      status: "Heavy Load Pro",
-    },
-    {
-      rank: "19",
-      name: "Nicole Adams",
-      division: "Regional Express",
-      miles: "678 mi",
-      alerts: 2,
-      score: 90,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=nicole.adams@shuttlecore.com",
-      status: "Top Rated",
-    },
-    {
-      rank: "20",
-      name: "Ryan Phillips",
-      division: "Last Mile",
-      miles: "1,987 mi",
-      alerts: 6,
-      score: 82,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=ryan.phillips@shuttlecore.com",
-      status: "Night Shift",
-    },
-    {
-      rank: "21",
-      name: "Stephanie Turner",
-      division: "Heavy Haul Div.",
-      miles: "1,234 mi",
-      alerts: 3,
-      score: 87,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=stephanie.turner@shuttlecore.com",
-      status: "Safety Leader",
-    },
-    {
-      rank: "22",
-      name: "Brandon Collins",
-      division: "Regional Express",
-      miles: "834 mi",
-      alerts: 2,
-      score: 88,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=brandon.collins@shuttlecore.com",
-      status: "On-Time Pro",
-    },
-    {
-      rank: "23",
-      name: "Rebecca Murphy",
-      division: "Last Mile",
-      miles: "1,654 mi",
-      alerts: 5,
-      score: 84,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=rebecca.murphy@shuttlecore.com",
-      status: "Delivery Pro",
-    },
-    {
-      rank: "24",
-      name: "Justin Rivera",
-      division: "Heavy Haul Div.",
-      miles: "1,432 mi",
-      alerts: 4,
-      score: 86,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=justin.rivera@shuttlecore.com",
-      status: "Load Master",
-    },
-    {
-      rank: "25",
-      name: "Laura Cooper",
-      division: "Regional Express",
-      miles: "765 mi",
-      alerts: 2,
-      score: 89,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=laura.cooper@shuttlecore.com",
-      status: "Express Pro",
-    },
-    {
-      rank: "26",
-      name: "Tyler Ward",
-      division: "Last Mile",
-      miles: "1,823 mi",
-      alerts: 6,
-      score: 83,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=tyler.ward@shuttlecore.com",
-      status: "Urban Expert",
-    },
-    {
-      rank: "27",
-      name: "Melissa Foster",
-      division: "Heavy Haul Div.",
-      miles: "1,567 mi",
-      alerts: 4,
-      score: 85,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=melissa.foster@shuttlecore.com",
-      status: "Long Distance",
-    },
-    {
-      rank: "28",
-      name: "Aaron Hughes",
-      division: "Regional Express",
-      miles: "912 mi",
-      alerts: 3,
-      score: 87,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=aaron.hughes@shuttlecore.com",
-      status: "Reliable",
-    },
-    {
-      rank: "29",
-      name: "Christina Butler",
-      division: "Last Mile",
-      miles: "1,745 mi",
-      alerts: 5,
-      score: 84,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=christina.butler@shuttlecore.com",
-      status: "Quick Pickup",
-    },
-    {
-      rank: "30",
-      name: "Jordan Simmons",
-      division: "Heavy Haul Div.",
-      miles: "1,398 mi",
-      alerts: 4,
-      score: 86,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=jordan.simmons@shuttlecore.com",
-      status: "Heavy Duty",
-    },
-    {
-      rank: "31",
-      name: "Victoria Price",
-      division: "Regional Express",
-      miles: "654 mi",
-      alerts: 1,
-      score: 91,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=victoria.price@shuttlecore.com",
-      status: "Elite Driver",
-    },
-    {
-      rank: "32",
-      name: "Dylan Richardson",
-      division: "Last Mile",
-      miles: "1,892 mi",
-      alerts: 6,
-      score: 82,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=dylan.richardson@shuttlecore.com",
-      status: "Multi-Stop",
-    },
-    {
-      rank: "33",
-      name: "Brittany Wood",
-      division: "Heavy Haul Div.",
-      miles: "1,456 mi",
-      alerts: 4,
-      score: 85,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=brittany.wood@shuttlecore.com",
-      status: "Freight Pro",
-    },
-    {
-      rank: "34",
-      name: "Cody Barnes",
-      division: "Regional Express",
-      miles: "876 mi",
-      alerts: 3,
-      score: 86,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=cody.barnes@shuttlecore.com",
-      status: "Shuttle Expert",
-    },
-    {
-      rank: "35",
-      name: "Megan Coleman",
-      division: "Last Mile",
-      miles: "1,678 mi",
-      alerts: 5,
-      score: 83,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=megan.coleman@shuttlecore.com",
-      status: "Same Day",
-    },
-    {
-      rank: "36",
-      name: "Shawn Patterson",
-      division: "Heavy Haul Div.",
-      miles: "1,534 mi",
-      alerts: 4,
-      score: 85,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=shawn.patterson@shuttlecore.com",
-      status: "Towing Spec",
-    },
-    {
-      rank: "37",
-      name: "Kelsey Jenkins",
-      division: "Regional Express",
-      miles: "723 mi",
-      alerts: 2,
-      score: 88,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=kelsey.jenkins@shuttlecore.com",
-      status: "Peak Performer",
-    },
-    {
-      rank: "38",
-      name: "Brett Perry",
-      division: "Last Mile",
-      miles: "1,834 mi",
-      alerts: 6,
-      score: 81,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=brett.perry@shuttlecore.com",
-      status: "Flexible",
-    },
-    {
-      rank: "39",
-      name: "Cassandra Long",
-      division: "Heavy Haul Div.",
-      miles: "1,623 mi",
-      alerts: 5,
-      score: 84,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=cassandra.long@shuttlecore.com",
-      status: "Industrial",
-    },
-    {
-      rank: "40",
-      name: "Derek Russell",
-      division: "Regional Express",
-      miles: "567 mi",
-      alerts: 1,
-      score: 92,
-      scoreColor: "slate",
-      img: "https://i.pravatar.cc/150?u=derek.russell@shuttlecore.com",
-      status: "Perfect Score",
-    },
-  ];
+  const [drivers, setDrivers] = useState([
+    { rank: "01", name: "Marcus Vance", division: "Heavy Haul Div.", miles: 1244, alerts: 0, score: 98, scoreColor: "green", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBBw7z2R0KH4HAZsobWRb4qGmGVYYjd-k0Dcm_PoYHQoUjLloqkYz3uL6Dj_iAvjjcCHTPOR4w8svAie85uoZaIqMZsvLnGOYKISvT2yZesD0Q4GuLvMfP3AckWIZFjXdzeU6cWSOopx8qlZ8ataQmtJk3GjJ127zpnuNzZhNfIPH1XlnY4cro6dmvlDPuqp5ZTbPTB26Cd0WNMnWn9-L-a19Tsi1krTB5N002-pXP90kHxUypgkg7YRQxwhltEKueNImZNXi01bwY", status: "Top Performer" },
+    { rank: "02", name: "Sarah Chen", division: "Regional Express", miles: 982, alerts: 2, score: 94, scoreColor: "cyan", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDkPtYBkrZ1lh4wsjxLGQ5CgWDU2vCTb-sVLnpPYFG6uHymmU7QPwgtCKlHwn0UH5ij6vb8wgvVFVjGH00WRha2mJFeQdBfhJ-qnXwLx7sB63znEJpaQJVbzD0LDobfMK-D74qhY5V949XSk-uF741quEhLNOe8RynMF7FthVA238WUvFJC6wFjV8jKeh93B_ab0y8_IUb1IedudkbQH28cxoq9bVXg1lD6EWGOHeas-td8dWvUWkoX2RXc_gDSzctB-RS5oMcB0ok", status: "Rising Star" },
+    { rank: "03", name: "David Miller", division: "Last Mile", miles: 2105, alerts: 5, score: 91, scoreColor: "cyan", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqJ-cs0VYoIQd5_LibrD7tr9DGOxbFSyXXVLs_OVWLZKgD1AHXEDn0JeLdA35ZE0lJgHtS5B6xcsQKrNWF_iPzWimDxn6TPUA_S3iy03L-Jgt4Jjwpt_utu96mCN5unFoBwJea7wEGldUhIoBk5cV3EyiIkO60vjSW7jEQ2eOWEjDfzdYZ7xqGfOzzc9wRzKJsdURU2hHxvvacBh1kvb4-fgH8f58Em4Yp3MwWdxL0wN7atSC5GL7AeHiEhe-AI2wCgn6cLj_JZy0", status: "High Volume" },
+    { rank: "04", name: "Jennifer Park", division: "Regional Express", miles: 876, alerts: 3, score: 89, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=4", status: "Airport Expert" },
+    { rank: "05", name: "Michael Torres", division: "Heavy Haul Div.", miles: 1156, alerts: 4, score: 87, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=5", status: "Hazmat Certified" },
+    { rank: "06", name: "Lisa Wong", division: "Last Mile", miles: 1945, alerts: 6, score: 85, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=6", status: "EV Specialist" },
+    { rank: "07", name: "James Wilson", division: "Regional Express", miles: 743, alerts: 4, score: 84, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=7", status: "ADA Certified" },
+    { rank: "08", name: "Emma Davis", division: "Last Mile", miles: 1678, alerts: 7, score: 82, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=8", status: "In Training" },
+    { rank: "09", name: "Alex Johnson", division: "Heavy Haul Div.", miles: 1089, alerts: 5, score: 80, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=9", status: "Oversized Load" },
+    { rank: "10", name: "Chris Martinez", division: "Regional Express", miles: 923, alerts: 2, score: 88, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=10", status: "Express Driver" },
+    { rank: "11", name: "Patricia Brown", division: "Last Mile", miles: 1834, alerts: 6, score: 86, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=11", status: "High Efficiency" },
+    { rank: "12", name: "Robert Taylor", division: "Heavy Haul Div.", miles: 1245, alerts: 3, score: 87, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=12", status: "Long Haul Pro" },
+    { rank: "13", name: "Amanda White", division: "Regional Express", miles: 756, alerts: 2, score: 89, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=13", status: "Customer Favorite" },
+    { rank: "14", name: "Kevin Lee", division: "Last Mile", miles: 2012, alerts: 7, score: 83, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=14", status: "Volume Driver" },
+    { rank: "15", name: "Sandra Garcia", division: "Heavy Haul Div.", miles: 1378, alerts: 4, score: 85, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=15", status: "Equipment Spec" },
+    { rank: "16", name: "Daniel Kim", division: "Regional Express", miles: 892, alerts: 3, score: 86, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=16", status: "Route Expert" },
+    { rank: "17", name: "Michelle Ross", division: "Last Mile", miles: 1756, alerts: 5, score: 84, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=17", status: "Fast Delivery" },
+    { rank: "18", name: "Jason Clark", division: "Heavy Haul Div.", miles: 1543, alerts: 4, score: 85, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=18", status: "Heavy Load Pro" },
+    { rank: "19", name: "Nicole Adams", division: "Regional Express", miles: 678, alerts: 2, score: 90, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=19", status: "Top Rated" },
+    { rank: "20", name: "Ryan Phillips", division: "Last Mile", miles: 1987, alerts: 6, score: 82, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=20", status: "Night Shift" },
+    { rank: "21", name: "Stephanie Turner", division: "Heavy Haul Div.", miles: 1234, alerts: 3, score: 87, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=21", status: "Safety Leader" },
+    { rank: "22", name: "Brandon Collins", division: "Regional Express", miles: 834, alerts: 2, score: 88, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=22", status: "On-Time Pro" },
+    { rank: "23", name: "Rebecca Murphy", division: "Last Mile", miles: 1654, alerts: 5, score: 84, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=23", status: "Delivery Pro" },
+    { rank: "24", name: "Justin Rivera", division: "Heavy Haul Div.", miles: 1432, alerts: 4, score: 86, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=24", status: "Load Master" },
+    { rank: "25", name: "Laura Cooper", division: "Regional Express", miles: 765, alerts: 2, score: 89, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=25", status: "Express Pro" },
+    { rank: "26", name: "Tyler Ward", division: "Last Mile", miles: 1823, alerts: 6, score: 83, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=26", status: "Urban Expert" },
+    { rank: "27", name: "Melissa Foster", division: "Heavy Haul Div.", miles: 1567, alerts: 4, score: 85, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=27", status: "Long Distance" },
+    { rank: "28", name: "Aaron Hughes", division: "Regional Express", miles: 912, alerts: 3, score: 87, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=28", status: "Reliable" },
+    { rank: "29", name: "Christina Butler", division: "Last Mile", miles: 1745, alerts: 5, score: 84, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=29", status: "Quick Pickup" },
+    { rank: "30", name: "Jordan Simmons", division: "Heavy Haul Div.", miles: 1398, alerts: 4, score: 86, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=30", status: "Heavy Duty" },
+    { rank: "31", name: "Victoria Price", division: "Regional Express", miles: 654, alerts: 1, score: 91, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=31", status: "Elite Driver" },
+    { rank: "32", name: "Dylan Richardson", division: "Last Mile", miles: 1892, alerts: 6, score: 82, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=32", status: "Multi-Stop" },
+    { rank: "33", name: "Brittany Wood", division: "Heavy Haul Div.", miles: 1456, alerts: 4, score: 85, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=33", status: "Freight Pro" },
+    { rank: "34", name: "Cody Barnes", division: "Regional Express", miles: 876, alerts: 3, score: 86, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=34", status: "Shuttle Expert" },
+    { rank: "35", name: "Megan Coleman", division: "Last Mile", miles: 1678, alerts: 5, score: 83, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=35", status: "Same Day" },
+    { rank: "36", name: "Shawn Patterson", division: "Heavy Haul Div.", miles: 1534, alerts: 4, score: 85, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=36", status: "Towing Spec" },
+    { rank: "37", name: "Kelsey Jenkins", division: "Regional Express", miles: 723, alerts: 2, score: 88, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=37", status: "Peak Performer" },
+    { rank: "38", name: "Brett Perry", division: "Last Mile", miles: 1834, alerts: 6, score: 81, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=38", status: "Flexible" },
+    { rank: "39", name: "Cassandra Long", division: "Heavy Haul Div.", miles: 1623, alerts: 5, score: 84, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=39", status: "Industrial" },
+    { rank: "40", name: "Derek Russell", division: "Regional Express", miles: 567, alerts: 1, score: 92, scoreColor: "slate", img: "https://i.pravatar.cc/150?u=40", status: "Perfect Score" },
+  ]);
+
+  const [stats, setStats] = useState({
+    activeDuty: 38,
+    inTraining: 2,
+    avgScore: 86
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      // Simulate real-time updates
+      setDrivers(prev => prev.map(d => {
+        // Randomly update miles or score slightly
+        if (Math.random() > 0.8) {
+          return {
+            ...d,
+            miles: d.miles + Math.floor(Math.random() * 2),
+            score: Math.max(50, Math.min(100, d.score + (Math.random() > 0.5 ? 0.1 : -0.1)))
+          };
+        }
+        return d;
+      }));
+
+      // Simulate shifts in active duty
+      if (Math.random() > 0.95) {
+        setStats(prev => ({
+          ...prev,
+          activeDuty: Math.max(35, Math.min(40, prev.activeDuty + (Math.random() > 0.5 ? 1 : -1)))
+        }));
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Calculate dynamic average score
+  useEffect(() => {
+    const avg = drivers.reduce((acc, d) => acc + d.score, 0) / drivers.length;
+    setStats(prev => ({ ...prev, avgScore: avg }));
+  }, [drivers]);
 
   const divisions = ["all", "Heavy Haul Div.", "Regional Express", "Last Mile"];
 
-  const filteredDrivers = allDrivers.filter(driver => {
+  const filteredDrivers = drivers.filter(driver => {
     const matchesSearch = driver.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDivision = filterDivision === "all" || driver.division === filterDivision;
     return matchesSearch && matchesDivision;
@@ -607,10 +245,10 @@ const AllDriversPage = () => {
             {/* Stats Summary */}
             <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { label: "Total Drivers", value: "40", icon: "people", color: "text-[var(--primary)]" },
-                { label: "Active Duty", value: "38", icon: "check_circle", color: "text-emerald-400" },
-                { label: "In Training", value: "2", icon: "school", color: "text-amber-400" },
-                { label: "Avg Score", value: "86%", icon: "trending_up", color: "text-blue-400" },
+                { label: "Total Drivers", value: drivers.length, icon: "people", color: "text-[var(--primary)]" },
+                { label: "Active Duty", value: stats.activeDuty, icon: "check_circle", color: "text-emerald-400" },
+                { label: "In Training", value: stats.inTraining, icon: "school", color: "text-amber-400" },
+                { label: "Avg Score", value: `${stats.avgScore.toFixed(1)}%`, icon: "trending_up", color: "text-blue-400" },
               ].map((stat, i) => (
                 <div key={i} className="dashboard-card !p-4 text-center">
                   <span className={`material-symbols-outlined ${stat.color} text-lg mb-2`}>{stat.icon}</span>
@@ -677,7 +315,7 @@ const AllDriversPage = () => {
                   <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--border)]">
                     <div className="text-center">
                       <p className="text-[9px] text-muted uppercase font-bold tracking-wider mb-1">Miles</p>
-                      <p className="text-[13px] font-black text-[var(--primary)]">{driver.miles}</p>
+                      <p className="text-[13px] font-black text-[var(--primary)]">{driver.miles.toLocaleString()} mi</p>
                     </div>
                     <div className="text-center">
                       <p className="text-[9px] text-muted uppercase font-bold tracking-wider mb-1">Alerts</p>
@@ -685,7 +323,7 @@ const AllDriversPage = () => {
                     </div>
                     <div className="text-center">
                       <p className="text-[9px] text-muted uppercase font-bold tracking-wider mb-1">Score</p>
-                      <p className={`text-[13px] font-black ${driver.score >= 95 ? "text-emerald-400" : driver.score >= 90 ? "text-blue-400" : "text-amber-400"}`}>{driver.score}%</p>
+                      <p className={`text-[13px] font-black ${driver.score >= 95 ? "text-emerald-400" : driver.score >= 90 ? "text-blue-400" : "text-amber-400"}`}>{driver.score.toFixed(1)}%</p>
                     </div>
                   </div>
 

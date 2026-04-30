@@ -17,13 +17,34 @@ const ProfilePage = () => {
     joinedDate: "January 2024",
     avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [twoFactor, setTwoFactor] = useState(true);
+  const [biometric, setBiometric] = useState(false);
+  const [editForm, setEditForm] = useState({
+    firstName: "Cmdr.",
+    lastName: "Operative",
+    email: "operative@shuttlecore.ai",
+    organization: "Systems Command",
+    role: "Systems Lead",
+    joinedDate: "January 2024",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
+  });
 
   useEffect(() => {
     const storedUser = localStorage.getItem("userProfile");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsed = JSON.parse(storedUser);
+      setUser(parsed);
+      setEditForm(parsed);
     }
   }, []);
+
+  const handleSaveProfile = () => {
+    localStorage.setItem("userProfile", JSON.stringify(editForm));
+    setUser(editForm);
+    setIsEditing(false);
+    alert("Operational identity synchronized successfully.");
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -149,29 +170,90 @@ const ProfilePage = () => {
                       <div className="grid grid-cols-2 gap-6">
                          <div className="space-y-2">
                             <label className="text-[9px] font-black text-muted uppercase tracking-widest">First Name</label>
-                            <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main">{user.firstName}</div>
+                            {isEditing ? (
+                              <input 
+                                type="text" 
+                                value={editForm.firstName} 
+                                onChange={e => setEditForm({...editForm, firstName: e.target.value})}
+                                className="input-field !p-4"
+                              />
+                            ) : (
+                              <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main">{user.firstName}</div>
+                            )}
                          </div>
                          <div className="space-y-2">
                             <label className="text-[9px] font-black text-muted uppercase tracking-widest">Last Name</label>
-                            <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main">{user.lastName}</div>
+                            {isEditing ? (
+                              <input 
+                                type="text" 
+                                value={editForm.lastName} 
+                                onChange={e => setEditForm({...editForm, lastName: e.target.value})}
+                                className="input-field !p-4"
+                              />
+                            ) : (
+                              <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main">{user.lastName}</div>
+                            )}
                          </div>
                       </div>
                       <div className="space-y-2">
                          <label className="text-[9px] font-black text-muted uppercase tracking-widest">Work Email Address</label>
-                         <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main flex items-center gap-3">
-                            <span className="material-symbols-outlined text-muted text-lg">mail</span>
-                            {user.email}
-                         </div>
+                         {isEditing ? (
+                            <input 
+                              type="email" 
+                              value={editForm.email} 
+                              onChange={e => setEditForm({...editForm, email: e.target.value})}
+                              className="input-field !p-4"
+                            />
+                         ) : (
+                            <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main flex items-center gap-3">
+                               <span className="material-symbols-outlined text-muted text-lg">mail</span>
+                               {user.email}
+                            </div>
+                         )}
                       </div>
                       <div className="space-y-2">
                          <label className="text-[9px] font-black text-muted uppercase tracking-widest">Fleet Organization</label>
-                         <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main flex items-center gap-3">
-                            <span className="material-symbols-outlined text-muted text-lg">corporate_fare</span>
-                            {user.organization}
-                         </div>
+                         {isEditing ? (
+                            <input 
+                              type="text" 
+                              value={editForm.organization} 
+                              onChange={e => setEditForm({...editForm, organization: e.target.value})}
+                              className="input-field !p-4"
+                            />
+                         ) : (
+                            <div className="p-4 bg-[var(--surface-muted)] border border-[var(--border)] rounded-2xl font-bold text-main flex items-center gap-3">
+                               <span className="material-symbols-outlined text-muted text-lg">corporate_fare</span>
+                               {user.organization}
+                            </div>
+                         )}
                       </div>
                     </div>
-                    <motion.button whileHover={{ scale: 1.02 }} className="w-full mt-10 py-4 bg-[var(--primary)] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20">Edit Identity Data</motion.button>
+                    {isEditing ? (
+                      <div className="flex gap-4 mt-10">
+                        <motion.button 
+                          whileHover={{ scale: 1.02 }} 
+                          onClick={handleSaveProfile}
+                          className="flex-1 py-4 bg-[var(--primary)] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20"
+                        >
+                          Save Operational Identity
+                        </motion.button>
+                        <motion.button 
+                          whileHover={{ scale: 1.02 }} 
+                          onClick={() => { setIsEditing(false); setEditForm(user); }}
+                          className="px-8 py-4 bg-[var(--surface-muted)] text-muted rounded-2xl text-[11px] font-black uppercase tracking-widest border border-[var(--border)]"
+                        >
+                          Cancel
+                        </motion.button>
+                      </div>
+                    ) : (
+                      <motion.button 
+                        whileHover={{ scale: 1.02 }} 
+                        onClick={() => setIsEditing(true)}
+                        className="w-full mt-10 py-4 bg-[var(--primary)] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20"
+                      >
+                        Edit Identity Data
+                      </motion.button>
+                    )}
                   </div>
 
                   <div className="dashboard-card !p-8 !bg-rose-500/5 !border-rose-500/20">
@@ -207,20 +289,36 @@ const ProfilePage = () => {
                           </div>
                         ))}
                       </div>
-                      <button className="w-full mt-8 py-3 text-[10px] font-black text-muted hover:text-main uppercase tracking-widest transition-colors border border-dashed border-[var(--border)] rounded-xl">View Audit Logs</button>
+                      <button onClick={() => navigate("/event-log")} className="w-full mt-8 py-3 text-[10px] font-black text-muted hover:text-main uppercase tracking-widest transition-colors border border-dashed border-[var(--border)] rounded-xl">View Audit Logs</button>
                    </div>
 
                    <div className="dashboard-card !p-8 relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-4 opacity-10"><span className="material-symbols-outlined text-6xl text-[var(--primary)]">shield</span></div>
                       <h3 className="text-[11px] font-black text-muted uppercase tracking-[0.3em] mb-6">Security Settings</h3>
                       <div className="space-y-4">
-                         <div className="flex items-center justify-between p-4 bg-[var(--surface-muted)] rounded-2xl border border-[var(--border)]">
-                            <span className="text-[12px] font-black text-main">Two-Factor Auth</span>
-                            <div className="w-10 h-5 bg-emerald-500/20 rounded-full relative p-1 cursor-pointer"><div className="w-3 h-3 bg-emerald-500 rounded-full absolute right-1" /></div>
+                         <div 
+                           onClick={() => setTwoFactor(!twoFactor)}
+                           className="flex items-center justify-between p-4 bg-[var(--surface-muted)] rounded-2xl border border-[var(--border)] cursor-pointer group"
+                         >
+                            <span className="text-[12px] font-black text-main group-hover:text-[var(--primary)] transition-colors">Two-Factor Auth</span>
+                            <div className={`w-10 h-5 ${twoFactor ? "bg-emerald-500/20" : "bg-slate-500/20"} rounded-full relative p-1 transition-colors`}>
+                              <motion.div 
+                                animate={{ x: twoFactor ? 20 : 0 }}
+                                className={`w-3 h-3 ${twoFactor ? "bg-emerald-500" : "bg-slate-400"} rounded-full`} 
+                              />
+                            </div>
                          </div>
-                         <div className="flex items-center justify-between p-4 bg-[var(--surface-muted)] rounded-2xl border border-[var(--border)]">
-                            <span className="text-[12px] font-black text-main">Biometric Access</span>
-                            <div className="w-10 h-5 bg-slate-500/20 rounded-full relative p-1 cursor-pointer"><div className="w-3 h-3 bg-slate-400 rounded-full absolute left-1" /></div>
+                         <div 
+                           onClick={() => setBiometric(!biometric)}
+                           className="flex items-center justify-between p-4 bg-[var(--surface-muted)] rounded-2xl border border-[var(--border)] cursor-pointer group"
+                         >
+                            <span className="text-[12px] font-black text-main group-hover:text-[var(--primary)] transition-colors">Biometric Access</span>
+                            <div className={`w-10 h-5 ${biometric ? "bg-emerald-500/20" : "bg-slate-500/20"} rounded-full relative p-1 transition-colors`}>
+                              <motion.div 
+                                animate={{ x: biometric ? 20 : 0 }}
+                                className={`w-3 h-3 ${biometric ? "bg-emerald-500" : "bg-slate-400"} rounded-full`} 
+                              />
+                            </div>
                          </div>
                       </div>
                    </div>

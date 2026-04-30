@@ -10,6 +10,9 @@ const Notification = require('../models/Notification');
 const Deployment = require('../models/Deployment');
 const Payment = require('../models/Payment');
 const EventLog = require('../models/EventLog');
+const Dispatch = require('../models/Dispatch');
+const SafetyEvent = require('../models/SafetyEvent');
+const Rider = require('../models/Rider');
 const connectDB = require('../config/database');
 
 connectDB();
@@ -27,6 +30,9 @@ const seedData = async () => {
     await Deployment.deleteMany();
     await Payment.deleteMany();
     await EventLog.deleteMany();
+    await Dispatch.deleteMany();
+    await SafetyEvent.deleteMany();
+    await Rider.deleteMany();
 
     console.log('🗑️  Cleared existing data');
 
@@ -447,6 +453,154 @@ const seedData = async () => {
     ]);
 
     console.log('✅ Created event logs');
+
+    // Create dispatch queue items
+    const dispatchQueue = await Dispatch.create([
+      {
+        id: 'TX-9012',
+        passenger: 'Marcus Thorne',
+        origin: 'LHR-T5',
+        destination: 'Central Hub',
+        priority: 'URGENT',
+        autoAssign: 'SV-201',
+        status: 'pending',
+        estimatedTime: 8,
+        distance: 12
+      },
+      {
+        id: 'TX-9013',
+        passenger: 'Elena Vance',
+        origin: 'District 4',
+        destination: 'Skyline Dr',
+        priority: 'ROUTINE',
+        autoAssign: null,
+        status: 'waitlist',
+        estimatedTime: 15,
+        distance: 8
+      },
+      {
+        id: 'TX-9014',
+        passenger: 'James Chen',
+        origin: 'Tech Park',
+        destination: 'Airport T2',
+        priority: 'ROUTINE',
+        autoAssign: 'SV-205',
+        status: 'assigned',
+        vehicle: vehicles[0]._id,
+        driver: drivers[0]._id,
+        estimatedTime: 22,
+        distance: 18
+      },
+      {
+        id: 'TX-9015',
+        passenger: 'Sarah Miller',
+        origin: 'Union Station',
+        destination: 'Financial District',
+        priority: 'LOW',
+        autoAssign: null,
+        status: 'pending',
+        estimatedTime: 10,
+        distance: 5
+      }
+    ]);
+
+    console.log('✅ Created dispatch queue items');
+
+    // Create safety events
+    const safetyEvents = await SafetyEvent.create([
+      {
+        unit: 'Unit #8421',
+        type: 'Harsh Braking',
+        icon: 'emergency_home',
+        color: 'red',
+        time: '2M AGO',
+        description: 'Impact force: 0.85g at 45mph. Driver identified.',
+        severity: 'high',
+        driver: drivers[0]._id,
+        impactForce: 0.85,
+        speed: 45,
+        speedLimit: 45
+      },
+      {
+        unit: 'Unit #9031',
+        type: 'Speed Limit +15',
+        icon: 'speed',
+        color: 'orange',
+        time: '14M AGO',
+        description: 'Observed speed 70mph in a 55mph construction zone.',
+        severity: 'medium',
+        driver: drivers[1]._id,
+        speed: 70,
+        speedLimit: 55
+      },
+      {
+        unit: 'Unit #1105',
+        type: 'Aggressive Turn',
+        icon: 'turn_right',
+        color: 'slate',
+        time: '42M AGO',
+        description: 'Lateral g-force exceeded safety threshold on exit 14B.',
+        severity: 'low',
+        driver: drivers[2]._id
+      },
+      {
+        unit: 'Unit #5521',
+        type: 'Lane Departure',
+        icon: 'lanes',
+        color: 'orange',
+        time: '1H AGO',
+        description: 'Vehicle drifted across lane markers without signaling.',
+        severity: 'medium',
+        driver: drivers[0]._id
+      }
+    ]);
+
+    console.log('✅ Created safety events');
+
+    // Create riders
+    const riders = await Rider.create([
+      {
+        user: users[1]._id,
+        name: 'John Doe',
+        phone: '+1-555-0123',
+        email: 'john@example.com',
+        rating: 4.8,
+        totalRides: 45,
+        preferredVehicle: 'standard',
+        homeLocation: '123 Main St, Downtown',
+        workLocation: '456 Business Ave, Financial District',
+        isVerified: true,
+        notes: 'Prefers quiet rides'
+      },
+      {
+        user: users[0]._id,
+        name: 'Cmdr. Operative',
+        phone: '+1-555-0199',
+        email: 'operative@shuttlecore.ai',
+        rating: 5.0,
+        totalRides: 120,
+        preferredVehicle: 'xl',
+        homeLocation: 'Systems Command HQ',
+        workLocation: 'Systems Command HQ',
+        isVerified: true,
+        notes: 'VIP user - priority service'
+      },
+      {
+        user: users[1]._id,
+        name: 'Jane Smith',
+        phone: '+1-555-0456',
+        email: 'jane@example.com',
+        rating: 4.5,
+        totalRides: 28,
+        preferredVehicle: 'bike',
+        homeLocation: '789 Oak Lane',
+        workLocation: '321 Tech Park',
+        isVerified: false,
+        notes: ''
+      }
+    ]);
+
+    console.log('✅ Created riders');
 
     console.log('🎉 Seeding completed successfully!');
     process.exit();

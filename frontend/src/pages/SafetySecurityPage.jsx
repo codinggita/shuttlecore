@@ -330,14 +330,9 @@ const SafetySecurityPage = () => {
 
         <div className="mt-auto p-6 space-y-4">
           <motion.button
-            whileHover={{
-              scale: 1.02,
-              backgroundColor: "rgba(244, 63, 94, 0.1)",
-            }}
+            whileHover={{ scale: 1.02, backgroundColor: "rgba(244, 63, 94, 0.1)" }}
             whileTap={{ scale: 0.98 }}
-            onClick={() =>
-              alert("EMERGENCY STOP ACTIVATED: All fleet units halted.")
-            }
+            onClick={() => navigate("/emergency")}
             className="w-full py-3.5 flex items-center justify-center gap-3 text-[11px] font-black text-rose-500 border-2 border-rose-500/30 rounded-2xl transition-all uppercase tracking-[0.2em] bg-rose-500/5 hover:border-rose-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]"
           >
             <span className="material-symbols-outlined text-lg animate-pulse">
@@ -394,6 +389,15 @@ const SafetySecurityPage = () => {
             >
               <span className="material-symbols-outlined">menu</span>
             </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center gap-2 px-3 py-2 bg-[var(--surface-muted)] border border-[var(--border)] rounded-xl text-[11px] font-black text-muted hover:text-[var(--text-main)] hover:border-[var(--primary)] transition-all"
+            >
+              <span className="material-symbols-outlined text-sm">dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
+            </motion.button>
             <div className="flex-1 max-w-xl hidden sm:block">
               <div className="relative group">
                 <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-[var(--text-main)] transition-colors text-lg">
@@ -446,7 +450,8 @@ const SafetySecurityPage = () => {
             <motion.button
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
-              className="btn-primary !py-2 !px-5 flex items-center gap-2 group shadow-none"
+              onClick={() => navigate("/emergency")}
+              className="btn-primary !py-2 !px-5 flex items-center gap-2 group shadow-none bg-rose-500 hover:bg-rose-600"
             >
               <span className="material-symbols-outlined text-sm group-hover:rotate-90 transition-transform duration-500">
                 emergency
@@ -813,7 +818,7 @@ const SafetySecurityPage = () => {
                         className="px-6 py-3 bg-[var(--primary)] text-white border border-[var(--primary)] rounded-xl text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-xl shadow-[var(--primary)]/20"
                       >
                         <span className="material-symbols-outlined text-sm">grid_view</span>
-                        View All {driverRankings.length} Drivers
+                        View All 40 Drivers
                       </motion.button>
                     </div>
                   )}
@@ -854,7 +859,7 @@ const SafetySecurityPage = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={handleApplyFleetAdjustment}
+                  onClick={() => navigate("/fleet-adjustment")}
                   className="bg-[var(--primary)] text-white font-black px-8 py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-2xl hover:opacity-90 transition-all whitespace-nowrap"
                 >
                   Apply Fleet Adjustment

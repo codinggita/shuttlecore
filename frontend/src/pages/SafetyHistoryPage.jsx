@@ -244,6 +244,15 @@ const SafetyHistoryPage = () => {
             <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden icon-btn">
               <span className="material-symbols-outlined">menu</span>
             </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center gap-2 px-3 py-2 bg-[var(--surface-muted)] border border-[var(--border)] rounded-xl text-[11px] font-black text-muted hover:text-[var(--text-main)] hover:border-[var(--primary)] transition-all"
+            >
+              <span className="material-symbols-outlined text-sm">dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
+            </motion.button>
             <button onClick={() => navigate("/safety")} className="text-muted hover:text-[var(--text-main)] transition-colors">
               <span className="material-symbols-outlined text-sm">arrow_back</span>
             </button>

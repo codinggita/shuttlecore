@@ -14,6 +14,8 @@ const BookMyRidePage = () => {
   const [selectedRide, setSelectedRide] = useState(null);
   const [showPrices, setShowPrices] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [reserveDate, setReserveDate] = useState("");
+  const [reserveTime, setReserveTime] = useState("");
   const [showRideOptions, setShowRideOptions] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
@@ -37,8 +39,6 @@ const BookMyRidePage = () => {
 
   const topNavItems = [
     { id: "request", label: "Request a ride", icon: "local_taxi" },
-    { id: "reserve", label: "Reserve a ride", icon: "event" },
-    { id: "prices", label: "See prices", icon: "payments" },
     { id: "explore", label: "Explore ride options", icon: "explore" },
     { id: "airport", label: "Airport rides", icon: "flight" },
   ];
@@ -366,7 +366,11 @@ const BookMyRidePage = () => {
               {topNavItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    if (item.id === "explore") navigate("/explore-rides");
+                    else if (item.id === "airport") navigate("/airport-rides");
+                    else setActiveTab(item.id);
+                  }}
                   className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
                     activeTab === item.id 
                       ? "bg-[var(--primary)] text-white" 
@@ -691,29 +695,32 @@ const BookMyRidePage = () => {
                   <p className="text-[13px] text-muted mb-6">Choose date and time</p>
                   
                   <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted">calendar_today</span>
+                    <div className="relative group">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 z-10 pointer-events-none">calendar_month</span>
                       <input
-                        type="text"
-                        placeholder="Date"
-                        className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold"
+                        type="date"
+                        value={reserveDate}
+                        onChange={(e) => setReserveDate(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold relative z-0"
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
                       />
                     </div>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted">schedule</span>
-                      <select className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold appearance-none">
-                        <option>Time</option>
-                        <option>08:00 AM</option>
-                        <option>09:00 AM</option>
-                        <option>10:00 AM</option>
-                        <option>11:00 AM</option>
-                      </select>
+                    <div className="relative group">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 z-10 pointer-events-none">schedule</span>
+                      <input
+                        type="time"
+                        value={reserveTime}
+                        onChange={(e) => setReserveTime(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-[var(--surface-light)] border border-[var(--border)] rounded-lg text-[13px] font-bold relative z-0"
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                      />
                     </div>
                   </div>
 
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={() => navigate("/reserve-ride", { state: { date: reserveDate, time: reserveTime } })}
                     className="w-full py-3 bg-[var(--text-main)] text-[var(--background)] rounded-lg text-[12px] font-black uppercase tracking-wider"
                   >
                     Next

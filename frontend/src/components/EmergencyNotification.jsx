@@ -35,12 +35,12 @@ const EmergencyNotification = () => {
       const visitedAt = localStorage.getItem("emergencyVisitedAt");
       
       // Check if user has already dismissed or visited in this cycle
-      const dismissed = dismissedAt && (Date.now() - parseInt(dismissedAt)) < 15 * 60 * 1000;
-      const visited = visitedAt && (Date.now() - parseInt(visitedAt)) < 15 * 60 * 1000;
+      const dismissed = dismissedAt && (Date.now() - parseInt(dismissedAt)) < 2 * 60 * 1000;
+      const visited = visitedAt && (Date.now() - parseInt(visitedAt)) < 2 * 60 * 1000;
       
       if (isEmergency === "true" && !dismissed && !visited) {
-        // Check if 15 minutes have passed since last shown
-        const canShow = !lastShownTime.current || (Date.now() - lastShownTime.current) >= 15 * 60 * 1000;
+        // Check if 2 minutes have passed since last shown
+        const canShow = !lastShownTime.current || (Date.now() - lastShownTime.current) >= 2 * 60 * 1000;
         
         if (canShow && location.pathname !== "/emergency") {
           setShowNotification(true);
@@ -167,7 +167,7 @@ const EmergencyNotification = () => {
               Click to respond.
             </p>
             <p className="text-[10px] text-muted mb-3">
-              Next reminder in 15 minutes if not addressed.
+              Next reminder in 2 minutes if not addressed.
             </p>
             
             {/* Action Buttons */}

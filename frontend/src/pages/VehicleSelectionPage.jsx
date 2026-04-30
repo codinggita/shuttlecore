@@ -11,13 +11,21 @@ const VehicleSelectionPage = () => {
   
   const { pickup, dropoff } = location.state || { pickup: "", dropoff: "" };
 
+  const calculatePrice = (basePrice, pickup, dropoff) => {
+    if (!pickup || !dropoff) return basePrice;
+    // Simulate dynamic pricing based on location strings
+    const seed = (pickup + dropoff).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const variance = (seed % 150); // Up to ₹150 variance
+    return basePrice + variance;
+  };
+
   const vehicleTypes = [
     {
       id: "bike",
       name: "Bike",
       description: "Fast & affordable for solo riders",
       capacity: "1 passenger",
-      basePrice: 45,
+      basePrice: calculatePrice(45, pickup, dropoff),
       time: "3 min",
       icon: "two_wheeler",
       color: "text-orange-400",
@@ -29,7 +37,7 @@ const VehicleSelectionPage = () => {
       name: "Auto",
       description: "No bargaining, doorstep pickup",
       capacity: "3 passengers",
-      basePrice: 89,
+      basePrice: calculatePrice(89, pickup, dropoff),
       time: "5 min",
       icon: "local_taxi",
       color: "text-yellow-400",
@@ -41,7 +49,7 @@ const VehicleSelectionPage = () => {
       name: "Sedan",
       description: "Comfortable sedans, top drivers",
       capacity: "4 passengers",
-      basePrice: 125,
+      basePrice: calculatePrice(125, pickup, dropoff),
       time: "2 min",
       icon: "directions_car",
       color: "text-blue-400",
@@ -53,7 +61,7 @@ const VehicleSelectionPage = () => {
       name: "XL",
       description: "Spacious SUVs & vans",
       capacity: "6 passengers",
-      basePrice: 195,
+      basePrice: calculatePrice(195, pickup, dropoff),
       time: "8 min",
       icon: "airport_shuttle",
       color: "text-purple-400",

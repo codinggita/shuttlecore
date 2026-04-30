@@ -159,6 +159,12 @@ const EmergencyStopPage = () => {
     },
   ];
 
+  const emergencyHistory = [
+    { id: "H-102", unit: "Unit #605", type: "Sudden Impact", time: "2h ago", status: "resolved", detail: "Minor collision at depot. Unit inspected." },
+    { id: "H-101", unit: "Unit #912", type: "Brake Failure", time: "5h ago", status: "resolved", detail: "Unit halted using remote override. Towed." },
+    { id: "H-100", unit: "Unit #112", type: "Unauthorized Entry", time: "1d ago", status: "resolved", detail: "Security responded. False alarm." }
+  ];
+
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
@@ -571,6 +577,34 @@ const EmergencyStopPage = () => {
                 )}
               </motion.div>
             </div>
+
+            {/* Emergency History Section */}
+            <motion.div variants={itemVariants} className="mt-12">
+              <h3 className="text-[13px] font-black text-main mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-muted">history</span>
+                Emergency Resolution History
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {emergencyHistory.map((item, i) => (
+                  <div key={i} className="dashboard-card !p-5 border-emerald-500/10 bg-emerald-500/5 relative group overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 bg-emerald-500/20 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="material-symbols-outlined text-emerald-400 text-sm">verified</span>
+                    </div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{item.id}</span>
+                      <span className="text-[10px] text-muted font-bold">{item.time}</span>
+                    </div>
+                    <h4 className="text-sm font-black text-main mb-1">{item.type}</h4>
+                    <p className="text-[11px] text-rose-400 font-bold mb-3">{item.unit}</p>
+                    <p className="text-[11px] text-muted leading-relaxed">{item.detail}</p>
+                    <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                      <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Resolved</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
 
             {/* Footer */}
             <footer className="mt-12 border-t border-rose-500/20 py-12">

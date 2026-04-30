@@ -42,6 +42,9 @@ const VehicleDetailPage = lazy(() => import("./pages/VehicleDetailPage"));
 const BookingConfirmationPage = lazy(() => import("./pages/BookingConfirmationPage"));
 const RideHistoryPage = lazy(() => import("./pages/RideHistoryPage"));
 const RideOptionDetailPage = lazy(() => import("./pages/RideOptionDetailPage"));
+const ExploreRidesPage = lazy(() => import("./pages/ExploreRidesPage"));
+const AirportRidesPage = lazy(() => import("./pages/AirportRidesPage"));
+const ReserveRidePage = lazy(() => import("./pages/ReserveRidePage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -69,6 +72,8 @@ const AnimatedRoutes = () => {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/faq" element={<FAQPage />} />
+          <Route path="/airport-rides" element={<AirportRidesPage />} />
+          <Route path="/reserve-ride" element={<ReserveRidePage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/payments" element={<PaymentMethodsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
@@ -225,6 +230,30 @@ const AnimatedRoutes = () => {
             element={
               <ProtectedRoute>
                 <RideOptionDetailPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/explore-rides" 
+            element={
+              <ProtectedRoute>
+                <ExploreRidesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/airport-rides" 
+            element={
+              <ProtectedRoute>
+                <AirportRidesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/reserve-ride" 
+            element={
+              <ProtectedRoute>
+                <ReserveRidePage />
               </ProtectedRoute>
             } 
           />

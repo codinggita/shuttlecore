@@ -277,6 +277,7 @@ const RideHistoryPage = () => {
                     key={booking.id}
                     variants={itemVariants}
                     whileHover={{ y: -2, borderColor: "var(--primary)" }}
+                    onClick={() => navigate("/booking-confirmation", { state: { booking } })}
                     className="dashboard-card !p-6 border-2 transition-all cursor-pointer"
                   >
                     <div className="flex items-start gap-4">
@@ -312,11 +313,11 @@ const RideHistoryPage = () => {
                             <span className="text-xs text-muted">{booking.dropoff}</span>
                           </div>
                         </div>
-                        {booking.bookingType === "reserve" && booking.reserveDate && (
+                        {(booking.bookingType === "reserve" || booking.bookingType === "airport") && booking.reserveDate && (
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="material-symbols-outlined text-sm text-blue-400">event</span>
-                            <span className="text-xs text-blue-400 font-bold">
-                              Reserved for {booking.reserveDate} at {booking.reserveTime}
+                            <span className={`material-symbols-outlined text-sm ${booking.bookingType === "airport" ? "text-amber-400" : "text-blue-400"}`}>event</span>
+                            <span className={`text-xs font-bold ${booking.bookingType === "airport" ? "text-amber-400" : "text-blue-400"}`}>
+                              {booking.bookingType === "airport" ? "Airport Transfer" : "Reserved"} for {booking.reserveDate} at {booking.reserveTime}
                             </span>
                           </div>
                         )}

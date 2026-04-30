@@ -1,20 +1,73 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const VehicleDetailPage = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { vehicleId: urlVehicleId } = useParams();
+  const { pickup, dropoff } = location.state || {};
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState("card");
   const [selectedDiscount, setSelectedDiscount] = useState(null);
   const [bookingType, setBookingType] = useState("now"); // "now" or "reserve"
   const [reserveDate, setReserveDate] = useState("");
   const [reserveTime, setReserveTime] = useState("");
-  
-  const { vehicle, pickup, dropoff } = location.state || {};
+  const [vehicle, setVehicle] = useState(null);
+  const [discounts, setDiscounts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch vehicle and discounts on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const stateVehicleId = location.state?.vehicleId || location.state?.vehicle?._id || location.state?.vehicle?.id;
+        const effectiveVehicleId = stateVehicleId || urlVehicleId;
+        
+        if (effectiveVehicleId) {
+          const [vehicleRes, discountsRes] = await Promise.all([
+            api.get(`/vehicles/${effectiveVehicleId}`),
+            api.get('/discounts')
+          ]);
+          
+          // Merge API data with any UI-specific properties from state
+          const apiVehicle = vehicleRes.data.vehicle;
+          const stateVehicle = location.state?.vehicle || {};
+          
+          setVehicle({
+            ...apiVehicle,
+            // Fallback UI properties if not present in API response
+            borderColor: stateVehicle.borderColor || 'border-gray-500/30',
+            bgColor: stateVehicle.bgColor || 'bg-gray-500/10',
+            color: stateVehicle.color || 'text-gray-400',
+            icon: stateVehicle.icon || 'directions_car',
+            time: stateVehicle.time || '5 min',
+            capacity: stateVehicle.capacity || '4 passengers'
+          });
+          setDiscounts(discountsRes.data.discounts || []);
+        } else if (location.state?.vehicle) {
+          // Use vehicle from location state if available
+          setVehicle(location.state.vehicle);
+          const discountsRes = await api.get('/discounts');
+          setDiscounts(discountsRes.data.discounts || []);
+        }
+      } catch (error) {
+        console.error("Error fetching vehicle data:", error);
+        // Fallback to location state if API fails
+        if (location.state?.vehicle) {
+          setVehicle(location.state.vehicle);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [location.state, urlVehicleId]);
 
   const paymentMethods = [
     { id: "card", name: "Credit/Debit Card", icon: "credit_card", last4: "4242" },
@@ -23,7 +76,14 @@ const VehicleDetailPage = () => {
     { id: "wallet", name: "ShuttleCore Wallet", icon: "account_balance_wallet", balance: "₹250" },
   ];
 
-  const discountOffers = [
+  const discountOffers = discounts.length > 0 ? discounts.map(d => ({
+    id: d._id,
+    code: d.code,
+    description: d.description,
+    discount: d.discountPercentage || 0,
+    maxDiscount: d.maxDiscount || 0,
+    cashback: d.cashback || 0
+  })) : [
     { id: "new50", code: "NEW50", description: "50% off for new users", discount: 50, maxDiscount: 100 },
     { id: "ride20", code: "RIDE20", description: "20% off on all rides", discount: 20, maxDiscount: 50 },
     { id: "cashback", code: "CASHBACK", description: "₹50 cashback", discount: 0, cashback: 50 },
@@ -39,34 +99,56 @@ const VehicleDetailPage = () => {
     return price;
   };
 
-  const handleConfirmBooking = () => {
+  const handleConfirmBooking = async () => {
     // Validate reserve booking
     if (bookingType === "reserve" && (!reserveDate || !reserveTime)) {
       alert("Please select both date and time for your reservation");
       return;
     }
 
-    // Save booking to localStorage
-    const booking = {
-      id: `BK-${Date.now()}`,
-      vehicle: vehicle,
-      pickup,
-      dropoff,
+    // Prepare booking data
+    const bookingData = {
+      vehicleId: vehicle._id || vehicle.id,
+      pickupLocation: location.state?.pickup,
+      dropoffLocation: location.state?.dropoff,
       price: getDiscountedPrice(vehicle.basePrice),
       paymentMethod: selectedPayment,
-      discount: selectedDiscount,
-      status: bookingType === "reserve" ? "reserved" : "confirmed",
+      discountCode: selectedDiscount ? discountOffers.find(o => o.id === selectedDiscount)?.code : null,
       bookingType: bookingType,
-      timestamp: new Date().toISOString(),
       reserveDate: bookingType === "reserve" ? reserveDate : null,
       reserveTime: bookingType === "reserve" ? reserveTime : null,
     };
-    
-    const existingBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-    const updatedBookings = [booking, ...existingBookings];
-    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
-    
-    navigate("/booking-confirmation", { state: { booking } });
+
+    try {
+      const response = await api.post('/bookings', bookingData);
+      const booking = response.data.booking;
+      
+      // Navigate to confirmation page
+      navigate("/booking-confirmation", { state: { booking, vehicle } });
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      // Fallback to localStorage if API fails
+      const fallbackBooking = {
+        id: `BK-${Date.now()}`,
+        vehicle: vehicle,
+        pickup: location.state?.pickup,
+        dropoff: location.state?.dropoff,
+        price: getDiscountedPrice(vehicle.basePrice),
+        paymentMethod: selectedPayment,
+        discount: selectedDiscount,
+        status: bookingType === "reserve" ? "reserved" : "confirmed",
+        bookingType: bookingType,
+        timestamp: new Date().toISOString(),
+        reserveDate: bookingType === "reserve" ? reserveDate : null,
+        reserveTime: bookingType === "reserve" ? reserveTime : null,
+      };
+      
+      const existingBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+      existingBookings.push(fallbackBooking);
+      localStorage.setItem("bookings", JSON.stringify(existingBookings));
+      
+      navigate("/booking-confirmation", { state: { booking: fallbackBooking, vehicle } });
+    }
   };
 
   const handleLogout = () => {

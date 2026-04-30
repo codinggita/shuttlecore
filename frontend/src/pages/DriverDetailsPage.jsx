@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -16,6 +16,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import api from "../services/api";
 
 const DriverDetailsPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -24,9 +25,39 @@ const DriverDetailsPage = () => {
   const { driverName } = useParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [driver, setDriver] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Get driver data from navigation state or generate based on URL
-  const passedDriver = location.state?.driver;
+  // Fetch driver data on mount
+  useEffect(() => {
+    const fetchDriverData = async () => {
+      setIsLoading(true);
+      try {
+        const driverId = location.state?.driverId || location.state?.driver?._id;
+        
+        if (driverId) {
+          const response = await api.get(`/drivers/${driverId}`);
+          setDriver(response.data.driver);
+        } else if (location.state?.driver) {
+          // Use driver from location state if available
+          setDriver(location.state.driver);
+        }
+      } catch (error) {
+        console.error("Error fetching driver data:", error);
+        // Fallback to location state if API fails
+        if (location.state?.driver) {
+          setDriver(location.state.driver);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDriverData();
+  }, [location.state]);
+
+  // Get driver data from state or API
+  const passedDriver = driver || location.state?.driver;
   
   // Default values for missing properties
   const defaultDriverData = {

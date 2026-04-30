@@ -30,6 +30,9 @@ const RiderDetailsPage = lazy(() => import("./pages/RiderDetailsPage"));
 const NotifyNextStopPage = lazy(() => import("./pages/NotifyNextStopPage"));
 const IncidentReportPage = lazy(() => import("./pages/IncidentReportPage"));
 const EventLogPage = lazy(() => import("./pages/EventLogPage"));
+const DriverDetailsPage = lazy(() => import("./pages/DriverDetailsPage"));
+const SafetyHistoryPage = lazy(() => import("./pages/SafetyHistoryPage"));
+const AllDriversPage = lazy(() => import("./pages/AllDriversPage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -125,6 +128,30 @@ const AnimatedRoutes = () => {
             element={
               <ProtectedRoute>
                 <EventLogPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/driver-details/:driverName" 
+            element={
+              <ProtectedRoute>
+                <DriverDetailsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/safety-history" 
+            element={
+              <ProtectedRoute>
+                <SafetyHistoryPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/all-drivers" 
+            element={
+              <ProtectedRoute>
+                <AllDriversPage />
               </ProtectedRoute>
             } 
           />

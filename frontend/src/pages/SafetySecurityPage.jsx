@@ -10,6 +10,7 @@ const SafetySecurityPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [timeFilter, setTimeFilter] = useState("24h");
   const [showNotifications, setShowNotifications] = useState(false);
+  const [driverView, setDriverView] = useState("top"); // "top" or "weekly"
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -116,6 +117,106 @@ const SafetySecurityPage = () => {
       score: 91,
       scoreColor: "cyan",
       img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqJ-cs0VYoIQd5_LibrD7tr9DGOxbFSyXXVLs_OVWLZKgD1AHXEDn0JeLdA35ZE0lJgHtS5B6xcsQKrNWF_iPzWimDxn6TPUA_S3iy03L-Jgt4Jjwpt_utu96mCN5unFoBwJea7wEGldUhIoBk5cV3EyiIkO60vjSW7jEQ2eOWEjDfzdYZ7xqGfOzzc9wRzKJsdURU2hHxvvacBh1kvb4-fgH8f58Em4Yp3MwWdxL0wN7atSC5GL7AeHiEhe-AI2wCgn6cLj_JZy0",
+    },
+    {
+      rank: "04",
+      name: "Jennifer Park",
+      division: "Regional Express",
+      miles: "876 mi",
+      alerts: 3,
+      score: 89,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=jennifer.park@shuttlecore.com",
+    },
+    {
+      rank: "05",
+      name: "Michael Torres",
+      division: "Heavy Haul Div.",
+      miles: "1,156 mi",
+      alerts: 4,
+      score: 87,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=michael.torres@shuttlecore.com",
+    },
+    {
+      rank: "06",
+      name: "Lisa Wong",
+      division: "Last Mile",
+      miles: "1,945 mi",
+      alerts: 6,
+      score: 85,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=lisa.wong@shuttlecore.com",
+    },
+    {
+      rank: "07",
+      name: "James Wilson",
+      division: "Regional Express",
+      miles: "743 mi",
+      alerts: 4,
+      score: 84,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=james.wilson@shuttlecore.com",
+    },
+    {
+      rank: "08",
+      name: "Emma Davis",
+      division: "Last Mile",
+      miles: "1,678 mi",
+      alerts: 7,
+      score: 82,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=emma.davis@shuttlecore.com",
+    },
+    {
+      rank: "09",
+      name: "Alex Johnson",
+      division: "Heavy Haul Div.",
+      miles: "1,089 mi",
+      alerts: 5,
+      score: 80,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=alex.johnson@shuttlecore.com",
+    },
+  ];
+
+  // Weekly performance data - previous week rankings
+  const weeklyDriverRankings = [
+    {
+      rank: "01",
+      name: "Sarah Chen",
+      division: "Regional Express",
+      miles: "1,156 mi",
+      alerts: 1,
+      score: 96,
+      scoreColor: "green",
+      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDkPtYBkrZ1lh4wsjxLGQ5CgWDU2vCTb-sVLnpPYFG6uHymmU7QPwgtCKlHwn0UH5ij6vb8wgvVFVjGH00WRha2mJFeQdBfhJ-qnXwLx7sB63znEJpaQJVbzD0LDobfMK-D74qhY5V949XSk-uF741quEhLNOe8RynMF7FthVA238WUvFJC6wFjV8jKeh93B_ab0y8_IUb1IedudkbQH28cxoq9bVXg1lD6EWGOHeas-td8dWvUWkoX2RXc_gDSzctB-RS5oMcB0ok",
+      trend: "up",
+      change: "+2",
+    },
+    {
+      rank: "02",
+      name: "Marcus Vance",
+      division: "Heavy Haul Div.",
+      miles: "1,089 mi",
+      alerts: 0,
+      score: 97,
+      scoreColor: "green",
+      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBBw7z2R0KH4HAZsobWRb4qGmGVYYjd-k0Dcm_PoYHQoUjLloqkYz3uL6Dj_iAvjjcCHTPOR4w8svAie85uoZaIqMZsvLnGOYKISvT2yZesD0Q4GuLvMfP3AckWIZFjXdzeU6cWSOopx8qlZ8ataQmtJk3GjJ127zpnuNzZhNfIPH1XlnY4cro6dmvlDPuqp5ZTbPTB26Cd0WNMnWn9-L-a19Tsi1krTB5N002-pXP90kHxUypgkg7YRQxwhltEKueNImZNXi01bwY",
+      trend: "down",
+      change: "-1",
+    },
+    {
+      rank: "03",
+      name: "David Miller",
+      division: "Last Mile",
+      miles: "1,945 mi",
+      alerts: 3,
+      score: 89,
+      scoreColor: "cyan",
+      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqJ-cs0VYoIQd5_LibrD7tr9DGOxbFSyXXVLs_OVWLZKgD1AHXEDn0JeLdA35ZE0lJgHtS5B6xcsQKrNWF_iPzWimDxn6TPUA_S3iy03L-Jgt4Jjwpt_utu96mCN5unFoBwJea7wEGldUhIoBk5cV3EyiIkO60vjSW7jEQ2eOWEjDfzdYZ7xqGfOzzc9wRzKJsdURU2hHxvvacBh1kvb4-fgH8f58Em4Yp3MwWdxL0wN7atSC5GL7AeHiEhe-AI2wCgn6cLj_JZy0",
+      trend: "same",
+      change: "0",
     },
   ];
 
@@ -382,15 +483,13 @@ const SafetySecurityPage = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() =>
-                    setTimeFilter(timeFilter === "24h" ? "7d" : "24h")
-                  }
+                  onClick={() => navigate("/safety-history")}
                   className="bg-[var(--surface-muted)] border border-[var(--border)] px-5 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2.5 text-main hover:bg-[var(--surface-light)] transition-all uppercase tracking-widest"
                 >
                   <span className="material-symbols-outlined text-sm">
                     calendar_today
                   </span>
-                  {timeFilter === "24h" ? "Last 24 Hours" : "Last 7 Days"}
+                  View 7 Day History
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -595,16 +694,30 @@ const SafetySecurityPage = () => {
                 className="md:col-span-7 dashboard-card p-8 rounded-[24px] border-[var(--border)] shadow-2xl overflow-hidden"
               >
                 <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-xl font-black text-main tracking-tight">
-                    Operator Performance
-                  </h2>
+                  <div>
+                    <h2 className="text-xl font-black text-main tracking-tight">
+                      Operator Performance
+                    </h2>
+                    {driverView === "weekly" && (
+                      <p className="text-[11px] text-muted mt-1 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                        Previous Week Data (Apr 22 - Apr 28)
+                      </p>
+                    )}
+                  </div>
                   <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[9px] font-black rounded-lg border border-emerald-500/10 uppercase tracking-widest">
+                    <button 
+                      onClick={() => setDriverView("top")}
+                      className={`px-3 py-1 text-[9px] font-black rounded-lg border uppercase tracking-widest transition-all ${driverView === "top" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-[var(--surface-muted)] text-muted border-[var(--border)] hover:border-[var(--text-muted)]"}`}
+                    >
                       Top Tier
-                    </span>
-                    <span className="px-3 py-1 bg-[var(--surface-muted)] text-muted text-[9px] font-black rounded-lg border border-[var(--border)] uppercase tracking-widest">
+                    </button>
+                    <button 
+                      onClick={() => setDriverView("weekly")}
+                      className={`px-3 py-1 text-[9px] font-black rounded-lg border uppercase tracking-widest transition-all ${driverView === "weekly" ? "bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20" : "bg-[var(--surface-muted)] text-muted border-[var(--border)] hover:border-[var(--text-muted)]"}`}
+                    >
                       Weekly
-                    </span>
+                    </button>
                   </div>
                 </div>
                 <div className="overflow-x-auto custom-scrollbar">
@@ -616,10 +729,11 @@ const SafetySecurityPage = () => {
                         <th className="pb-5 font-black">Tele-Distance</th>
                         <th className="pb-5 font-black">Alerts</th>
                         <th className="pb-5 font-black">Efficiency</th>
+                        <th className="pb-5 font-black"></th>
                       </tr>
                     </thead>
                     <tbody className="text-sm">
-                      {driverRankings.map((driver, i) => (
+                      {(driverView === "top" ? driverRankings.slice(0, 3) : weeklyDriverRankings).map((driver, i) => (
                         <motion.tr
                           key={i}
                           initial={{ opacity: 0 }}
@@ -632,6 +746,11 @@ const SafetySecurityPage = () => {
                             className={`py-5 font-black text-lg ${i === 0 ? "text-[var(--primary)] dark:text-white" : "text-muted opacity-40"}`}
                           >
                             {driver.rank}
+                            {driverView === "weekly" && driver.trend && (
+                              <span className={`ml-2 text-[10px] ${driver.trend === "up" ? "text-emerald-400" : driver.trend === "down" ? "text-rose-400" : "text-muted"}`}>
+                                {driver.trend === "up" ? "↑" : driver.trend === "down" ? "↓" : "→"}
+                              </span>
+                            )}
                           </td>
                           <td className="py-5">
                             <div className="flex items-center gap-4">
@@ -674,10 +793,30 @@ const SafetySecurityPage = () => {
                               </span>
                             </div>
                           </td>
+                          <td className="py-5 text-right">
+                            <span className="material-symbols-outlined text-muted opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1">
+                              arrow_forward
+                            </span>
+                          </td>
                         </motion.tr>
                       ))}
                     </tbody>
                   </table>
+                  
+                  {/* View All Button - Only show in Top Tier view */}
+                  {driverView === "top" && (
+                    <div className="mt-6 flex justify-center">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate("/all-drivers")}
+                        className="px-6 py-3 bg-[var(--primary)] text-white border border-[var(--primary)] rounded-xl text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-xl shadow-[var(--primary)]/20"
+                      >
+                        <span className="material-symbols-outlined text-sm">grid_view</span>
+                        View All {driverRankings.length} Drivers
+                      </motion.button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </div>

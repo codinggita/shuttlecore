@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -17,8 +17,43 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   const [chartView, setChartView] = useState("realtime");
+  
+  // Emergency notification state
+  const [emergencyAlert, setEmergencyAlert] = useState(null);
+  
+  // Check for active emergency
+  useEffect(() => {
+    const checkEmergency = () => {
+      const isEmergency = localStorage.getItem("emergencyActive");
+      const emergencyCount = localStorage.getItem("emergencyCount");
+      const emergencyTime = localStorage.getItem("emergencyTime");
+      
+      if (isEmergency === "true") {
+        setEmergencyAlert({
+          count: emergencyCount || "4",
+          time: emergencyTime,
+        });
+      } else {
+        setEmergencyAlert(null);
+      }
+    };
+    
+    // Check immediately
+    checkEmergency();
+    
+    // Check every 5 seconds for updates
+    const interval = setInterval(checkEmergency, 5000);
+    
+    // Also listen for storage events (when localStorage changes in other tabs)
+    const handleStorage = () => checkEmergency();
+    window.addEventListener("storage", handleStorage);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -364,6 +399,38 @@ const Dashboard = () => {
                 autonomous clusters report sync.
               </p>
             </motion.div>
+
+            {/* Emergency Alert Banner */}
+            {emergencyAlert && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 p-5 rounded-2xl bg-rose-500/10 border-2 border-rose-500/30 cursor-pointer hover:bg-rose-500/20 transition-all"
+                onClick={() => navigate("/emergency")}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-rose-500/20 flex items-center justify-center animate-pulse">
+                    <span className="material-symbols-outlined text-rose-400 text-2xl">emergency_home</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h2 className="text-lg font-black text-rose-400">EMERGENCY ALERT</h2>
+                      <span className="px-2 py-1 bg-rose-500 text-white text-[9px] font-black rounded-lg uppercase tracking-wider animate-pulse">
+                        ACTIVE
+                      </span>
+                    </div>
+                    <p className="text-[13px] text-main">
+                      <span className="font-black text-rose-400">{emergencyAlert.count}</span> emergency incidents requiring immediate attention. 
+                      Click to view details and respond.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-2">
+                    <span className="text-[11px] text-muted uppercase font-bold">View Emergency</span>
+                    <span className="material-symbols-outlined text-rose-400">arrow_forward</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Stats Grid */}
             <motion.div

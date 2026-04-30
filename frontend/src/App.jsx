@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './context/ThemeContext';
+import EmergencyNotification from './components/EmergencyNotification';
 import './index.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -33,6 +34,9 @@ const EventLogPage = lazy(() => import("./pages/EventLogPage"));
 const DriverDetailsPage = lazy(() => import("./pages/DriverDetailsPage"));
 const SafetyHistoryPage = lazy(() => import("./pages/SafetyHistoryPage"));
 const AllDriversPage = lazy(() => import("./pages/AllDriversPage"));
+const FleetAdjustmentPage = lazy(() => import("./pages/FleetAdjustmentPage"));
+const EmergencyStopPage = lazy(() => import("./pages/EmergencyStopPage"));
+const BookMyRidePage = lazy(() => import("./pages/BookMyRidePage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -155,6 +159,30 @@ const AnimatedRoutes = () => {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/fleet-adjustment" 
+            element={
+              <ProtectedRoute>
+                <FleetAdjustmentPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/emergency" 
+            element={
+              <ProtectedRoute>
+                <EmergencyStopPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/book-ride" 
+            element={
+              <ProtectedRoute>
+                <BookMyRidePage />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </Suspense>
     </AnimatePresence>
@@ -166,6 +194,7 @@ function App() {
     <ThemeProvider>
       <Router>
         <ScrollToTop />
+        <EmergencyNotification />
         <AnimatedRoutes />
       </Router>
     </ThemeProvider>

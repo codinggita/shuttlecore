@@ -423,6 +423,150 @@ const DriverDetailsPage = () => {
         { icon: "schedule", title: "Night Owl", desc: "Night Shift Expert", color: "purple" },
       ],
     },
+    "chris-martinez": {
+      name: "Chris Martinez",
+      rank: "10",
+      division: "Regional Express",
+      miles: "923 mi",
+      alerts: 2,
+      score: 88,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=chris.martinez@shuttlecore.com",
+      employeeId: "DRV-2023-0901",
+      joined: "July 2023",
+      license: "Class B CDL",
+      certifications: ["Passenger", "Express Route"],
+      phone: "+1 (415) 555-0901",
+      email: "c.martinez@shuttlecore.com",
+      status: "Active Duty",
+      vehicle: "Unit #9010",
+      vehicleType: "Express Shuttle ES-120",
+      shift: "Day Shift (08:00 - 16:00)",
+      supervisor: "Cmdr. James Peterson",
+      bio: "Chris is a reliable express route driver with consistent on-time performance and excellent customer feedback.",
+      safetyMetrics: { harshBraking: 0, speeding: 1, laneDeparture: 0, collisionWarning: 0, fatigueAlert: 1 },
+      weeklyHours: [38, 40, 38, 40, 38, 36, 38],
+      efficiencyHistory: [
+        { day: "Mon", score: 87 }, { day: "Tue", score: 88 }, { day: "Wed", score: 89 },
+        { day: "Thu", score: 88 }, { day: "Fri", score: 87 }, { day: "Sat", score: 88 }, { day: "Sun", score: 88 },
+      ],
+      recentTrips: [
+        { id: "TR-4490", route: "Downtown → Airport", cargo: "Passengers (16)", status: "Completed", time: "35m", distance: "18 mi", date: "Apr 30" },
+        { id: "TR-4489", route: "Business District Loop", cargo: "Passengers (22)", status: "Completed", time: "1h 20m", distance: "24 mi", date: "Apr 29" },
+      ],
+      achievements: [
+        { icon: "schedule", title: "On Time", desc: "98% Punctuality", color: "blue" },
+        { icon: "thumb_up", title: "Rated", desc: "4.7/5 Stars", color: "emerald" },
+      ],
+    },
+    "patricia-brown": {
+      name: "Patricia Brown",
+      rank: "11",
+      division: "Last Mile",
+      miles: "1,834 mi",
+      alerts: 6,
+      score: 86,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=patricia.brown@shuttlecore.com",
+      employeeId: "DRV-2022-1123",
+      joined: "November 2022",
+      license: "Class C Commercial",
+      certifications: ["Last Mile Delivery", "Package Handling"],
+      phone: "+1 (415) 555-1123",
+      email: "p.brown@shuttlecore.com",
+      status: "Active Duty",
+      vehicle: "Unit #2311",
+      vehicleType: "Delivery Pod DP-300",
+      shift: "Swing Shift (14:00 - 22:00)",
+      supervisor: "Cmdr. Lisa Wong",
+      bio: "Patricia is a high-efficiency delivery driver specializing in same-day deliveries with excellent route optimization skills.",
+      safetyMetrics: { harshBraking: 2, speeding: 1, laneDeparture: 2, collisionWarning: 1, fatigueAlert: 0 },
+      weeklyHours: [46, 48, 46, 48, 44, 42, 44],
+      efficiencyHistory: [
+        { day: "Mon", score: 85 }, { day: "Tue", score: 86 }, { day: "Wed", score: 86 },
+        { day: "Thu", score: 87 }, { day: "Fri", score: 86 }, { day: "Sat", score: 86 }, { day: "Sun", score: 86 },
+      ],
+      recentTrips: [
+        { id: "TR-4488", route: "Hub → 48 Deliveries", cargo: "Packages", status: "Completed", time: "7h 45m", distance: "86 mi", date: "Apr 30" },
+        { id: "TR-4487", route: "Sort → 44 Deliveries", cargo: "E-commerce", status: "Completed", time: "7h 15m", distance: "78 mi", date: "Apr 29" },
+      ],
+      achievements: [
+        { icon: "speed", title: "Fast", desc: "48 Stops/Day", color: "amber" },
+        { icon: "route", title: "Optimizer", desc: "Best Route Planner", color: "blue" },
+      ],
+    },
+    "robert-taylor": {
+      name: "Robert Taylor",
+      rank: "12",
+      division: "Heavy Haul Div.",
+      miles: "1,245 mi",
+      alerts: 3,
+      score: 87,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=robert.taylor@shuttlecore.com",
+      employeeId: "DRV-2021-1212",
+      joined: "December 2021",
+      license: "Class A CDL",
+      certifications: ["Heavy Haul", "Long Distance"],
+      phone: "+1 (415) 555-1212",
+      email: "r.taylor@shuttlecore.com",
+      status: "Active Duty",
+      vehicle: "Unit #1212",
+      vehicleType: "Long Haul LH-4500",
+      shift: "Night Shift (22:00 - 06:00)",
+      supervisor: "Cmdr. Sarah Mitchell",
+      bio: "Robert is an experienced long-haul driver specializing in interstate freight transportation with an impeccable safety record.",
+      safetyMetrics: { harshBraking: 1, speeding: 0, laneDeparture: 1, collisionWarning: 1, fatigueAlert: 0 },
+      weeklyHours: [44, 46, 44, 46, 42, 40, 42],
+      efficiencyHistory: [
+        { day: "Mon", score: 86 }, { day: "Tue", score: 87 }, { day: "Wed", score: 87 },
+        { day: "Thu", score: 88 }, { day: "Fri", score: 87 }, { day: "Sat", score: 87 }, { day: "Sun", score: 87 },
+      ],
+      recentTrips: [
+        { id: "TR-4486", route: "LA → SF Freight", cargo: "Manufactured Goods", status: "Completed", time: "8h 30m", distance: "382 mi", date: "Apr 30" },
+        { id: "TR-4485", route: "Oakland → Sacramento", cargo: "Industrial Equipment", status: "Completed", time: "5h 45m", distance: "156 mi", date: "Apr 28" },
+      ],
+      achievements: [
+        { icon: "social_distance", title: "Long Haul", desc: "100K+ Miles", color: "rose" },
+        { icon: "verified", title: "Safe", desc: "3 Years No Incidents", color: "emerald" },
+      ],
+    },
+    "derek-russell": {
+      name: "Derek Russell",
+      rank: "40",
+      division: "Regional Express",
+      miles: "567 mi",
+      alerts: 1,
+      score: 92,
+      scoreColor: "slate",
+      img: "https://i.pravatar.cc/150?u=derek.russell@shuttlecore.com",
+      employeeId: "DRV-2024-4001",
+      joined: "January 2024",
+      license: "Class B CDL",
+      certifications: ["Passenger", "Defensive Driving"],
+      phone: "+1 (415) 555-4001",
+      email: "d.russell@shuttlecore.com",
+      status: "Active Duty",
+      vehicle: "Unit #4001",
+      vehicleType: "Shuttle Coach SC-200",
+      shift: "Day Shift (06:00 - 14:00)",
+      supervisor: "Cmdr. James Peterson",
+      bio: "Derek is a rising star in the fleet with a perfect safety record and exceptional customer service ratings. A true example of excellence.",
+      safetyMetrics: { harshBraking: 0, speeding: 0, laneDeparture: 0, collisionWarning: 1, fatigueAlert: 0 },
+      weeklyHours: [36, 38, 36, 38, 36, 34, 36],
+      efficiencyHistory: [
+        { day: "Mon", score: 91 }, { day: "Tue", score: 92 }, { day: "Wed", score: 92 },
+        { day: "Thu", score: 93 }, { day: "Fri", score: 92 }, { day: "Sat", score: 92 }, { day: "Sun", score: 92 },
+      ],
+      recentTrips: [
+        { id: "TR-4401", route: "Airport Shuttle Loop", cargo: "Passengers (18)", status: "Completed", time: "2h 30m", distance: "32 mi", date: "Apr 30" },
+        { id: "TR-4400", route: "Hotel Circuit", cargo: "Passengers (24)", status: "Completed", time: "3h 15m", distance: "28 mi", date: "Apr 29" },
+      ],
+      achievements: [
+        { icon: "military_tech", title: "Perfect", desc: "Zero Incidents", color: "emerald" },
+        { icon: "star", title: "Top Rated", desc: "5.0/5.0 Stars", color: "amber" },
+      ],
+    },
   };
 
   const driver = passedDriver 
@@ -540,6 +684,15 @@ const DriverDetailsPage = () => {
           <div className="flex items-center gap-4 flex-1">
             <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden icon-btn">
               <span className="material-symbols-outlined">menu</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center gap-2 px-3 py-2 bg-[var(--surface-muted)] border border-[var(--border)] rounded-xl text-[11px] font-black text-muted hover:text-[var(--text-main)] hover:border-[var(--primary)] transition-all"
+            >
+              <span className="material-symbols-outlined text-sm">dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
             </motion.button>
             <button onClick={() => navigate("/safety")} className="text-muted hover:text-[var(--text-main)] transition-colors">
               <span className="material-symbols-outlined text-sm">arrow_back</span>

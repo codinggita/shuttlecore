@@ -510,6 +510,15 @@ const EventLogPage = () => {
             <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden icon-btn">
               <span className="material-symbols-outlined">menu</span>
             </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center gap-2 px-3 py-2 bg-[var(--surface-muted)] border border-[var(--border)] rounded-xl text-[11px] font-black text-muted hover:text-[var(--text-main)] hover:border-[var(--primary)] transition-all"
+            >
+              <span className="material-symbols-outlined text-sm">dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
+            </motion.button>
             <div className="flex-1 max-w-xl hidden sm:block">
               <div className="relative group">
                 <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-[var(--text-main)] transition-colors text-lg">search</span>

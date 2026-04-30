@@ -128,6 +128,7 @@ const Dashboard = () => {
       opacity: 1,
       transition: { staggerChildren: 0.05 },
     },
+    
   };
 
   const itemVariants = {

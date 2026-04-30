@@ -581,6 +581,8 @@ const SafetySecurityPage = () => {
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate("/event-log")}
                   className="mt-10 w-full py-4 border border-[var(--border)] text-muted hover:text-[var(--text-main)] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-[var(--surface-muted)] rounded-xl transition-all"
                 >
                   Complete Event Log
@@ -623,6 +625,7 @@ const SafetySecurityPage = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.6 + i * 0.1 }}
+                          onClick={() => navigate(`/driver-details/${driver.name.toLowerCase().replace(/\s+/g, '-')}`, { state: { driver } })}
                           className="border-b border-[var(--border)] hover:bg-[var(--surface-muted)] transition-colors group cursor-pointer"
                         >
                           <td

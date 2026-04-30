@@ -29,6 +29,7 @@ const FinalizeNoShowPage = lazy(() => import("./pages/FinalizeNoShowPage"));
 const RiderDetailsPage = lazy(() => import("./pages/RiderDetailsPage"));
 const NotifyNextStopPage = lazy(() => import("./pages/NotifyNextStopPage"));
 const IncidentReportPage = lazy(() => import("./pages/IncidentReportPage"));
+const EventLogPage = lazy(() => import("./pages/EventLogPage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -116,6 +117,14 @@ const AnimatedRoutes = () => {
             element={
               <ProtectedRoute>
                 <DemandHeatmapsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/event-log" 
+            element={
+              <ProtectedRoute>
+                <EventLogPage />
               </ProtectedRoute>
             } 
           />

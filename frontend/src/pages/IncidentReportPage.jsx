@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const IncidentReportPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -17,10 +18,23 @@ const IncidentReportPage = () => {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    showToast("Incident Logged", "Report #INC-7721 queued for post-op review.", "success");
+    
+    try {
+      const response = await api.post('/incidents', {
+        severity: form.severity,
+        category: form.category,
+        notes: form.notes,
+        status: 'pending'
+      });
+      
+      setIsSubmitted(true);
+      showToast("Incident Logged", `Report #${response.data.incident.id} queued for post-op review.`, "success");
+    } catch (error) {
+      console.error("Error submitting incident:", error);
+      showToast("Error", "Failed to submit incident report.", "error");
+    }
   };
 
   const menuItems = [

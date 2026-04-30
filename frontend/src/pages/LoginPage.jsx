@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const LoginPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -11,16 +12,25 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(false); // Reset loading state if needed, though usually it redirects
     setIsLoading(true);
-    // Simulate auth delay for "professional" feel
-    setTimeout(() => {
-      console.log("Login attempt:", { email, password });
+    
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user } = response.data;
+      
+      localStorage.setItem("token", token);
+      localStorage.setItem("userProfile", JSON.stringify(user));
       localStorage.setItem("isAuthenticated", "true");
+      
       navigate("/dashboard");
-    }, 1500);
+    } catch (error) {
+      console.error("Login failed:", error.response?.data?.message || error.message);
+      alert(error.response?.data?.message || "Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const containerVariants = {

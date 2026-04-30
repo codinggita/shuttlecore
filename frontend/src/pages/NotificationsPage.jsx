@@ -2,60 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import { useSocket } from "../context/SocketContext";
+import api from "../services/api";
 
 const NotificationsPage = () => {
   const { theme, toggleTheme } = useTheme();
+  const { urgentAlert, emergencyAlert, clearUrgentAlert, clearEmergencyAlert } = useSocket();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [filter, setFilter] = useState("all");
-  const [notificationsData, setNotificationsData] = useState([
-    {
-      id: 1,
-      type: "urgent",
-      title: "Route 405 Congestion Alert",
-      desc: "Autonomous shuttle unit SH-402 reports 14-minute delay due to unforeseen roadwork on the Pacific Hwy intersection. Re-routing logic suggested.",
-      time: "2 MIN AGO",
-      category: "Active Traffic Delay - Tier 2",
-      icon: "warning",
-      color: "amber",
-      read: false,
-    },
-    {
-      id: 2,
-      type: "operational",
-      title: "Unit SH-209 Handover Complete",
-      desc: "Vehicle maintenance cycle concluded. Unit has returned to active duty in the Northern District. Diagnostics: 100% Nominal.",
-      time: "15 MIN AGO",
-      category: "Fleet Confirmation",
-      icon: "airport_shuttle",
-      color: "cyan",
-      read: false,
-    },
-    {
-      id: 3,
-      type: "system",
-      title: "New Restricted Zone: Sector 7G",
-      desc: "Temporary closure due to VIP transit event. 4 units scheduled for automatic re-routing at 14:00 UTC.",
-      time: "1 HOUR AGO",
-      category: "Geofence Update",
-      icon: "map",
-      color: "blue",
-      hasMap: true,
-      read: false,
-    },
-    {
-      id: 4,
-      type: "system",
-      title: "Firmware Deployment v4.2.1",
-      desc: "Fleet-wide update deployed successfully. Navigation mesh enhanced for night-time visibility operations.",
-      time: "2 HOURS AGO",
-      category: "Protocol Success",
-      icon: "verified",
-      color: "slate",
-      read: false,
-    },
-  ]);
+  const [notificationsData, setNotificationsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [user, setUser] = useState({
     firstName: "Cmdr.",
@@ -67,24 +25,152 @@ const NotificationsPage = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    
+    fetchUserProfile();
   }, []);
+
+  // Fetch notifications on mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/notifications');
+        const notifications = response.data.notifications || [];
+        
+        // Transform notifications to match UI format
+        const transformedNotifications = notifications.map(n => ({
+          id: n._id,
+          type: n.type || 'system',
+          title: n.title,
+          desc: n.description,
+          time: formatTimeAgo(n.createdAt),
+          category: n.category || 'System',
+          icon: getIconForType(n.type),
+          color: getColorForType(n.type),
+          read: n.isRead
+        }));
+        
+        setNotificationsData(transformedNotifications);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        // Fallback to empty array if API fails
+        setNotificationsData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchNotifications();
+  }, []);
+
+  // Handle real-time alerts from WebSocket
+  useEffect(() => {
+    if (urgentAlert) {
+      const newNotification = {
+        id: `urgent-${Date.now()}`,
+        type: 'urgent',
+        title: urgentAlert.title || 'Urgent Alert',
+        desc: urgentAlert.message || urgentAlert.description,
+        time: 'JUST NOW',
+        category: 'Real-time Alert',
+        icon: 'warning',
+        color: 'amber',
+        read: false
+      };
+      setNotificationsData(prev => [newNotification, ...prev]);
+      clearUrgentAlert();
+    }
+  }, [urgentAlert, clearUrgentAlert]);
+
+  useEffect(() => {
+    if (emergencyAlert) {
+      const newNotification = {
+        id: `emergency-${Date.now()}`,
+        type: 'urgent',
+        title: emergencyAlert.title || 'Emergency Alert',
+        desc: emergencyAlert.message || emergencyAlert.description,
+        time: 'JUST NOW',
+        category: 'Emergency',
+        icon: 'emergency_home',
+        color: 'red',
+        read: false
+      };
+      setNotificationsData(prev => [newNotification, ...prev]);
+      clearEmergencyAlert();
+    }
+  }, [emergencyAlert, clearEmergencyAlert]);
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    
+    if (diffMins < 1) return "JUST NOW";
+    if (diffMins < 60) return `${diffMins} MIN AGO`;
+    if (diffHours < 24) return `${diffHours} HOURS AGO`;
+    return "1 DAY AGO";
+  };
+
+  const getIconForType = (type) => {
+    const icons = {
+      urgent: 'warning',
+      operational: 'airport_shuttle',
+      system: 'verified',
+      info: 'info'
+    };
+    return icons[type] || 'info';
+  };
+
+  const getColorForType = (type) => {
+    const colors = {
+      urgent: 'amber',
+      operational: 'cyan',
+      system: 'slate',
+      info: 'blue'
+    };
+    return colors[type] || 'slate';
+  };
 
   const [unreadCount, setUnreadCount] = useState(notificationsData.filter(n => !n.read).length);
 
-  const handleMarkAllRead = () => {
-    setNotificationsData(prev => prev.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
-    alert("SYSTEM: All telemetry alerts marked as read.");
+  const handleMarkAllRead = async () => {
+    try {
+      await api.put('/notifications/mark-all-read');
+      setNotificationsData(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+      // Fallback to local state update
+      setNotificationsData(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    }
   };
 
-  const handleNotificationAction = (id, action) => {
-    setNotificationsData(prev => prev.filter(n => n.id !== id));
-    setUnreadCount(prev => Math.max(0, prev - 1));
-    alert(`PROTOCOL SUCCESS: ${action} command executed. Alert #${id} resolved.`);
+  const handleNotificationAction = async (id, action) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      setNotificationsData(prev => prev.filter(n => n.id !== id));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error updating notification:", error);
+      // Fallback to local state update
+      setNotificationsData(prev => prev.filter(n => n.id !== id));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
   };
 
   const filteredNotifications = notificationsData.filter(n => {

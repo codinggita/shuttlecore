@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const BookMyRidePage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -21,10 +22,57 @@ const BookMyRidePage = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState("card");
   const [selectedDiscount, setSelectedDiscount] = useState(null);
+  const [vehicles, setVehicles] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  // Fetch available vehicles and discounts on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [vehiclesRes, discountsRes] = await Promise.all([
+          api.get('/vehicles'),
+          api.get('/discounts')
+        ]);
+        setVehicles(vehiclesRes.data.vehicles || []);
+        setDiscounts(discountsRes.data.discounts || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleBookRide = async () => {
+    if (!pickupLocation || !dropoffLocation || !selectedVehicle) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.post('/bookings', {
+        pickupLocation,
+        dropoffLocation,
+        vehicle: selectedVehicle._id,
+        vehicleType: selectedVehicle.type,
+        status: 'pending',
+        discountCode: selectedDiscount?.code
+      });
+      
+      navigate('/booking-confirmation', { state: { booking: response.data.booking } });
+    } catch (error) {
+      console.error("Booking failed:", error);
+      alert(error.response?.data?.message || "Booking failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const menuItems = [

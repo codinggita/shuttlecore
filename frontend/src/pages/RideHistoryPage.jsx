@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import api from "../services/api";
 
 const RideHistoryPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -20,16 +21,51 @@ const RideHistoryPage = () => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+      } catch (error) {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    
+    fetchUserProfile();
   }, []);
 
-
+  // Fetch bookings on mount
   useEffect(() => {
-    const savedBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-    setBookings(savedBookings);
+    const fetchBookings = async () => {
+      try {
+        const response = await api.get('/bookings');
+        const bookingsData = response.data.bookings || [];
+        
+        // Transform bookings to match UI format
+        const transformedBookings = bookingsData.map(b => ({
+          id: b._id,
+          pickupLocation: b.pickupLocation,
+          dropoffLocation: b.dropoffLocation,
+          vehicleType: b.vehicleType,
+          status: b.status,
+          price: b.price,
+          createdAt: b.createdAt,
+          bookingType: b.bookingType || 'standard'
+        }));
+        
+        setBookings(transformedBookings);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+        // Fallback to localStorage if API fails
+        const savedBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+        setBookings(savedBookings);
+      }
+    };
+    
+    fetchBookings();
   }, []);
 
   const filteredBookings = bookings.filter(booking => {

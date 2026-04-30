@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -11,6 +11,22 @@ const FleetPage = () => {
   const [waitTimer, setWaitTimer] = useState(222); // 03:42 in seconds
   const [showContactModal, setShowContactModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [user, setUser] = useState({
+    firstName: "Cmdr.",
+    lastName: "Operative",
+    email: "operative@shuttlecore.ai",
+    organization: "Systems Command",
+    role: "Systems Lead",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
+  });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userProfile");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   
   const [detectionMatrix, setDetectionMatrix] = useState([
     { label: "Lidar Confirm", value: "NO_HUMAN_DETECTED", color: "text-emerald-400" },
@@ -261,21 +277,21 @@ const FleetPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="dashboard-card !p-4 !rounded-2xl bg-[var(--surface-muted)] border-[var(--border)]"
           >
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-4 group/pcard cursor-pointer" onClick={() => navigate("/profile")}>
               <div className="relative">
                 <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFxhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
+                  src={user.avatar}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border border-white/20"
+                  className="w-10 h-10 rounded-full border border-white/20 group-hover/pcard:border-[var(--primary)] transition-all"
                 />
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[var(--surface)]"></div>
               </div>
               <div>
-                <p className="text-[13px] font-black text-main leading-tight">
-                  Cmdr. Operative
+                <p className="text-[13px] font-black text-main leading-tight group-hover/pcard:text-[var(--primary)] transition-colors">
+                  {user.firstName} {user.lastName}
                 </p>
                 <p className="text-[10px] text-muted uppercase font-bold tracking-wider">
-                  Systems Lead
+                  {user.role}
                 </p>
               </div>
             </div>

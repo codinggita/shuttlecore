@@ -8,9 +8,30 @@ const SignupPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    organization: ""
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Store user data in localStorage for profile persistence
+    localStorage.setItem("userProfile", JSON.stringify({
+      ...formData,
+      role: "Systems Lead",
+      joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD55HcRKzMuoQrlgQh1yQeMdyIi4jA_kfYQVnebkaZniNplKPT0Kw00a9787eqzziKaz_k8lYkJfXu8-0uVnFtUhRAEqqsg1LkniZinWJJVP5n0Eyn6GYKsv_sHVUP2RO9Uzpq1zsnhQXAhGcDQ0lWh4mhDYDfg0CI4ozsDpf8HPlIJBFhtxycjBE5bKxoJCy7emXTwc37hibY95aATNAUeF9aIWo8exvA8iRgIYw51Ek_Yz04IA7j6g_eERd-xHtSe55DvZbI9Bw"
+    }));
+
     setTimeout(() => {
       navigate("/login");
     }, 1500);
@@ -180,6 +201,9 @@ const SignupPage = () => {
                   </label>
                   <input
                     required
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     className="w-full bg-white/[0.03] border border-[var(--border)] focus:border-white/30 text-[var(--text-main)] p-4 rounded-2xl transition-all focus:outline-none font-bold placeholder:text-muted/20"
                     placeholder="John"
                     type="text"
@@ -191,6 +215,9 @@ const SignupPage = () => {
                   </label>
                   <input
                     required
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
                     className="w-full bg-white/[0.03] border border-[var(--border)] focus:border-white/30 text-[var(--text-main)] p-4 rounded-2xl transition-all focus:outline-none font-bold placeholder:text-muted/20"
                     placeholder="Doe"
                     type="text"
@@ -207,6 +234,9 @@ const SignupPage = () => {
                   </span>
                   <input
                     required
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     className="w-full bg-white/[0.03] border border-[var(--border)] focus:border-white/30 text-[var(--text-main)] pl-12 p-4 rounded-2xl transition-all focus:outline-none font-bold placeholder:text-muted/20"
                     placeholder="j.doe@company-transit.com"
                     type="email"
@@ -223,6 +253,9 @@ const SignupPage = () => {
                   </span>
                   <input
                     required
+                    name="organization"
+                    value={formData.organization}
+                    onChange={handleChange}
                     className="w-full bg-white/[0.03] border border-[var(--border)] focus:border-white/30 text-[var(--text-main)] pl-12 p-4 rounded-2xl transition-all focus:outline-none font-bold placeholder:text-muted/20"
                     placeholder="Global Transit Systems"
                     type="text"

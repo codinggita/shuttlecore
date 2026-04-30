@@ -94,7 +94,7 @@ const ReserveRidePage = () => {
                       type="date" 
                       value={date} 
                       onChange={e => setDate(e.target.value)} 
-                      className="input-field !pl-12 !pr-4 relative z-0" 
+                      className={`input-field !pl-12 !pr-4 relative z-0 ${!date && "border-rose-500/20"}`}
                       onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     />
                   </div>
@@ -104,11 +104,16 @@ const ReserveRidePage = () => {
                       type="time" 
                       value={time} 
                       onChange={e => setTime(e.target.value)} 
-                      className="input-field !pl-12 !pr-4 relative z-0" 
+                      className={`input-field !pl-12 !pr-4 relative z-0 ${!time && "border-rose-500/20"}`}
                       onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     />
                   </div>
                 </div>
+                {(!pickup || !dropoff || !date || !time) && (
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mt-4 opacity-70 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-xs">info</span> All telemetry parameters required to proceed
+                  </p>
+                )}
               </div>
               <motion.button 
                 whileTap={{ scale: 0.98 }}

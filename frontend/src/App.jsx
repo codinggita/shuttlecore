@@ -179,7 +179,7 @@ const AnimatedRoutes = () => {
             } 
           />
           <Route 
-            path="/emergency" 
+            path="/emergency-stop" 
             element={
               <ProtectedRoute>
                 <EmergencyStopPage />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -7,8 +7,8 @@ const ExploreRidesPage = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const rideOptions = [
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [rideOptions, setRideOptions] = useState([
     {
       id: "ride",
       title: "Standard Ride",
@@ -16,8 +16,11 @@ const ExploreRidesPage = () => {
       icon: "directions_car",
       image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800",
       price: "From ₹89",
+      basePrice: 89,
       features: ["2 min pickup", "Verified drivers", "Live tracking"],
-      color: "text-blue-400"
+      color: "text-blue-400",
+      available: true,
+      demand: "High"
     },
     {
       id: "xl",
@@ -26,8 +29,11 @@ const ExploreRidesPage = () => {
       icon: "airport_shuttle",
       image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800",
       price: "From ₹195",
+      basePrice: 195,
       features: ["Extra legroom", "Group travel", "Safe & clean"],
-      color: "text-purple-400"
+      color: "text-purple-400",
+      available: true,
+      demand: "Medium"
     },
     {
       id: "bike",
@@ -36,8 +42,11 @@ const ExploreRidesPage = () => {
       icon: "two_wheeler",
       image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800",
       price: "From ₹45",
+      basePrice: 45,
       features: ["Traffic-proof", "Pocket-friendly", "Helmet provided"],
-      color: "text-orange-400"
+      color: "text-orange-400",
+      available: true,
+      demand: "High"
     },
     {
       id: "rentals",
@@ -46,8 +55,11 @@ const ExploreRidesPage = () => {
       icon: "schedule",
       image: "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800",
       price: "From ₹350/hr",
+      basePrice: 350,
       features: ["Hourly bookings", "Unlimited stops", "Chauffeur included"],
-      color: "text-emerald-400"
+      color: "text-emerald-400",
+      available: true,
+      demand: "Low"
     },
     {
       id: "intercity",
@@ -56,8 +68,11 @@ const ExploreRidesPage = () => {
       icon: "commute",
       image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800",
       price: "From ₹2500",
+      basePrice: 2500,
       features: ["One-way/Round trip", "Top-tier sedans", "Roadside assistance"],
-      color: "text-sky-400"
+      color: "text-sky-400",
+      available: true,
+      demand: "Medium"
     },
     {
       id: "parcel",
@@ -66,10 +81,47 @@ const ExploreRidesPage = () => {
       icon: "local_shipping",
       image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800",
       price: "From ₹60",
+      basePrice: 60,
       features: ["Doorstep pickup", "Insured delivery", "Proof of delivery"],
-      color: "text-rose-400"
+      color: "text-rose-400",
+      available: true,
+      demand: "High"
     }
-  ];
+  ]);
+
+  // Real-time updates every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Update current time
+      setCurrentTime(new Date());
+
+      // Update ride options with simulated real-time changes
+      setRideOptions(prevOptions => prevOptions.map(option => {
+        // Randomly update demand level
+        const demandLevels = ["High", "Medium", "Low"];
+        const demandChange = Math.random() > 0.8;
+        const newDemand = demandChange ? demandLevels[Math.floor(Math.random() * demandLevels.length)] : option.demand;
+
+        // Randomly update availability
+        const availabilityChange = Math.random() > 0.9;
+        const newAvailable = availabilityChange ? !option.available : option.available;
+
+        // Slightly adjust price based on demand
+        const priceMultiplier = newDemand === "High" ? 1.1 : newDemand === "Medium" ? 1.0 : 0.95;
+        const newPrice = Math.round(option.basePrice * priceMultiplier);
+        const priceString = option.id === "rentals" ? `From ₹${newPrice}/hr` : `From ₹${newPrice}`;
+
+        return {
+          ...option,
+          demand: newDemand,
+          available: newAvailable,
+          price: priceString,
+        };
+      }));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -154,27 +206,41 @@ const ExploreRidesPage = () => {
                   className="dashboard-card !p-0 overflow-hidden group cursor-pointer"
                   onClick={() => navigate(`/ride-option/${option.id}`, { state: { rideOption: option } })}
                 >
-                  <div className="h-48 overflow-hidden relative">
+                  <div className="h-36 overflow-hidden relative">
                     <img src={option.image} alt={option.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                    <div className="absolute bottom-4 left-4">
-                      <div className={`w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center ${option.color} border border-white/20`}>
-                        <span className="material-symbols-outlined text-2xl">{option.icon}</span>
+                    <div className="absolute bottom-3 left-3">
+                      <div className={`w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center ${option.color} border border-white/20`}>
+                        <span className="material-symbols-outlined text-xl">{option.icon}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-xl font-black text-main group-hover:text-[var(--primary)] transition-colors">{option.title}</h3>
-                      <span className="text-lg font-black text-[var(--primary)]">{option.price}</span>
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-lg font-black text-main group-hover:text-[var(--primary)] transition-colors">{option.title}</h3>
+                      <span className="text-base font-black text-[var(--primary)]">{option.price}</span>
                     </div>
-                    <p className="text-sm text-muted mb-6 leading-relaxed line-clamp-2">{option.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${
+                        option.demand === "High" ? "bg-rose-500/10 text-rose-400" : 
+                        option.demand === "Medium" ? "bg-amber-500/10 text-amber-400" : 
+                        "bg-emerald-500/10 text-emerald-400"
+                      }`}>
+                        {option.demand} Demand
+                      </span>
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${
+                        option.available ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                      }`}>
+                        {option.available ? "Available" : "Unavailable"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted mb-4 leading-relaxed line-clamp-2">{option.description}</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {option.features.map((f, i) => (
-                        <span key={i} className="text-[10px] font-black uppercase tracking-widest px-2 py-1 bg-[var(--surface-muted)] text-muted rounded-md">{f}</span>
+                        <span key={i} className="text-[9px] font-black uppercase tracking-widest px-2 py-1 bg-[var(--surface-muted)] text-muted rounded-md">{f}</span>
                       ))}
                     </div>
-                    <button className="w-full py-3 bg-[var(--surface-muted)] border border-[var(--border)] rounded-xl text-[11px] font-black uppercase tracking-[0.2em] group-hover:bg-[var(--primary)] group-hover:text-white group-hover:border-[var(--primary)] transition-all">
+                    <button className="w-full py-2.5 bg-[var(--surface-muted)] border border-[var(--border)] rounded-xl text-[10px] font-black uppercase tracking-[0.2em] group-hover:bg-[var(--primary)] group-hover:text-white group-hover:border-[var(--primary)] transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled={!option.available}>
                       View Details
                     </button>
                   </div>

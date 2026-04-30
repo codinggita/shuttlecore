@@ -10,9 +10,11 @@ const EmergencyStopPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedEmergency, setSelectedEmergency] = useState(null);
   const [isResolving, setIsResolving] = useState(false);
+  const [isContactingRider, setIsContactingRider] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const audioRef = useRef(null);
 
-  const emergencyIncidents = [
+  const [incidents, setIncidents] = useState([
     {
       id: "EM-402",
       type: "Brake System Failure",
@@ -21,12 +23,20 @@ const EmergencyStopPage = () => {
       location: "Downtown Core - 5th Ave",
       coordinates: { lat: 34.0522, lng: -118.2437 },
       passengers: 4,
-      battery: "12%",
-      speed: "0 mph",
+      battery: 12,
+      speed: 0,
       heading: "N/A",
       lastUpdate: "4s ago",
       desc: "Emergency regenerative braking engaged after hydraulic pressure loss. Vehicle is currently stationary but blocking a primary artery.",
       nearbyUnits: ["SH-102 (2m)", "SH-881 (5m)", "MED-01 (8m)"],
+      logs: [
+        { time: "14:02:11", msg: "CORE_BOOT: Emergency Protocol Engaged" },
+        { time: "14:02:14", msg: "SENSOR_FAILURE: Lidar_Main_Obstructed" },
+        { time: "14:02:18", msg: "AUTO_HALT: Unit SH-402 Stopped" },
+        { time: "14:02:22", msg: "DISPATCH: Recovery Team MED-01 Enroute" },
+        { time: "14:02:25", msg: "SAT_SYNC: Visual Feed Offline" },
+        { time: "14:02:30", msg: "COMM_LINK: Operative Input Required" },
+      ]
     },
     {
       id: "EM-881",
@@ -36,12 +46,16 @@ const EmergencyStopPage = () => {
       location: "Pacific Coast Hwy",
       coordinates: { lat: 34.0122, lng: -118.4912 },
       passengers: 0,
-      battery: "65%",
-      speed: "5 mph",
+      battery: 65,
+      speed: 5,
       heading: "Westbound",
       lastUpdate: "12s ago",
       desc: "Vision system reports total blindness in Sector-B. Autonomous logic holding vehicle in safe-crawl mode.",
       nearbyUnits: ["SH-209 (4m)", "TECH-04 (12m)"],
+      logs: [
+        { time: "14:10:05", msg: "SIGNAL_DEGRADATION: Sector-B Vision compromised" },
+        { time: "14:10:08", msg: "AI_OVERRIDE: Safe-crawl mode engaged" },
+      ]
     },
     {
       id: "EM-209",
@@ -51,14 +65,18 @@ const EmergencyStopPage = () => {
       location: "Financial District",
       coordinates: { lat: 34.0488, lng: -118.2518 },
       passengers: 2,
-      battery: "88%",
-      speed: "18 mph",
+      battery: 88,
+      speed: 18,
       heading: "Eastbound",
       lastUpdate: "1s ago",
       desc: "Rear emergency hatch opened while in transit. AI has locked the vehicle and initiated police dispatch.",
       nearbyUnits: ["SH-402 (10m)", "SEC-09 (3m)"],
+      logs: [
+        { time: "14:15:22", msg: "SECURITY_BREACH: Rear Hatch Sensor Tripped" },
+        { time: "14:15:25", msg: "POLICE_DISPATCH: Automated SOS broadcast" },
+      ]
     },
-  ];
+  ]);
 
   useEffect(() => {
     try {
@@ -95,6 +113,50 @@ const EmergencyStopPage = () => {
     }
   }, []);
 
+  // Real-time updates every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Update current time
+      setCurrentTime(new Date());
+
+      // Update incidents with simulated real-time changes
+      setIncidents(prevIncidents => {
+        const updatedIncidents = prevIncidents.map(incident => {
+          // Randomly update battery level
+          const batteryChange = Math.random() > 0.7 ? (Math.random() > 0.5 ? -1 : 1) : 0;
+          const newBattery = Math.max(0, Math.min(100, incident.battery + batteryChange));
+
+          // Randomly update speed for moving units
+          const speedChange = incident.speed > 0 ? (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0) : 0;
+          const newSpeed = Math.max(0, incident.speed + speedChange);
+
+          // Update lastUpdate time
+          const updateTimes = ["1s ago", "2s ago", "3s ago", "4s ago", "5s ago", "Just now"];
+          const newLastUpdate = updateTimes[Math.floor(Math.random() * updateTimes.length)];
+
+          return {
+            ...incident,
+            battery: newBattery,
+            speed: newSpeed,
+            lastUpdate: newLastUpdate,
+          };
+        });
+
+        // Update selectedEmergency if it exists
+        if (selectedEmergency) {
+          const updatedSelected = updatedIncidents.find(i => i.id === selectedEmergency.id);
+          if (updatedSelected) {
+            setSelectedEmergency(updatedSelected);
+          }
+        }
+
+        return updatedIncidents;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [selectedEmergency]);
+
   const handleResolve = (id) => {
     setIsResolving(true);
     setTimeout(() => {
@@ -103,6 +165,14 @@ const EmergencyStopPage = () => {
       localStorage.removeItem("emergencyActive");
       alert(`Incident ${id} has been marked as RESOLVED. Recovery teams are on-site.`);
     }, 1500);
+  };
+
+  const handleContactRider = () => {
+    setIsContactingRider(true);
+    setTimeout(() => {
+      setIsContactingRider(false);
+      alert("Voice link established with rider. Connection stable.");
+    }, 2000);
   };
 
   const handleLogout = () => {
@@ -187,7 +257,7 @@ const EmergencyStopPage = () => {
               <span className="text-sm font-mono font-black text-rose-400">SYNC_ERROR_LOW</span>
             </div>
             <div className="h-10 w-[1px] bg-rose-900/30 mx-2" />
-            <span className="text-xl font-mono font-black text-rose-500 animate-pulse">{new Date().toLocaleTimeString([], { hour12: false })}</span>
+            <span className="text-xl font-mono font-black text-rose-500 animate-pulse">{currentTime.toLocaleTimeString([], { hour12: false })}</span>
           </div>
         </header>
 
@@ -201,15 +271,15 @@ const EmergencyStopPage = () => {
             <div className="grid grid-cols-12 gap-8">
               <div className="col-span-12 xl:col-span-4 space-y-6">
                 <h3 className="text-[11px] font-black text-rose-500 uppercase tracking-[0.3em] mb-2 px-2">Active Incidents</h3>
-                {emergencyIncidents.map((incident) => (
-                  <motion.div key={incident.id} variants={itemVariants} onClick={() => setSelectedEmergency(incident)} className={`p-6 rounded-3xl border-2 transition-all cursor-pointer relative overflow-hidden group ${selectedEmergency?.id === incident.id ? "bg-rose-600/20 border-rose-500 shadow-[0_0_40px_rgba(225,29,72,0.2)]" : "bg-[#0a0c10] border-rose-900/20 hover:border-rose-500/50 hover:bg-rose-900/5"}`}>
+                {incidents.map((incident) => (
+                  <motion.div key={incident.id} variants={itemVariants} onClick={() => setSelectedEmergency(incident)} className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden group ${selectedEmergency?.id === incident.id ? "bg-rose-600/20 border-rose-500 shadow-[0_0_40px_rgba(225,29,72,0.2)]" : "bg-[#0a0c10] border-rose-900/20 hover:border-rose-500/50 hover:bg-rose-900/5"}`}>
                     {incident.severity === "critical" && <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 blur-3xl pointer-events-none" />}
-                    <div className="flex justify-between items-start mb-4 relative z-10">
-                      <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${incident.severity === "critical" ? "bg-rose-600 text-white animate-pulse" : "bg-amber-600/20 text-amber-500"}`}>{incident.severity}</div>
+                    <div className="flex justify-between items-start mb-3 relative z-10">
+                      <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${incident.severity === "critical" ? "bg-rose-600 text-white animate-pulse" : "bg-amber-600/20 text-amber-500"}`}>{incident.severity}</div>
                       <span className="text-[10px] font-mono text-slate-500 font-bold">{incident.id}</span>
                     </div>
-                    <h3 className="text-xl font-black text-white mb-1 group-hover:text-rose-400 transition-colors">{incident.type}</h3>
-                    <p className="text-[12px] text-slate-400 font-bold mb-4 uppercase tracking-tighter">{incident.unit} • {incident.location}</p>
+                    <h3 className="text-lg font-black text-white mb-1 group-hover:text-rose-400 transition-colors">{incident.type}</h3>
+                    <p className="text-[11px] text-slate-400 font-bold mb-3 uppercase tracking-tighter">{incident.unit} • {incident.location}</p>
                     <div className="flex gap-2">
                        <div className="flex-1 h-1 bg-rose-900/30 rounded-full overflow-hidden"><motion.div animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }} className="w-1/2 h-full bg-rose-600" /></div>
                     </div>
@@ -281,7 +351,7 @@ const EmergencyStopPage = () => {
                           <div>
                             <h4 className="text-[11px] font-black text-rose-500 uppercase tracking-widest mb-6 flex items-center gap-2"><span className="material-symbols-outlined text-sm">support_agent</span> Remote Assistance</h4>
                             <div className="flex gap-3">
-                               <button onClick={() => alert("Opening Voice Link...")} className="flex-1 py-4 bg-rose-600/10 border border-rose-500/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-rose-600/20 transition-all group"><span className="material-symbols-outlined text-rose-500 group-hover:scale-110 transition-transform">mic</span><span className="text-[9px] font-black text-white uppercase tracking-tighter">Voice Link</span></button>
+                               <button onClick={handleContactRider} disabled={isContactingRider} className={`flex-1 py-4 bg-rose-600/10 border border-rose-500/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-rose-600/20 transition-all group ${isContactingRider ? "opacity-50 cursor-wait" : ""}`}><span className="material-symbols-outlined text-rose-500 group-hover:scale-110 transition-transform">mic</span><span className="text-[9px] font-black text-white uppercase tracking-tighter">{isContactingRider ? "CONNECTING..." : "Contact Rider"}</span></button>
                                <button onClick={() => alert("Opening Visual Override...")} className="flex-1 py-4 bg-rose-600/10 border border-rose-500/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-rose-600/20 transition-all group"><span className="material-symbols-outlined text-rose-500 group-hover:scale-110 transition-transform">videocam</span><span className="text-[9px] font-black text-white uppercase tracking-tighter">Visual Feed</span></button>
                                <button onClick={() => alert("Deploying Drone...")} className="flex-1 py-4 bg-rose-600/10 border border-rose-500/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-rose-600/20 transition-all group"><span className="material-symbols-outlined text-rose-500 group-hover:scale-110 transition-transform">aerostat</span><span className="text-[9px] font-black text-white uppercase tracking-tighter">Drone Scouter</span></button>
                             </div>

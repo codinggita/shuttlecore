@@ -28,6 +28,8 @@ const AddUnitPage = () => {
 
   const menuItems = [
     { id: "simulation", label: "Simulation", icon: "model_training", path: "/dashboard" },
+    { id: "bookride", label: "Book My Ride", icon: "local_taxi", path: "/book-ride" },
+    { id: "ridehistory", label: "Ride History", icon: "history", path: "/ride-history" },
     { id: "analytics", label: "AI Dispatch", icon: "query_stats", path: "/ai-dispatch" },
     { id: "heatmaps", label: "Demand Heatmaps", icon: "local_fire_department", path: "/demand-heatmaps" },
     { id: "fleet", label: "Fleet Management", icon: "airport_shuttle", path: "/fleet" },

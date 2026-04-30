@@ -132,6 +132,18 @@ const Dashboard = () => {
       path: "/dashboard",
     },
     {
+      id: "bookride",
+      label: "Book My Ride",
+      icon: "local_taxi",
+      path: "/book-ride",
+    },
+    {
+      id: "ridehistory",
+      label: "Ride History",
+      icon: "history",
+      path: "/ride-history",
+    },
+    {
       id: "analytics",
       label: "AI Dispatch",
       icon: "query_stats",

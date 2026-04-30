@@ -37,6 +37,11 @@ const AllDriversPage = lazy(() => import("./pages/AllDriversPage"));
 const FleetAdjustmentPage = lazy(() => import("./pages/FleetAdjustmentPage"));
 const EmergencyStopPage = lazy(() => import("./pages/EmergencyStopPage"));
 const BookMyRidePage = lazy(() => import("./pages/BookMyRidePage"));
+const VehicleSelectionPage = lazy(() => import("./pages/VehicleSelectionPage"));
+const VehicleDetailPage = lazy(() => import("./pages/VehicleDetailPage"));
+const BookingConfirmationPage = lazy(() => import("./pages/BookingConfirmationPage"));
+const RideHistoryPage = lazy(() => import("./pages/RideHistoryPage"));
+const RideOptionDetailPage = lazy(() => import("./pages/RideOptionDetailPage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -180,6 +185,46 @@ const AnimatedRoutes = () => {
             element={
               <ProtectedRoute>
                 <BookMyRidePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/vehicle-selection" 
+            element={
+              <ProtectedRoute>
+                <VehicleSelectionPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/vehicle/:vehicleId" 
+            element={
+              <ProtectedRoute>
+                <VehicleDetailPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/booking-confirmation" 
+            element={
+              <ProtectedRoute>
+                <BookingConfirmationPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/ride-history" 
+            element={
+              <ProtectedRoute>
+                <RideHistoryPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/ride-option/:rideId" 
+            element={
+              <ProtectedRoute>
+                <RideOptionDetailPage />
               </ProtectedRoute>
             } 
           />

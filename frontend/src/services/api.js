@@ -1,16 +1,29 @@
 import axios from 'axios';
 
-const API = import.meta.env.VITE_API_URL;
+// ─────────────────────────────────────────────────────────────────────
+// Resolve API base URL:
+//  - Local dev:  reads VITE_API_BASE_URL from frontend/.env  → http://localhost:5000/api
+//  - Production: reads VITE_API_BASE_URL from Netlify env vars → https://shuttle-core.onrender.com/api
+//  - Hard fallback (should never be reached in practice)
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://shuttle-core.onrender.com/api';  // <─ production safety net
 
-// Create a centralized Axios instance
+if (import.meta.env.DEV) {
+  console.log('[API] Base URL:', BASE_URL);
+}
+// ─────────────────────────────────────────────────────────────────────
+
+// Centralized Axios instance used throughout the app
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // send cookies / auth headers cross-origin
 });
 
-// Request Interceptor (attach token)
+// Request Interceptor ─ attach JWT from localStorage
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,28 +32,23 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response Interceptor (error handling)
+// Response Interceptor ─ centralised error handling
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // Handle specific status codes, like unauthorized/expired token
-    if (error.response && error.response.status === 401) {
-      // e.g., trigger a logout or token refresh process
-      console.warn('Unauthorized! Token may be invalid or expired.');
-      // Optional: localStorage.removeItem('token');
-      // Optional: window.location.href = '/login';
+    if (error.response?.status === 401) {
+      console.warn('[API] 401 Unauthorized — clearing session and redirecting to login.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userProfile');
+      // Only redirect if not already on an auth page
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
-    
-    // You can also add generic error toast notification logic here
-    console.error('API Error:', error.response?.data?.message || error.message);
-    
+    console.error('[API] Error:', error.response?.data?.message || error.message);
     return Promise.reject(error);
   }
 );

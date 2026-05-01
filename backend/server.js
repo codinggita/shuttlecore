@@ -159,7 +159,9 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
 server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
   console.log(`🚀 ShuttleCore API Server running on port ${PORT}`);
   console.log(`📡 WebSocket Server ready for connections`);
 });

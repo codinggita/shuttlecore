@@ -27,14 +27,34 @@ const app = express();
 connectDB();
 
 // Middleware
-const allowedOrigins = [
-  "https://shuttle-core.netlify.app",
-  "https://shuttle-core1.netlify.app",
-  "https://shuttlecore4.netlify.app"
-];
+// CORS origins are driven by the FRONTEND_URL env variable.
+// In production (Render), set: FRONTEND_URL=https://shuttle-core1.netlify.app
+// Locally it falls back to http://localhost:5173
+const buildAllowedOrigins = () => {
+  const origins = new Set([
+    "http://localhost:5173",   // Vite dev server default
+    "http://localhost:3000",   // CRA dev server fallback
+  ]);
+  // Accept comma-separated list from env: e.g. "https://shuttle-core1.netlify.app,https://shuttle-core.netlify.app"
+  if (process.env.FRONTEND_URL) {
+    process.env.FRONTEND_URL.split(',').map(u => u.trim()).filter(Boolean).forEach(u => origins.add(u));
+  }
+  return [...origins];
+};
+
+const allowedOrigins = buildAllowedOrigins();
+console.log('[CORS] Allowed origins:', allowedOrigins);
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    // Allow server-to-server calls (no origin header) and whitelisted origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      callback(new Error(`CORS policy: origin ${origin} is not allowed`));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -64,6 +84,7 @@ app.use(errorHandler);
 const server = http.createServer(app);
 
 // Initialize Socket.io
+// Uses the same allowedOrigins list as Express CORS (built from FRONTEND_URL env var)
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,

@@ -179,6 +179,14 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Real-time location updates from clients
+  socket.on("update_location", (data) => {
+    io.emit("location_broadcast", {
+      ...data,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   socket.on("disconnect", () => {
     connectedClients--;
     console.log(`[Socket] Disconnected: ${socket.id} | Total Clients: ${connectedClients}`);

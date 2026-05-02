@@ -579,8 +579,8 @@ const FleetPage = () => {
                         </span>
                         <div className="flex items-center gap-2.5">
                           <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
-                          <span className="text-[10px] font-black text-white tracking-widest">
-                            UNIT_POS: 40.7128° N, 74.0060° W
+                          <span className="text-[10px] font-black text-white tracking-widest uppercase">
+                            UNIT_POS: 23.0850° N, 72.6450° E
                           </span>
                         </div>
                       </div>
@@ -600,17 +600,170 @@ const FleetPage = () => {
                       </span>
                       Finalize No-Show
                     </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => navigate("/rider-details")}
-                      className="px-8 py-3.5 border border-[var(--border)] text-[var(--text-main)] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-[var(--surface-muted)] transition-all shadow-xl"
-                    >
-                      <span className="material-symbols-outlined text-lg">
-                        call
-                      </span>
-                      Contact Rider
-                    </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          // Step 1: Show Driver Dossier Profile
+                          const dossier = document.createElement("div");
+                          dossier.id = "driver-dossier-overlay";
+                          dossier.className = "fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6";
+                          dossier.innerHTML = `
+                            <div class="bg-[var(--surface)] w-full max-w-xl rounded-[3rem] border border-white/10 shadow-2xl overflow-hidden animate-scale-in">
+                              <div class="h-32 bg-gradient-to-r from-[var(--primary)]/20 to-transparent p-12 flex items-end">
+                                <h2 class="text-4xl font-black text-main tracking-tighter uppercase">Driver Dossier</h2>
+                              </div>
+                              <div class="p-12 space-y-8">
+                                <div class="flex items-center gap-8">
+                                  <div class="w-24 h-24 rounded-3xl bg-[var(--surface-light)] border border-white/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-5xl text-[var(--primary)]">person</span>
+                                  </div>
+                                  <div>
+                                    <p class="text-xs text-muted font-black uppercase tracking-[0.3em] mb-1">Assigned Personnel</p>
+                                    <p class="text-3xl font-black text-main tracking-tight">Marcus Thorne</p>
+                                    <p class="text-[var(--primary)] font-bold text-sm tracking-widest">Unit 42-Bravo • 4.9⭐ Rating</p>
+                                  </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                  <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                    <p class="text-[9px] text-muted font-black uppercase mb-1">Last Sync</p>
+                                    <p class="text-sm font-bold text-main uppercase">Just Now</p>
+                                  </div>
+                                  <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                    <p class="text-[9px] text-muted font-black uppercase mb-1">Current Sector</p>
+                                    <p class="text-sm font-bold text-main uppercase">Nana Chiloda</p>
+                                  </div>
+                                </div>
+                                <div class="flex gap-4">
+                                  <button class="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all" onclick="this.closest('#driver-dossier-overlay').remove()">Abort</button>
+                                  <button id="establish-link-btn" class="flex-[2] py-5 bg-[var(--primary)] hover:brightness-110 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-[var(--primary)]/20 transition-all">Establish Secure Link</button>
+                                </div>
+                              </div>
+                            </div>
+                          `;
+                          document.body.appendChild(dossier);
+
+                          // Step 2: Handle Link Establishment
+                          document.getElementById("establish-link-btn").onclick = () => {
+                            dossier.remove();
+                            const notification = document.createElement("div");
+                            notification.id = "active-fleet-call";
+                            notification.className = "fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center";
+                            notification.innerHTML = `
+                              <div class="bg-[var(--surface)] p-12 rounded-[3rem] border border-white/10 shadow-2xl flex flex-col items-center gap-8 animate-scale-in">
+                                <div class="w-24 h-24 rounded-full bg-[var(--primary)]/20 flex items-center justify-center animate-pulse" id="fleet-call-icon">
+                                  <span class="material-symbols-outlined text-5xl text-[var(--primary)]">call</span>
+                                </div>
+                                <div class="text-center">
+                                  <p class="text-xs text-muted font-black uppercase tracking-[0.3em] mb-2" id="fleet-call-status">Syncing Neural Link...</p>
+                                  <p class="text-3xl font-black text-main tracking-tight mb-1">Marcus Thorne</p>
+                                  <p class="text-[var(--primary)] font-bold text-sm tracking-widest">Unit 42-Bravo</p>
+                                </div>
+                                <div class="flex gap-4">
+                                  <button class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                                    <span class="material-symbols-outlined">mic_off</span>
+                                  </button>
+                                  <button class="w-16 h-16 rounded-full bg-rose-500 flex items-center justify-center hover:bg-rose-600 transition-all shadow-xl shadow-rose-500/20" onclick="this.closest('.fixed').remove(); window.speechSynthesis.cancel();">
+                                    <span class="material-symbols-outlined text-white">call_end</span>
+                                  </button>
+                                </div>
+                              </div>
+                            `;
+                            document.body.appendChild(notification);
+
+                            setTimeout(() => {
+                              const status = document.getElementById("fleet-call-status");
+                              const icon = document.getElementById("fleet-call-icon");
+                              if (status && icon) {
+                                status.innerText = "CONNECTED";
+                                icon.classList.add("bg-emerald-500/20");
+                                                          const speak = (text) => {
+                                   window.speechSynthesis.cancel(); // Clear any existing speech
+                                   const utterance = new SpeechSynthesisUtterance(text);
+                                   const voices = window.speechSynthesis.getVoices();
+                                   
+                                   // Select premium quality English voice
+                                   const premiumVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('en')) || 
+                                                        voices.find(v => v.lang.includes('en-GB')) || 
+                                                        voices[0];
+                                   
+                                   utterance.voice = premiumVoice;
+                                   utterance.pitch = 1.05;
+                                   utterance.rate = 1.3;
+                                   utterance.volume = 1;
+                                   window.speechSynthesis.speak(utterance);
+                                   return utterance;
+                                 };
+
+                                 const startInteractiveSession = () => {
+                                   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                   if (!Recognition) return;
+                                   
+                                   const recognition = new Recognition();
+                                   recognition.lang = 'en-US';
+                                   recognition.continuous = false;
+                                   recognition.interimResults = false;
+
+                                   recognition.onstart = () => { 
+                                     if (status) {
+                                       status.innerHTML = `<span class="flex items-center gap-2 text-emerald-400 font-black animate-pulse"><span class="material-symbols-outlined text-sm">mic</span> LISTENING...</span>`;
+                                     }
+                                     icon.classList.add("ring-8", "ring-emerald-500/30");
+                                   };
+
+                                   recognition.onresult = (event) => {
+                                     const transcript = event.results[0][0].transcript.toLowerCase();
+                                     if (status) status.innerHTML = `<span class="text-indigo-400 font-black">PROCESSING...</span>`;
+                                     
+                                     let response = "Acknowledged. Standing by for further coordinates.";
+                                     
+                                     // Context-Aware Responses for Marcus Thorne
+                                     if (transcript.includes("where") || transcript.includes("location") || transcript.includes("area") || transcript.includes("loaction")) {
+                                       response = "I am currently at the Nana Chiloda intersection. Traffic is moderate and I am holding my position.";
+                                     } else if (transcript.includes("who") || transcript.includes("name") || transcript.includes("identify")) {
+                                       response = "This is Unit 42-Bravo, Marcus Thorne. Operational status is green.";
+                                     } else if (transcript.includes("stop") || transcript.includes("wait") || transcript.includes("abort")) {
+                                       response = "Copy that. Searching for a safe stopping point in the Naroda sector to await further orders.";
+                                     } else if (transcript.includes("hello") || transcript.includes("hi") || transcript.includes("anyone")) {
+                                       response = "Hello Operator! Marcus Thorne here, secure link established. Directing my full focus to your commands.";
+                                     } else if (transcript.includes("status") || transcript.includes("report") || transcript.includes("ok")) {
+                                       response = "All vehicle systems are operational. Battery at 85% and I am ready for deployment.";
+                                     } else if (transcript.includes("time") || transcript.includes("eta") || transcript.includes("arrive")) {
+                                       response = "Current navigation shows 4 minutes to the next waypoint if I depart now.";
+                                     }
+
+                                     // Instant response - no delay
+                                     if (status) status.innerHTML = `<span class="text-white font-black animate-pulse">REPLYING...</span>`;
+                                     const utt = speak(response);
+                                     utt.onend = () => {
+                                       startInteractiveSession();
+                                     };
+                                   };
+
+                                   recognition.onerror = (e) => {
+                                     if (status) status.innerText = "CONNECTED";
+                                     setTimeout(startInteractiveSession, 100); // Fast restart
+                                   };
+
+                                   try { recognition.start(); } catch(e) {}
+                                 };
+
+                                // Initial Greeting
+                                const greeting = speak("Marcus Thorne here. Secure link established at Nana Chiloda. I am standing by for your voice commands.");
+                                greeting.onend = () => {
+                                  startInteractiveSession();
+                                };
+                              }
+                            }, 500);
+                          };
+                        }}
+                        className="px-8 py-3.5 border border-[var(--border)] text-[var(--text-main)] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-[var(--surface-muted)] transition-all shadow-xl"
+                      >
+                        <span className="material-symbols-outlined text-lg">
+                          call
+                        </span>
+                        Contact Driver
+                      </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}

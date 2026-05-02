@@ -341,7 +341,7 @@ const BookingConfirmationPage = () => {
                       const existingBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
                       const updatedBookings = existingBookings.map(b => b.id === booking.id ? updatedBooking : b);
                       localStorage.setItem("bookings", JSON.stringify(updatedBookings));
-                      navigate("/ride-history");
+                      navigate("/ride-history", { state: { showNotification: true, bookingId: booking.id, type: booking.bookingType } });
                     } catch (error) {
                       console.error("Error confirming ride:", error);
                       alert("There was an error confirming your ride. Please try again.");

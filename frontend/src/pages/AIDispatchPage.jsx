@@ -1,8 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSelector, useDispatch } from "react-redux";
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Polyline, Circle } from "@react-google-maps/api";
+import { updateLiveLocation, toggleTracking, setConnectedUserLocations } from '../features/user/userSlice';
+import { useSocket, emitLocation } from '../context/SocketContext';
 import { useTheme } from "../context/ThemeContext";
 import api from "../services/api";
+import axios from 'axios';
+
+const MAP_OPTIONS = {
+  disableDefaultUI: false,
+  zoomControl: true,
+  mapTypeControl: false,
+  scaleControl: true,
+  streetViewControl: false,
+  rotateControl: false,
+  fullscreenControl: true,
+  styles: [
+    { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#94A3B8' }] },
+    { featureType: 'all', elementType: 'labels.text.stroke', stylers: [{ visibility: 'off' }] },
+    { featureType: 'landscape', elementType: 'all', stylers: [{ color: '#0B0E14' }] },
+    { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road', elementType: 'all', stylers: [{ saturation: -100 }, { lightness: -70 }] },
+    { featureType: 'transit', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'water', elementType: 'all', stylers: [{ color: '#1C222D' }] }
+  ]
+};
 
 const AIDispatchPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -35,50 +59,197 @@ const AIDispatchPage = () => {
     fetchUserProfile();
   }, []);
 
+  const dispatch = useDispatch();
+  const { profile } = useSelector((state) => state.user);
+  const { currentLocation, trackingActive: reduxTrackingActive, connectedUsersLocations } = useSelector((state) => state.user);
+  const { socket, isConnected } = useSocket();
+
   const [dispatchQueue, setDispatchQueue] = useState([]);
   const [vehicles, setVehicles] = useState([]);
+  const [trackingActive, setTrackingActive] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [map, setMap] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [clusters, setClusters] = useState([]);
+  const [activeRoutes, setActiveRoutes] = useState([]);
+  const [simulatedDrivers, setSimulatedDrivers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const watchId = React.useRef(null);
+
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: googleMapsApiKey || '',
+    language: 'en'
+  });
+
+  const handleLocationUpdate = React.useCallback(async (position) => {
+    const { latitude, longitude } = position.coords;
+    const newLocation = { lat: latitude, lng: longitude };
+    
+    dispatch(updateLiveLocation(newLocation));
+    setLastUpdated(new Date());
+
+    if (profile) {
+      const locationData = {
+        userId: profile.id || profile._id,
+        name: `${profile.firstName} ${profile.lastName}`,
+        role: profile.role,
+        ...newLocation
+      };
+
+      emitLocation(socket, locationData);
+
+      try {
+        await axios.put('/api/dispatch/location', locationData, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+      } catch (err) {
+        console.error('Failed to update location on server:', err);
+      }
+    }
+  }, [dispatch, profile, socket]);
+
+  const handleLocationError = React.useCallback((err) => {
+    console.error('Location error:', err.message);
+    if (trackingActive) {
+      dispatch(toggleTracking());
+    }
+  }, [dispatch, trackingActive]);
+
+  React.useEffect(() => {
+    // Auto-enable tracking on mount for this page
+    if (!trackingActive) {
+      dispatch(toggleTracking());
+    }
+
+    if ("geolocation" in navigator) {
+      watchId.current = navigator.geolocation.watchPosition(
+        handleLocationUpdate,
+        handleLocationError,
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
+    return () => {
+      if (watchId.current) {
+        navigator.geolocation.clearWatch(watchId.current);
+        watchId.current = null;
+      }
+    };
+  }, [handleLocationUpdate, handleLocationError, dispatch, trackingActive]);
+
+  // Tactical Radar Fallback Component for Missing API Key
+  const TacticalRadar = () => (
+    <div className="w-full h-full bg-[#0B0E14] relative overflow-hidden flex items-center justify-center">
+      {/* Radar Grid */}
+      <div className="absolute inset-0 opacity-20" 
+           style={{ backgroundImage: 'linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)', backgroundSize: '50px 50px' }}></div>
+      <div className="absolute inset-0 opacity-10" 
+           style={{ backgroundImage: 'radial-gradient(circle, #334155 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+      
+      {/* Radar Sweeper Animation */}
+      <motion.div 
+        animate={{ rotate: 360 }}
+        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        className="absolute w-[200%] h-[200%] bg-gradient-to-tr from-[var(--primary)]/10 to-transparent origin-center pointer-events-none"
+      />
+
+      {/* Simulated Operational Content */}
+      <div className="relative z-10 text-center">
+        <div className="w-24 h-24 rounded-full border-4 border-[var(--primary)]/30 flex items-center justify-center mb-6 animate-pulse mx-auto">
+          <span className="material-symbols-outlined text-4xl text-[var(--primary)]">radar</span>
+        </div>
+        <h3 className="text-2xl font-black text-main tracking-tighter uppercase mb-2">Tactical Radar Active</h3>
+        <p className="text-[10px] text-muted font-black uppercase tracking-[0.3em]">Satellite Link: Established • API Auth: Simulation Mode</p>
+      </div>
+
+      {/* Render Simulated Drivers on Radar */}
+      {Object.values(simulatedDrivers).map((driver, idx) => (
+        <motion.div
+          key={`radar-driver-${idx}`}
+          className="absolute flex flex-col items-center gap-1"
+          style={{ 
+            left: `${((driver.lng - 72.6450) * 5000) + 50}%`, 
+            top: `${((23.0850 - driver.lat) * 5000) + 50}%` 
+          }}
+        >
+          <div className="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_10px_#10B981] animate-pulse"></div>
+          <span className="text-[8px] font-bold text-emerald-500 bg-black/80 px-1 rounded uppercase tracking-tighter">
+            {driver.vehicleId || 'UNIT'}
+          </span>
+        </motion.div>
+      ))}
+
+      {/* Warning Toast for Developer */}
+      {!googleMapsApiKey && (
+        <div className="absolute top-6 right-6 z-50 bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl backdrop-blur-md max-w-[240px]">
+          <div className="flex gap-3 items-start">
+            <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
+            <div>
+              <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">API Key Missing</p>
+              <p className="text-[9px] text-main opacity-80 leading-relaxed font-bold">Provide <code className="bg-black/20 px-1">VITE_GOOGLE_MAPS_API_KEY</code> in your .env file to enable high-resolution satellite imagery.</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   // Fetch dispatch queue and vehicles on mount
   useEffect(() => {
     const fetchDispatchData = async () => {
       setIsLoading(true);
       try {
-        const [dispatchRes, vehiclesRes] = await Promise.all([
+        const [dispatchRes, vehiclesRes, clustersRes] = await Promise.all([
           api.get('/dispatch'),
-          api.get('/vehicles')
+          api.get('/vehicles'),
+          api.get('/clusters')
         ]);
         
-        const dispatchData = dispatchRes.data.dispatch || [];
+        const dispatchData = dispatchRes.data.dispatchQueue || dispatchRes.data.dispatch || [];
         const vehiclesData = vehiclesRes.data.vehicles || [];
+        const clustersData = clustersRes.data.clusters || [];
         
-        // Transform dispatch queue to match UI format
+        // Transform dispatch queue
         const transformedDispatch = dispatchData.map(d => ({
-          id: d._id,
-          passenger: d.passengerName || "Unknown",
-          origin: d.origin || "Unknown",
-          destination: d.destination || "Unknown",
-          priority: d.priority || "ROUTINE",
-          autoAssign: d.assignedVehicle || null,
-          status: d.status || "pending"
+          id: d.id || d._id,
+          passenger: d.passenger || "Noah K.",
+          origin: d.origin || "Nana Chiloda",
+          destination: d.destination || "Airport Road",
+          priority: d.priority || "URGENT",
+          autoAssign: d.autoAssign || "Unit 104",
+          status: d.status || "pending",
+          originCoords: { lat: 23.0850 + (Math.random() - 0.5) * 0.02, lng: 72.6450 + (Math.random() - 0.5) * 0.02 },
+          destCoords: { lat: 23.0850 + (Math.random() - 0.5) * 0.02, lng: 72.6450 + (Math.random() - 0.5) * 0.02 }
         }));
+
+        const ahmedabadClusters = [
+          { name: 'Nana Chiloda', coordinates: { lat: 23.0850, lng: 72.6450 }, demand: 'High', passengers: 14 },
+          { name: 'Naroda GIDC', coordinates: { lat: 23.0650, lng: 72.6650 }, demand: 'Medium', passengers: 8 },
+          { name: 'Airport Road', coordinates: { lat: 23.0750, lng: 72.6250 }, demand: 'High', passengers: 22 }
+        ];
         
-        // Transform vehicles to match UI format
-        const transformedVehicles = vehiclesData.map(v => ({
-          id: v._id,
-          eta: `${Math.floor(Math.random() * 10)}m ${Math.floor(Math.random() * 60)}s`,
-          x: v.location?.coordinates?.[0] || 50,
-          y: v.location?.coordinates?.[1] || 50,
-          status: v.status || "active",
-          rawEta: Math.floor(Math.random() * 600)
-        }));
-        
-        setDispatchQueue(transformedDispatch);
-        setVehicles(transformedVehicles);
+        setDispatchQueue(transformedDispatch.length ? transformedDispatch : [
+          { id: 'D-9921', passenger: 'Noah K.', origin: 'Nana Chiloda', destination: 'Airport Rd', priority: 'URGENT', status: 'pending', autoAssign: 'Unit 104', originCoords: { lat: 23.0850, lng: 72.6450 }, destCoords: { lat: 23.0750, lng: 72.6250 } }
+        ]);
+        setClusters(ahmedabadClusters);
+
+        // Generate routes for active dispatches
+        const routes = (transformedDispatch.length ? transformedDispatch : [{ status: 'confirmed', originCoords: { lat: 23.0850, lng: 72.6450 }, destCoords: { lat: 23.0750, lng: 72.6250 } }])
+          .filter(d => d.status === 'assigned' || d.status === 'confirmed' || d.status === 'pending')
+          .map(d => [d.originCoords, d.destCoords]);
+        setActiveRoutes(routes);
+
       } catch (error) {
         console.error("Error fetching dispatch data:", error);
-        // Fallback to empty arrays if API fails
-        setDispatchQueue([]);
+        setDispatchQueue([
+          { id: 'D-9921', passenger: 'Noah K.', origin: 'Nana Chiloda', destination: 'Airport Rd', priority: 'URGENT', status: 'pending', autoAssign: 'Unit 104', originCoords: { lat: 23.0850, lng: 72.6450 }, destCoords: { lat: 23.0750, lng: 72.6250 } }
+        ]);
+        setClusters([
+          { name: 'Nana Chiloda', coordinates: { lat: 23.0850, lng: 72.6450 }, demand: 'High', passengers: 14 }
+        ]);
         setVehicles([]);
       } finally {
         setIsLoading(false);
@@ -104,19 +275,6 @@ const AIDispatchPage = () => {
   // Real-time update simulation
   React.useEffect(() => {
     const timer = setInterval(() => {
-      // Update vehicle positions and ETAs
-      setVehicles(prev => prev.map(v => {
-        const newRaw = Math.max(0, v.rawEta - 1);
-        const mins = Math.floor(newRaw / 60);
-        const secs = newRaw % 60;
-        return { 
-          ...v, 
-          rawEta: newRaw, 
-          eta: `${mins}m ${secs}s`,
-          x: v.x + (Math.random() * 0.2 - 0.1),
-          y: v.y + (Math.random() * 0.2 - 0.1)
-        };
-      }));
 
       // Fluctuate efficiency
       setEfficiency(prev => Math.min(100, Math.max(95, prev + (Math.random() * 0.2 - 0.1))));
@@ -152,43 +310,82 @@ const AIDispatchPage = () => {
           return item;
         });
 
-        // Randomly remove a confirmed order and add a new waitlist one
-        if (Math.random() > 0.95) {
-          const names = ["Aria Smith", "Liam J.", "Sophia W.", "Noah K.", "Olivia R.", "Ethan B."];
-          const hubs = ["Sector 4", "East Plaza", "Port Alpha", "Nexus Prime", "District 9"];
+        // Randomly remove a confirmed order and add a new pending one more frequently
+        if (Math.random() > 0.8) {
+          const names = ["Aria Smith", "Liam J.", "Sophia W.", "Noah K.", "Olivia R.", "Ethan B.", "Dharmi P.", "Rahul S."];
+          const hubs = ["Nana Chiloda", "Naroda GIDC", "Hansol", "Nikol", "Airport Circle"];
           const newOrder = {
             id: `TX-${Math.floor(Math.random() * 9000 + 1000)}`,
             passenger: names[Math.floor(Math.random() * names.length)],
             origin: hubs[Math.floor(Math.random() * hubs.length)],
             destination: hubs[Math.floor(Math.random() * hubs.length)],
-            priority: Math.random() > 0.7 ? "URGENT" : "ROUTINE",
-            autoAssign: Math.random() > 0.5 ? `SV-${Math.floor(Math.random() * 900 + 100)}` : null,
-            status: "waitlist"
+            priority: Math.random() > 0.6 ? "URGENT" : "ROUTINE",
+            autoAssign: `Unit ${Math.floor(Math.random() * 900 + 100)}`,
+            status: "pending",
+            originCoords: { lat: 23.0850 + (Math.random() - 0.5) * 0.05, lng: 72.6450 + (Math.random() - 0.5) * 0.05 },
+            destCoords: { lat: 23.0850 + (Math.random() - 0.5) * 0.05, lng: 72.6450 + (Math.random() - 0.5) * 0.05 }
           };
           
-          // Remove first confirmed if exists
+          // Trigger notification for new pending request
+          const toast = document.createElement("div");
+          toast.className = "fixed bottom-10 right-10 z-[100] bg-[var(--primary)] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-slide-in-right border border-white/10 backdrop-blur-xl";
+          toast.innerHTML = `
+            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
+              <span class="material-symbols-outlined text-xl">notifications_active</span>
+            </div>
+            <div>
+              <p class="font-black text-[10px] uppercase tracking-widest opacity-70">New Request</p>
+              <p class="font-black text-sm">${newOrder.passenger} • ${newOrder.origin}</p>
+            </div>
+          `;
+          document.body.appendChild(toast);
+          setTimeout(() => toast.remove(), 4000);
+
+          // Remove first confirmed if exists to keep queue clean
           const confirmedIndex = nextQueue.findIndex(i => i.status === "confirmed");
           if (confirmedIndex !== -1) {
             nextQueue = [...nextQueue.slice(0, confirmedIndex), ...nextQueue.slice(confirmedIndex + 1), newOrder];
-          } else if (nextQueue.length < 6) {
+          } else if (nextQueue.length < 8) {
             nextQueue = [...nextQueue, newOrder];
           }
         }
 
-        // Shift waitlist to pending
-        nextQueue = nextQueue.map(item => {
-          if (item.status === "waitlist" && Math.random() > 0.9) {
-            return { ...item, status: "pending", autoAssign: item.autoAssign || `SV-${Math.floor(Math.random() * 900 + 100)}` };
-          }
-          return item;
-        });
+        return nextQueue.slice(-10); // Keep last 10
+      });
 
-        return nextQueue;
+      // Update simulated drivers
+      setSimulatedDrivers(prev => {
+        const next = { ...prev };
+        dispatchQueue.forEach(item => {
+          if (item.status === 'confirmed' || item.status === 'assigned' || item.status === 'pending') {
+            const driverId = item.autoAssign || item.id;
+            const current = next[driverId] || { ...item.originCoords, heading: 0 };
+            const dest = item.destCoords;
+            
+            if (dest) {
+              const dx = dest.lng - current.lng;
+              const dy = dest.lat - current.lat;
+              const dist = Math.sqrt(dx*dx + dy*dy);
+              
+              if (dist > 0.0001) {
+                const step = 0.0005; // speed
+                const angle = Math.atan2(dy, dx);
+                next[driverId] = {
+                  lat: current.lat + Math.sin(angle) * step,
+                  lng: current.lng + Math.cos(angle) * step,
+                  heading: (angle * 180) / Math.PI,
+                  name: driverId
+                };
+              }
+            }
+          }
+        });
+        return next;
       });
 
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [dispatchQueue]);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -589,69 +786,192 @@ const AIDispatchPage = () => {
                 variants={itemVariants}
                 className="dashboard-card !p-0 rounded-[32px] overflow-hidden h-[450px] relative group border-[var(--border)] shadow-2xl"
               >
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity group-hover:scale-105 transition-transform duration-[10s]"
-                  style={{
-                    backgroundImage:
-                      "url(https://lh3.googleusercontent.com/aida-public/AB6AXuDp8spq3mDA9ta6CRefSmovMdLnMQa-IXxWoyUe5Ke0ZgulpzuOfi3Z8kEl-wHTfqMlrJTuRgS5cjuAhBE0Et89VyYQEagtOaL6HY1vCI5Ej6jWht5yxUU2TUpq2YP8JajO3tF9pPq8I5F_x_3pyZUT-UztMEYUrYF_0MvQulECtrdw_aV_cM-CKeg2FIEVOKqV8PlAli1K_9Htkry46pwwQ_bZr9JRW3NvlQGoF9kia2aKvtxtsi91OTrIlElNeg38N1caUctq8AI)",
-                  }}
-                ></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-transparent to-transparent opacity-80"></div>
+                {(!isLoaded || !googleMapsApiKey) ? (
+                  <TacticalRadar />
+                ) : (
+                  <GoogleMap
+                    mapContainerStyle={{ width: '100%', height: '100%' }}
+                    center={currentLocation || { lat: 23.0850, lng: 72.6450 }}
+                    zoom={14}
+                    options={MAP_OPTIONS}
+                    onLoad={(map) => setMap(map)}
+                  >
+                    {/* User's Own Location */}
+                    {currentLocation && (
+                      <Marker
+                        position={currentLocation}
+                        icon={{
+                          path: google.maps.SymbolPath.CIRCLE,
+                          fillColor: profile?.role === 'driver' ? '#6366F1' : '#10B981',
+                          fillOpacity: 1,
+                          strokeWeight: 2,
+                          strokeColor: '#FFFFFF',
+                          scale: 8
+                        }}
+                      />
+                    )}
 
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
-                  <div className="bg-black/60 backdrop-blur-xl px-4 py-2 rounded-xl border border-white/10 flex items-center gap-3 text-[10px] font-black tracking-[0.2em] shadow-2xl">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                    LIVE NETWORK STREAM: SECTOR_7
+                    {/* Passenger Demand Clusters */}
+                    {clusters.map((cluster, idx) => (
+                      <React.Fragment key={`cluster-${idx}`}>
+                        <Circle
+                          center={cluster.coordinates}
+                          radius={300}
+                          options={{
+                            fillColor: cluster.demand === 'High' ? '#F59E0B' : '#10B981',
+                            fillOpacity: 0.15,
+                            strokeColor: cluster.demand === 'High' ? '#F59E0B' : '#10B981',
+                            strokeWeight: 1,
+                            strokeOpacity: 0.3
+                          }}
+                        />
+                        <Marker
+                          position={cluster.coordinates}
+                          icon={{
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: cluster.demand === 'High' ? '#F59E0B' : '#10B981',
+                            fillOpacity: 1,
+                            strokeWeight: 2,
+                            strokeColor: '#FFFFFF',
+                            scale: 4
+                          }}
+                          label={{
+                            text: cluster.passengers.toString(),
+                            color: 'white',
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            className: 'mt-4'
+                          }}
+                        />
+                      </React.Fragment>
+                    ))}
+
+                    {/* Active Routes */}
+                    {activeRoutes.map((path, idx) => (
+                      <Polyline
+                        key={`route-${idx}`}
+                        path={path}
+                        options={{
+                          strokeColor: '#6366F1',
+                          strokeOpacity: 0.4,
+                          strokeWeight: 2,
+                          geodesic: true,
+                          icons: [{
+                            icon: { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW },
+                            offset: '100%',
+                            repeat: '50px'
+                          }]
+                        }}
+                      />
+                    ))}
+                    {/* Connected Drivers */}
+                    {Object.values(connectedUsersLocations).map((userLoc, i) => (
+                      <Marker
+                        key={`driver-${i}`}
+                        position={{ lat: userLoc.lat, lng: userLoc.lng }}
+                        onClick={() => setSelectedUser(userLoc)}
+                        icon={{
+                          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                          fillColor: '#6366F1',
+                          fillOpacity: 1,
+                          strokeWeight: 2,
+                          strokeColor: '#FFFFFF',
+                          scale: 6,
+                          rotation: userLoc.heading || 0
+                        }}
+                      />
+                    ))}
+
+                    {/* Simulated Drivers Tracking */}
+                    {Object.values(simulatedDrivers).map((driver, i) => (
+                      <Marker
+                        key={`sim-driver-${i}`}
+                        position={{ lat: driver.lat, lng: driver.lng }}
+                        onClick={() => setSelectedUser({ ...driver, role: 'driver' })}
+                        icon={{
+                          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                          fillColor: '#10B981',
+                          fillOpacity: 1,
+                          strokeWeight: 2,
+                          strokeColor: '#FFFFFF',
+                          scale: 7,
+                          rotation: driver.heading
+                        }}
+                      />
+                    ))}
+
+                    {/* Live Connected Drivers */}
+                    {Object.values(connectedUsersLocations).map((userLoc, i) => (
+                      <Marker
+                        key={`driver-${i}`}
+                        position={{ lat: userLoc.lat, lng: userLoc.lng }}
+                        onClick={() => setSelectedUser(userLoc)}
+                        icon={{
+                          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                          fillColor: '#6366F1',
+                          fillOpacity: 1,
+                          strokeWeight: 2,
+                          strokeColor: '#FFFFFF',
+                          scale: 6,
+                          rotation: userLoc.heading || 0
+                        }}
+                      />
+                    ))}
+
+                    {selectedUser && (
+                      <InfoWindow
+                        position={{ lat: selectedUser.lat, lng: selectedUser.lng }}
+                        onCloseClick={() => setSelectedUser(null)}
+                      >
+                        <div className="bg-[var(--surface)] p-2 rounded border border-[var(--border)] min-w-[140px]">
+                          <p className="font-bold text-xs uppercase text-[var(--text-main)] mb-1">{selectedUser.name}</p>
+                          <p className="text-[9px] text-[var(--primary)] font-black uppercase">{selectedUser.role}</p>
+                        </div>
+                      </InfoWindow>
+                    )}
+                  </GoogleMap>
+                )}
+
+                {/* HUD Overlay - Status */}
+                <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
+                  <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 border shadow-2xl transition-all bg-black/60 backdrop-blur-xl border-emerald-500/30 text-white`}>
+                    <div className={`w-2 h-2 rounded-full ${trackingActive ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10B981]' : 'bg-rose-500 animate-ping'}`}></div>
+                    {trackingActive ? 'Live Network Stream: Active' : 'Network Stream: Reconnecting...'}
                   </div>
                 </div>
 
-                <div className="absolute bottom-6 right-6 flex gap-3">
-                  {["add", "remove", "layers"].map((icon) => (
-                    <motion.button
-                      key={icon}
-                      whileHover={{
-                        scale: 1.1,
-                        backgroundColor: "rgba(255,255,255,0.1)",
-                      }}
-                      whileTap={{ scale: 0.9 }}
-                      className="h-10 w-10 rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white transition-all shadow-2xl"
-                    >
-                      <span className="material-symbols-outlined text-lg">
-                        {icon}
-                      </span>
-                    </motion.button>
-                  ))}
+                {/* Tracking Status Badge */}
+                <div className="absolute bottom-6 left-6 z-20">
+                  <div className="px-4 py-2 bg-rose-500 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+                    Tracking Active
+                  </div>
                 </div>
 
-                {/* Vehicle Indicators */}
-                {vehicles.map((vehicle, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5 + i * 0.1 }}
-                    className="absolute group cursor-pointer"
-                    style={{ top: `${vehicle.y}%`, left: `${vehicle.x}%` }}
+                {/* Map Legend HUD */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 flex items-center gap-8 shadow-2xl pointer-events-none">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Active Nodes</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></div>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">High Demand</span>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-6 right-6 flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (map && currentLocation) {
+                        map.panTo(currentLocation);
+                        map.setZoom(15);
+                      }
+                    }}
+                    className="p-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all"
                   >
-                    <div className="h-5 w-5 bg-white rounded-full border-2 border-gray-900 shadow-2xl flex items-center justify-center group-hover:scale-125 transition-transform">
-                      <span className="material-symbols-outlined text-[10px] text-gray-900 font-black">
-                        chevron_right
-                      </span>
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      whileHover={{ opacity: 1, y: 0 }}
-                      className="absolute -top-16 -left-12 pointer-events-none bg-black/80 backdrop-blur-xl border border-white/10 p-3 rounded-xl text-[10px] w-32 shadow-2xl"
-                    >
-                      <p className="font-black text-white mb-1 uppercase tracking-widest">
-                        Unit {vehicle.id}
-                      </p>
-                      <p className="text-muted font-bold">
-                        ETA: <span className="text-white">{vehicle.eta}</span>
-                      </p>
-                    </motion.div>
-                  </motion.div>
-                ))}
+                    <span className="material-symbols-outlined text-sm">navigation</span>
+                  </button>
+                </div>
               </motion.div>
 
               {/* Pending Dispatch Table */}
@@ -676,6 +996,7 @@ const AIDispatchPage = () => {
                         <th className="px-8 py-5 font-black">ROUTE MATRIX</th>
                         <th className="px-8 py-5 font-black">PRIORITY</th>
                         <th className="px-8 py-5 font-black">AUTO-ASSIGN</th>
+                        <th className="px-8 py-5 font-black text-center">COMMS</th>
                         <th className="px-8 py-5 font-black">ACTION</th>
                       </tr>
                     </thead>
@@ -735,12 +1056,149 @@ const AIDispatchPage = () => {
                               </span>
                             )}
                           </td>
+                          <td className="px-8 py-7 text-center">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => {
+                                const notification = document.createElement("div");
+                                notification.id = "active-call-toast";
+                                notification.className = "fixed top-24 left-1/2 -translate-x-1/2 z-[200] bg-[var(--primary)] text-white px-8 py-6 rounded-[2rem] shadow-2xl flex flex-col items-center gap-4 animate-bounce-in border border-white/20 backdrop-blur-2xl transition-all";
+                                notification.innerHTML = `
+                                  <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center animate-pulse" id="call-icon-container">
+                                    <span class="material-symbols-outlined text-4xl">call</span>
+                                  </div>
+                                  <div class="text-center">
+                                    <p class="font-black text-lg uppercase tracking-widest" id="call-status">Calling Driver...</p>
+                                    <p class="text-xs opacity-70">${item.autoAssign || 'Assigned Unit'}</p>
+                                  </div>
+                                  <button class="mt-2 px-6 py-2 bg-rose-500 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 transition-colors" onclick="this.parentElement.remove(); window.speechSynthesis.cancel();">End Call</button>
+                                `;
+                                document.body.appendChild(notification);
+
+                                // Simulation: Connection after 2 seconds
+                                setTimeout(() => {
+                                  const status = document.getElementById("call-status");
+                                  const container = document.getElementById("call-icon-container");
+                                  if (status && container) {
+                                    status.innerText = "CONNECTED";
+                                    container.classList.remove("bg-white/20");
+                                    container.classList.add("bg-emerald-500/40");
+                                    
+                                    // Get driver's current location for context
+                                    const driverLoc = simulatedDrivers[item.autoAssign || item.id] || { lat: 23.0850, lng: 72.6450 };
+                                    const locationName = driverLoc.lat > 23.08 ? "Nana Chiloda" : driverLoc.lat > 23.07 ? "Airport Road" : "Naroda";
+
+                                    const speak = (text) => {
+                                      window.speechSynthesis.cancel(); // Stop any current speech
+                                      const utterance = new SpeechSynthesisUtterance(text);
+                                      const voices = window.speechSynthesis.getVoices();
+                                      
+                                      // Priority voices for better quality
+                                      const premiumVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('en')) || 
+                                                           voices.find(v => v.lang.includes('en-GB')) || 
+                                                           voices[0];
+                                      
+                                      utterance.voice = premiumVoice;
+                                      utterance.pitch = 1.1;
+                                      utterance.rate = 1.3; // Slightly faster for responsiveness
+                                      utterance.volume = 1;
+                                      window.speechSynthesis.speak(utterance);
+                                      return utterance;
+                                    };
+
+                                    const startInteractiveSession = () => {
+                                      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                      if (!Recognition) return;
+                                      
+                                      const recognition = new Recognition();
+                                      recognition.continuous = false;
+                                      recognition.interimResults = false;
+                                      recognition.lang = 'en-US';
+
+                                      recognition.onstart = () => {
+                                        if (status) {
+                                          status.innerHTML = `<span class="flex items-center gap-2 text-emerald-400 font-black animate-pulse"><span class="material-symbols-outlined text-sm">mic</span> LISTENING...</span>`;
+                                        }
+                                        container.classList.add("ring-8", "ring-emerald-500/30");
+                                      };
+
+                                      recognition.onresult = (event) => {
+                                        const transcript = event.results[0][0].transcript.toLowerCase();
+                                        if (status) status.innerHTML = `<span class="text-indigo-400 font-black">PROCESSING...</span>`;
+
+                                        let response = "Acknowledged, Dispatch. Continuing mission.";
+                                        
+                                        // Enhanced Natural Language Logic
+                                        if (transcript.includes("where") || transcript.includes("location") || transcript.includes("area") || transcript.includes("loaction")) {
+                                          response = `I am currently passing through ${locationName}. The road is clear and I am on schedule.`;
+                                        } else if (transcript.includes("who") || transcript.includes("identify") || transcript.includes("name")) {
+                                          response = `This is Unit ${item.autoAssign || 'Delta-1'}. System status is green.`;
+                                        } else if (transcript.includes("hurry") || transcript.includes("fast") || transcript.includes("emergency")) {
+                                          response = "Copy that! Activating high-priority transit mode. ETA reduced by 2 minutes.";
+                                        } else if (transcript.includes("hello") || transcript.includes("hi") || transcript.includes("anyone")) {
+                                          response = `Hello Dispatch, Unit ${item.autoAssign} is connected and awaiting your orders.`;
+                                        } else if (transcript.includes("time") || transcript.includes("eta") || transcript.includes("long")) {
+                                          response = `My navigation system predicts arrival at ${item.origin} in approximately 3 minutes.`;
+                                        } else if (transcript.includes("status") || transcript.includes("ok") || transcript.includes("how are you")) {
+                                          response = "All systems operational. Vehicle telemetry is stable and I am focused on the route.";
+                                        } else if (transcript.includes("stop") || transcript.includes("abort") || transcript.includes("wait")) {
+                                          response = "Understood. Re-routing to a safe standby position in the Naroda sector.";
+                                        }
+
+                                        // Instant reply - no timeout
+                                        if (status) status.innerHTML = `<span class="text-white font-black animate-pulse">REPLYING...</span>`;
+                                        const utt = speak(response);
+                                        utt.onend = () => {
+                                          startInteractiveSession();
+                                        };
+                                      };
+
+                                      recognition.onerror = () => {
+                                        if (status) status.innerText = "CONNECTED";
+                                        setTimeout(startInteractiveSession, 100); // Fast restart
+                                      };
+
+                                      try { recognition.start(); } catch(e) {}
+                                    };
+
+                                    // Initial Greeting
+                                    const greeting = speak(`Hello, this is ${item.autoAssign || 'your driver'}. I am on my way, currently near ${locationName}. How can I help you?`);
+                                    greeting.onend = () => {
+                                      startInteractiveSession();
+                                    };
+                                  }
+                                }, 500);
+                              }}
+                              className="w-10 h-10 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center hover:bg-[var(--primary)] hover:text-white transition-all shadow-lg shadow-[var(--primary)]/20"
+                            >
+                              <span className="material-symbols-outlined text-lg">call</span>
+                            </motion.button>
+                          </td>
                           <td className="px-8 py-7">
                             {item.status === "pending" ? (
                               <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                onClick={() => handleDispatchConfirm(item.id)}
+                                onClick={() => {
+                                  // Call original handler
+                                  handleDispatchConfirm(item.id);
+                                  
+                                  // Also save to history for demo
+                                  const confirmedBooking = {
+                                    id: item.id,
+                                    pickup: item.origin,
+                                    dropoff: item.destination,
+                                    vehicle: { name: item.autoAssign || 'Assigned Unit', icon: 'airport_shuttle', color: 'text-emerald-400', bgColor: 'bg-emerald-400/10' },
+                                    status: 'confirmed',
+                                    timestamp: new Date().toISOString(),
+                                    price: 250,
+                                    paymentMethod: 'card',
+                                    bookingType: 'now'
+                                  };
+                                  const existing = JSON.parse(localStorage.getItem('bookings') || '[]');
+                                  localStorage.setItem('bookings', JSON.stringify([confirmedBooking, ...existing]));
+                                }}
                                 className="bg-[var(--primary)] text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:opacity-90 transition-all shadow-2xl shadow-indigo-500/20"
                               >
                                 CONFIRM

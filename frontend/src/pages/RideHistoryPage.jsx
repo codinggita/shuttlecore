@@ -42,35 +42,64 @@ const RideHistoryPage = () => {
     const fetchBookings = async () => {
       try {
         const response = await api.get('/bookings');
-        const bookingsData = response.data.bookings || [];
+        const apiBookings = response.data.bookings || [];
+        const localBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
         
-        // Transform bookings to match UI format
-        const transformedBookings = bookingsData.map(b => ({
-          id: b.id,
-          pickupLocation: b.pickup,
-          dropoffLocation: b.dropoff,
-          vehicleType: b.vehicle?.type || 'Standard',
-          vehicleName: b.vehicle?.name || 'Standard Ride',
-          status: b.status,
-          price: b.price,
-          paymentMethod: b.paymentMethod,
-          createdAt: b.timestamp,
-          bookingType: b.bookingType || 'now',
-          reserveDate: b.reserveDate,
-          reserveTime: b.reserveTime
+        // Merge and deduplicate by ID
+        const merged = [...apiBookings, ...localBookings];
+        const uniqueBookings = Array.from(new Map(merged.map(item => [item.id, item])).values());
+        
+        // Ensure consistent structure for UI
+        const formatted = uniqueBookings.map(b => ({
+          ...b,
+          pickup: b.pickup || b.pickupLocation,
+          dropoff: b.dropoff || b.dropoffLocation,
+          timestamp: b.timestamp || b.createdAt || new Date().toISOString(),
+          vehicle: b.vehicle || { name: 'Standard Ride', icon: 'directions_car', color: 'text-main', bgColor: 'bg-white/10' }
         }));
+
+        // Sort by date (newest first)
+        formatted.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         
-        setBookings(transformedBookings);
+        setBookings(formatted);
       } catch (error) {
         console.error("Error fetching bookings:", error);
-        // Fallback to localStorage if API fails
         const savedBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-        setBookings(savedBookings);
+        setBookings(savedBookings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
       }
     };
     
     fetchBookings();
   }, []);
+
+  // Show success notification if redirected from booking confirmation
+  useEffect(() => {
+    if (location.state?.showNotification) {
+      const type = location.state.type === 'reserve' ? 'Reserved' : 'Confirmed';
+      const notification = document.createElement("div");
+      notification.className = "fixed top-24 right-6 z-[100] bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-slide-in-right border border-white/20 backdrop-blur-xl";
+      notification.innerHTML = `
+        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">check_circle</span>
+        </div>
+        <div>
+          <p class="font-black text-sm uppercase tracking-wider">Ride ${type}!</p>
+          <p class="text-xs opacity-90 font-medium">Booking ${location.state.bookingId} is now active.</p>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Clear state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+
+      setTimeout(() => {
+        notification.style.opacity = "0";
+        notification.style.transform = "translateX(50px)";
+        notification.style.transition = "all 0.5s ease";
+        setTimeout(() => notification.remove(), 500);
+      }, 4000);
+    }
+  }, [location.state]);
 
   const filteredBookings = bookings.filter(booking => {
     if (filter === "all") return true;

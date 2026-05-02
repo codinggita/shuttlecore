@@ -173,3 +173,53 @@ exports.autoAssign = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * @desc    Update live location
+ * @route   PUT /api/dispatch/location
+ * @access  Private
+ */
+exports.updateLiveLocation = async (req, res, next) => {
+  try {
+    const { lat, lng, userId } = req.body;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ message: 'Latitude and longitude are required' });
+    }
+
+    // Find active dispatch for this user (as driver or passenger)
+    const dispatch = await Dispatch.findOne({
+      $or: [
+        { driver: userId },
+        { passenger: userId } // Assuming passenger ID is stored, though Dispatch model has it as String
+      ],
+      status: { $in: ['assigned', 'in_progress'] }
+    }).sort({ updatedAt: -1 });
+
+    if (!dispatch) {
+      // If no active dispatch, we still might want to track the user generally,
+      // but the requirement says "extend the Dispatch model".
+      // For now, if no dispatch, we just return success but don't save to DB,
+      // the real-time broadcasting happens via Socket.io in server.js anyway.
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Location broadcasted (no active dispatch found to save to)' 
+      });
+    }
+
+    dispatch.liveLocation = {
+      lat,
+      lng,
+      timestamp: new Date()
+    };
+
+    await dispatch.save();
+
+    res.status(200).json({
+      success: true,
+      liveLocation: dispatch.liveLocation
+    });
+  } catch (error) {
+    next(error);
+  }
+};

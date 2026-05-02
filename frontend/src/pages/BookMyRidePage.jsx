@@ -66,6 +66,27 @@ const BookMyRidePage = () => {
         bookingType: 'now'
       });
       
+      const newBooking = {
+        id: response.data.booking.id,
+        pickup: pickupLocation,
+        dropoff: dropoffLocation,
+        vehicle: {
+          name: selectedVehicle.name,
+          type: selectedVehicle.id,
+          icon: selectedVehicle.icon,
+          color: selectedVehicle.color,
+          bgColor: 'bg-[var(--primary)]/10'
+        },
+        status: 'confirmed',
+        price: getDiscountedPrice(selectedVehicle.price),
+        paymentMethod: selectedPayment,
+        timestamp: new Date().toISOString(),
+        bookingType: 'now'
+      };
+
+      const existing = JSON.parse(localStorage.getItem('bookings') || '[]');
+      localStorage.setItem('bookings', JSON.stringify([newBooking, ...existing]));
+
       navigate('/booking-confirmation', { state: { booking: response.data.booking } });
     } catch (error) {
       console.error("Booking failed:", error);

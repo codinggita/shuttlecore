@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { useDispatch } from "react-redux";
+import { setConnectedUserLocations } from "../features/user/userSlice";
 
 const SocketContext = createContext(null);
 
@@ -22,6 +24,7 @@ export const SocketProvider = ({ children }) => {
   const [emergencyAlert, setEmergencyAlert] = useState(null);
   const [urgentAlert, setUrgentAlert] = useState(null);
   const [statusChange, setStatusChange] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // Get token from localStorage for authentication
@@ -83,6 +86,12 @@ export const SocketProvider = ({ children }) => {
       setStatusChange(data);
     });
 
+    // Location broadcast listener
+    socketInstance.on("location_broadcast", (data) => {
+      dispatch(setConnectedUserLocations(data));
+      window.dispatchEvent(new CustomEvent('LOCATION_UPDATE_RECEIVED', { detail: data }));
+    });
+
     // Clean up on unmount
     return () => {
       socketInstance.disconnect();
@@ -109,4 +118,10 @@ export const SocketProvider = ({ children }) => {
       {children}
     </SocketContext.Provider>
   );
+};
+
+export const emitLocation = (socket, locationData) => {
+  if (socket) {
+    socket.emit("update_location", locationData);
+  }
 };

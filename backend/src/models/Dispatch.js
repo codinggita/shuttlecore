@@ -47,6 +47,14 @@ const dispatchSchema = new mongoose.Schema({
   distance: {
     type: Number,
     default: 0
+  },
+  liveLocation: {
+    lat: Number,
+    lng: Number,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
   }
 }, {
   timestamps: true

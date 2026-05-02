@@ -15,14 +15,8 @@
 
 <br/>
 
-[![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com/Dharmi-456-design/shuttlecore)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-orange?style=for-the-badge)](CONTRIBUTING.md)
-[![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge)](https://github.com/Dharmi-456-design)
 
-<br/>
 
-> **Transforming corporate commutes** — from rigid timetables to intelligent, demand-driven transportation.
 
 <br/>
 

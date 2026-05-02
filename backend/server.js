@@ -28,12 +28,13 @@ connectDB();
 
 // Middleware
 // CORS origins are driven by the FRONTEND_URL env variable.
-// In production (Render), set: FRONTEND_URL=https://shuttle-core1.netlify.app
+// In production (Render), set: FRONTEND_URL=https://shuttle-core2.netlify.app
 // Locally it falls back to http://localhost:5173
 const buildAllowedOrigins = () => {
   const origins = new Set([
     "http://localhost:5173",   // Vite dev server default
-    "http://localhost:3000",   // CRA dev server fallback
+    "http://localhost:3000",
+    "https://shuttle-core2.netlify.app",   // CRA dev server fallback
   ]);
   // Accept comma-separated list from env: e.g. "https://shuttle-core1.netlify.app,https://shuttle-core.netlify.app"
   if (process.env.FRONTEND_URL) {

@@ -206,9 +206,11 @@ Visit `http://localhost:3000` to access the app.
 
 ---
 
-## 🌐 Live Demo
+## 🌐 Live Deployment
 
-> 🚧 **Live demo coming soon.** Deployment is in progress — check back shortly or watch the repository for updates.
+Check out the live application:
+🚀 **[Live Demo on Netlify](https://shuttle-core2.netlify.app/)**
+
 
 ---
 ## 🎨 Figma Design
@@ -217,7 +219,18 @@ Explore the full UI/UX design of Smart Shuttle — including wireframes, compone
  
 | Design Asset | Link |
 |---|---|
-| 🖼️ Wireframes | [View Wireframes](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&t=VPiiFhj5jTisvL5N-1) |
+| 🖼️ Figma Design | [View on Figma](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&p=f&t=Xoa9GLNwZKz1GHoj-0) |
+
+---
+
+## 📖 API Documentation
+
+Comprehensive API documentation for the Smart Shuttle backend.
+
+| Documentation | Link |
+|---|---|
+| 📮 Postman Docs | [View on Postman](https://documenter.getpostman.com/view/50839318/2sBXqKofEP) |
+
 
 ---
 

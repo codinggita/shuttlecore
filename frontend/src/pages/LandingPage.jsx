@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import ContactModal from "../components/ContactModal";
+import SEO from "../components/SEO";
 
 const LandingPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -40,6 +41,10 @@ const LandingPage = () => {
 
   return (
     <div className="bg-[var(--background)] text-[var(--text-main)] font-sans overflow-x-hidden transition-colors duration-300">
+      <SEO
+        title="Home"
+        description="ShuttleCore - Real-Time Dynamic Office Shuttle Routing. Transforming corporate commutes from rigid timetables to intelligent, demand-driven transportation with AI-powered route optimization."
+      />
       <motion.header
         initial="hidden"
         animate="visible"

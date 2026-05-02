@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import api from "../services/api";
+import SEO from "../components/SEO";
 
 const SignupPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -65,6 +66,10 @@ const SignupPage = () => {
 
   return (
     <div className="bg-[var(--background)] text-[var(--text-main)] font-sans min-h-screen flex flex-col transition-colors duration-300 overflow-x-hidden">
+      <SEO
+        title="Sign Up"
+        description="Sign up for ShuttleCore - Join the leading network for autonomous transit logistics and predictive dispatch management. Start optimizing your fleet today."
+ />
       {/* TopAppBar */}
       <motion.header
         initial={{ y: -100 }}

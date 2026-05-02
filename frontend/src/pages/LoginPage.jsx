@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import emailjs from "@emailjs/browser";
 import api from "../services/api";
+import SEO from "../components/SEO";
 
 const LoginPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -73,6 +74,10 @@ const LoginPage = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden bg-[var(--background)] text-[var(--text-main)] font-sans selection:bg-white selection:text-gray-900 transition-colors duration-300">
+      <SEO
+        title="Login"
+        description="Login to ShuttleCore - Access your fleet management dashboard and control autonomous transit operations with real-time routing and AI-powered optimization."
+ />
       {/* Theme Toggle */}
       <div className="fixed top-6 right-6 z-50">
         <motion.button

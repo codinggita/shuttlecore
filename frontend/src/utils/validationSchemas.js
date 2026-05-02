@@ -23,3 +23,15 @@ export const signupSchema = Yup.object().shape({
     .oneOf([Yup.ref('password'), null], 'Passwords must match')
     .required('Confirm password is required'),
 });
+
+export const locationSchema = Yup.object().shape({
+  lat: Yup.number()
+    .min(-90, 'Invalid latitude')
+    .max(90, 'Invalid latitude')
+    .required('Latitude is required'),
+  lng: Yup.number()
+    .min(-180, 'Invalid longitude')
+    .max(180, 'Invalid longitude')
+    .required('Longitude is required'),
+  userId: Yup.string().required('User ID is required'),
+});

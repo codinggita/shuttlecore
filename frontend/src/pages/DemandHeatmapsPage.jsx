@@ -2,8 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
-import { useSocket } from "../context/SocketContext";
+import { useSocket, emitLocation } from "../context/SocketContext";
+import { GoogleMap, useJsApiLoader, Marker, Circle, Polyline } from "@react-google-maps/api";
+import { updateLiveLocation, toggleTracking } from '../features/user/userSlice';
+import { useSelector, useDispatch } from "react-redux";
 import api from "../services/api";
+import axios from 'axios';
 
 const DemandHeatmapsPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -37,12 +41,128 @@ const DemandHeatmapsPage = () => {
     fetchUserProfile();
   }, []);
 
+  const dispatch = useDispatch();
+  const { profile, currentLocation, trackingActive } = useSelector((state) => state.user);
+  const { socket } = useSocket();
+  
   const [efficiency, setEfficiency] = useState(94);
   const [walkDistance, setWalkDistance] = useState(180);
   const [fleetLoad, setFleetLoad] = useState(82);
   const [avgWait, setAvgWait] = useState(4.2);
-  const [predictionTime, setPredictionTime] = useState(1035); // 17:15 in minutes
+  const [predictionTime, setPredictionTime] = useState(1035);
   const [clusters, setClusters] = useState([]);
+  const [map, setMap] = useState(null);
+  
+  // Booking Workflow State
+  const [bookingStep, setBookingStep] = useState('map'); // map, request, vehicle, payment, confirmed
+  const [activeRequest, setActiveRequest] = useState(null);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [bookingId, setBookingId] = useState(null);
+
+  const watchId = React.useRef(null);
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+    language: 'en'
+  });
+
+  const MAP_OPTIONS = {
+    disableDefaultUI: false,
+    zoomControl: true,
+    mapTypeControl: false,
+    styles: [
+      { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#94A3B8' }] },
+      { featureType: 'landscape', elementType: 'all', stylers: [{ color: '#0B0E14' }] },
+      { featureType: 'road', elementType: 'all', stylers: [{ saturation: -100 }, { lightness: -70 }] },
+      { featureType: 'water', elementType: 'all', stylers: [{ color: '#1C222D' }] }
+    ]
+  };
+
+  const handleLocationUpdate = React.useCallback(async (position) => {
+    const { latitude, longitude } = position.coords;
+    const newLoc = { lat: latitude, lng: longitude };
+    dispatch(updateLiveLocation(newLoc));
+    if (profile) {
+      emitLocation(socket, { userId: profile.id || profile._id, ...newLoc });
+    }
+  }, [dispatch, profile, socket]);
+
+  React.useEffect(() => {
+    // Auto-enable tracking on mount for this page
+    if (!trackingActive) {
+      dispatch(toggleTracking());
+    }
+
+    const startTracking = () => {
+      watchId.current = navigator.geolocation.watchPosition(
+        handleLocationUpdate,
+        (err) => console.error("Location error:", err),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+      );
+    };
+
+    startTracking();
+
+    return () => {
+      if (watchId.current) navigator.geolocation.clearWatch(watchId.current);
+    };
+  }, [handleLocationUpdate, dispatch, trackingActive]);
+
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  // Tactical Radar Fallback
+  const TacticalRadar = () => (
+    <div className="w-full h-full bg-[#0B0E14] relative overflow-hidden flex items-center justify-center">
+      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)', backgroundSize: '50px 50px' }}></div>
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="absolute w-[200%] h-[200%] bg-gradient-to-tr from-[var(--primary)]/10 to-transparent origin-center" />
+      <div className="relative z-10 text-center">
+        <div className="w-20 h-20 rounded-full border-2 border-[var(--primary)]/30 flex items-center justify-center mb-6 animate-pulse mx-auto">
+          <span className="material-symbols-outlined text-3xl text-[var(--primary)]">radar</span>
+        </div>
+        <h3 className="text-xl font-black text-main tracking-tighter uppercase">Demand Radar Active</h3>
+        <p className="text-[9px] text-muted font-black uppercase tracking-[0.2em]">Analyzing High-Density Zones</p>
+      </div>
+      
+      {/* Simulated Fleet on Radar */}
+      {fleetLocations && Object.values(fleetLocations).map((loc, idx) => (
+        <div key={`radar-fleet-${idx}`} className="absolute w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_#10B981]" 
+             style={{ left: `${((loc.lng - 72.6450) * 5000) + 50}%`, top: `${((23.0850 - loc.lat) * 5000) + 50}%` }}></div>
+      ))}
+    </div>
+  );
+
+  const triggerMockRequest = () => {
+    const passengers = ["Noah K.", "Sophia W.", "Alex J.", "Sarah M.", "David C."];
+    const locations = [
+      { name: "Nana Chiloda", lat: 23.0850, lng: 72.6450 },
+      { name: "Naroda GIDC", lat: 23.0650, lng: 72.6650 },
+      { name: "Airport Road", lat: 23.0750, lng: 72.6250 },
+      { name: "Hansol Sector", lat: 23.0550, lng: 72.6350 },
+      { name: "Nikol Hub", lat: 23.0450, lng: 72.6750 }
+    ];
+
+    const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
+    const pickupIdx = Math.floor(Math.random() * locations.length);
+    let destIdx = Math.floor(Math.random() * locations.length);
+    while (destIdx === pickupIdx) destIdx = Math.floor(Math.random() * locations.length);
+
+    const pickup = locations[pickupIdx];
+    const destination = locations[destIdx];
+    const randomDistance = (2 + Math.random() * 8).toFixed(1);
+    const randomFare = (80 + Math.random() * 300).toFixed(0);
+
+    setActiveRequest({
+      id: Math.random().toString(36).substr(2, 9).toUpperCase(),
+      passenger: randomPassenger,
+      pickup: pickup.name,
+      destination: destination.name,
+      distance: `${randomDistance} km`,
+      fare: `₹${randomFare}.00`,
+      coords: pickup
+    });
+    setBookingStep('request');
+  };
 
   // Fetch clusters on mount
   useEffect(() => {
@@ -191,30 +311,291 @@ const DemandHeatmapsPage = () => {
             </motion.div>
 
             <div className="grid grid-cols-12 gap-6">
-              <motion.div variants={itemVariants} className="col-span-12 lg:col-span-8 dashboard-card !p-2 relative overflow-hidden h-[600px] group border-[var(--border)]">
-                <div className="absolute inset-0 bg-[#E2E2D5] dark:bg-slate-900 overflow-hidden">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxjH0hJVR-3ax8Ghkx_cmuc_utpCPI_ZTug_BC53QR7J9oy_fjGfJWbBBmPg-XbBPdtImF9w2hD0zrMWAQR7dl4Cd1eRluej_OKzg-s_8YImHOcE54JBT4lBHczSF220JS18fvZG50sOC2aoy42QNoUokqVmoIWDrPBn8Rb3QGKcCYvj1-5Mp6HueBObujXx_9GX2_WizU303A8r8KhqxKrNNxAd-4syg98w5Voxg1X_f6uJGElXRMl5urL8f-PbTE80u4k6pJhdM" className="w-full h-full object-cover opacity-50 dark:opacity-30 grayscale group-hover:scale-105 transition-transform duration-1000" alt="Map" />
-                  {clusters.map((c) => (
-                    <div key={c.id} className="absolute transition-all duration-1000" style={{ top: c.id === "#1" ? "20%" : c.id === "#2" ? "65%" : "40%", left: c.id === "#1" ? "30%" : c.id === "#2" ? "45%" : "75%" }}>
-                      <div className="relative group/marker">
-                        <div className={`absolute -inset-16 ${c.color}/10 rounded-full blur-3xl animate-pulse`}></div>
-                        <div className={`w-${c.id === "#2" ? "16" : "12"} h-${c.id === "#2" ? "16" : "12"} ${c.color} rounded-full flex items-center justify-center text-white shadow-2xl border-2 border-white/20 font-black text-sm cursor-pointer hover:scale-110 transition-transform`}>
-                          {c.count}
+              <motion.div variants={itemVariants} className="col-span-12 lg:col-span-8 dashboard-card !p-0 relative overflow-hidden h-[600px] border-[var(--border)]">
+                {(isLoaded && googleMapsApiKey) ? (
+                  <div className="w-full h-full relative">
+                    <GoogleMap
+                      mapContainerStyle={{ width: '100%', height: '100%' }}
+                      center={currentLocation || { lat: 23.0850, lng: 72.6450 }}
+                      zoom={14}
+                      options={MAP_OPTIONS}
+                      onLoad={m => setMap(m)}
+                    >
+                      {/* Passenger Demand Clusters */}
+                      {clusters.map((c, i) => (
+                        <React.Fragment key={i}>
+                          <Circle
+                            center={c.coords || { lat: 23.0850 + (i*0.01), lng: 72.6450 + (i*0.01) }}
+                            radius={400}
+                            options={{
+                              fillColor: c.status === 'active' ? '#10B981' : '#F59E0B',
+                              fillOpacity: 0.15,
+                              strokeColor: c.status === 'active' ? '#10B981' : '#F59E0B',
+                              strokeWeight: 1,
+                              strokeOpacity: 0.3
+                            }}
+                          />
+                          <Marker
+                            position={c.coords || { lat: 23.0850 + (i*0.01), lng: 72.6450 + (i*0.01) }}
+                            icon={{
+                              path: google.maps.SymbolPath.CIRCLE,
+                              fillColor: c.status === 'active' ? '#10B981' : '#F59E0B',
+                              fillOpacity: 1,
+                              strokeWeight: 2,
+                              strokeColor: '#FFFFFF',
+                              scale: 4
+                            }}
+                            label={{
+                              text: c.count.toString(),
+                              color: 'white',
+                              fontSize: '10px',
+                              fontWeight: 'bold'
+                            }}
+                          />
+                        </React.Fragment>
+                      ))}
+
+                      {/* Live Fleet Simulation Tracking */}
+                      {Object.values(fleetLocations || {}).map((loc, idx) => (
+                        <Marker
+                          key={`fleet-sim-${idx}`}
+                          position={{ lat: loc.lat, lng: loc.lng }}
+                          icon={{
+                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            fillColor: '#6366F1',
+                            fillOpacity: 1,
+                            strokeWeight: 2,
+                            strokeColor: '#FFFFFF',
+                            scale: 6,
+                            rotation: loc.heading || 0
+                          }}
+                        />
+                      ))}
+
+                      {currentLocation && (
+                        <Marker
+                          position={currentLocation}
+                          icon={{
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: '#FFFFFF',
+                            fillOpacity: 1,
+                            strokeWeight: 2,
+                            strokeColor: '#6366F1',
+                            scale: 8
+                          }}
+                        />
+                      )}
+                    </GoogleMap>
+
+                    {/* AI DISPATCH HUD OVERLAYS */}
+                    <div className="absolute top-6 left-6 z-20 flex flex-col gap-3">
+                      <div className="bg-black/60 backdrop-blur-2xl border border-emerald-500/30 px-5 py-2.5 rounded-2xl flex items-center gap-3 shadow-2xl">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10B981]"></div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Telemetry Active</span>
+                          <span className="text-[8px] text-white/50 font-bold uppercase tracking-widest">Sector: Nana Chiloda Hub</span>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-4 rounded-2xl flex flex-col gap-3 shadow-2xl min-w-[180px]">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] font-black text-muted uppercase tracking-widest">Sync Health</span>
+                          <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">98.4%</span>
+                        </div>
+                        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                          <motion.div initial={{ width: 0 }} animate={{ width: '98.4%' }} className="h-full bg-emerald-500" />
                         </div>
                       </div>
                     </div>
-                  ))}
-                  <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
-                    <div className="bg-[var(--surface)]/90 backdrop-blur-md p-1.5 rounded-xl border border-[var(--border)] shadow-2xl">
-                      <button className="p-2 hover:bg-[var(--surface-light)] rounded-lg block mb-1 transition-colors text-main"><span className="material-symbols-outlined">layers</span></button>
-                      <button className="p-2 hover:bg-[var(--surface-light)] rounded-lg block transition-colors text-main"><span className="material-symbols-outlined">my_location</span></button>
+
+                    <div className="absolute top-6 right-6 z-20">
+                      <button 
+                        onClick={triggerMockRequest}
+                        className="bg-[var(--primary)] text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all flex items-center gap-2 group"
+                      >
+                        <span className="material-symbols-outlined text-sm group-hover:rotate-180 transition-transform">bolt</span>
+                        Inject Demand Node
+                      </button>
                     </div>
+
+                    <div className="absolute bottom-8 left-8 z-20 flex gap-4">
+                       <div className="bg-black/60 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-2xl flex items-center gap-4 shadow-2xl">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"></div>
+                            <span className="text-[9px] font-black text-white uppercase tracking-widest">Optimized</span>
+                          </div>
+                          <div className="w-px h-3 bg-white/10"></div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.6)]"></div>
+                            <span className="text-[9px] font-black text-white uppercase tracking-widest">Overload</span>
+                          </div>
+                       </div>
+                    </div>
+
+                    {/* Notification Overlay */}
+                    <AnimatePresence>
+                      {bookingStep === 'request' && activeRequest && (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className="absolute inset-0 z-30 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6"
+                        >
+                          <div className="bg-[var(--surface)] w-full max-w-md rounded-[2.5rem] p-8 border border-[var(--primary)]/30 shadow-[0_0_50px_rgba(99,102,241,0.2)]">
+                            <div className="flex justify-between items-start mb-6">
+                              <div>
+                                <h4 className="text-[10px] font-black text-[var(--primary)] uppercase tracking-[0.3em] mb-2">New Ride Request</h4>
+                                <h2 className="text-3xl font-black text-main tracking-tighter">{activeRequest.passenger}</h2>
+                              </div>
+                              <div className="bg-emerald-500/10 text-emerald-500 px-4 py-1 rounded-full text-[10px] font-black border border-emerald-500/20">{activeRequest.fare}</div>
+                            </div>
+                            
+                            <div className="space-y-4 mb-8">
+                              <div className="flex gap-4">
+                                <span className="material-symbols-outlined text-[var(--primary)]">location_on</span>
+                                <div><p className="text-[10px] uppercase font-black text-muted tracking-widest">Pickup</p><p className="font-bold text-main">{activeRequest.pickup}</p></div>
+                              </div>
+                              <div className="flex gap-4">
+                                <span className="material-symbols-outlined text-rose-500">near_me</span>
+                                <div><p className="text-[10px] uppercase font-black text-muted tracking-widest">Destination</p><p className="font-bold text-main">{activeRequest.destination}</p></div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <button 
+                                onClick={() => setBookingStep('vehicle')}
+                                className="py-4 bg-[var(--primary)] text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl"
+                              >
+                                Accept Request
+                              </button>
+                              <button 
+                                onClick={() => setBookingStep('map')}
+                                className="py-4 bg-white/5 border border-white/10 text-muted rounded-2xl text-xs font-black uppercase tracking-widest"
+                              >
+                                Decline
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {bookingStep === 'vehicle' && (
+                        <motion.div 
+                          initial={{ opacity: 0, x: 50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="absolute inset-y-0 right-0 w-96 bg-[var(--surface)]/95 backdrop-blur-xl border-l border-white/10 z-40 p-8 flex flex-col"
+                        >
+                          <h3 className="text-2xl font-black text-main tracking-tighter mb-8">Select Vehicle</h3>
+                          <div className="space-y-4 flex-1 overflow-y-auto">
+                            {[
+                              { id: 'bike', name: 'Bike', time: '2 min', icon: 'two_wheeler', price: '₹45' },
+                              { id: 'cab', name: 'Cab', time: '5 min', icon: 'directions_car', price: '₹145' },
+                              { id: 'auto', name: 'Auto', time: '4 min', icon: 'local_taxi', price: '₹85' }
+                            ].map(v => (
+                              <button 
+                                key={v.id}
+                                onClick={() => { setSelectedVehicle(v); setBookingStep('payment'); }}
+                                className="w-full bg-[var(--surface-muted)] p-6 rounded-[2rem] border border-white/5 hover:border-[var(--primary)] transition-all flex items-center justify-between group"
+                              >
+                                <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-white transition-all"><span className="material-symbols-outlined">{v.icon}</span></div>
+                                  <div className="text-left"><p className="font-black text-main">{v.name}</p><p className="text-[10px] text-muted uppercase font-black">{v.time} away</p></div>
+                                </div>
+                                <span className="font-black text-main">{v.price}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {bookingStep === 'payment' && selectedVehicle && (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 1.1 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="absolute inset-0 z-50 bg-[var(--background)] flex items-center justify-center p-6"
+                        >
+                          <div className="w-full max-w-lg bg-[var(--surface)] rounded-[3rem] p-10 border border-white/5 shadow-2xl">
+                            <h3 className="text-3xl font-black text-main tracking-tighter mb-8">Payment Summary</h3>
+                            <div className="space-y-4 mb-10">
+                              <div className="flex justify-between py-4 border-b border-white/5">
+                                <span className="text-muted font-bold">Fare Breakdown</span>
+                                <span className="text-main font-black">{selectedVehicle.price}</span>
+                              </div>
+                              <div className="flex justify-between py-4 border-b border-white/5">
+                                <span className="text-muted font-bold">Booking Fee</span>
+                                <span className="text-main font-black">₹10.00</span>
+                              </div>
+                              <div className="flex justify-between py-6">
+                                <span className="text-xl font-black text-main">Total Amount</span>
+                                <span className="text-2xl font-black text-[var(--primary)] tracking-tighter">₹{(parseInt(selectedVehicle.price.replace('₹','')) + 10).toFixed(2)}</span>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => { 
+                                const id = 'SC-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                                const newBooking = {
+                                  id: id,
+                                  pickup: activeRequest.pickup,
+                                  dropoff: activeRequest.destination,
+                                  vehicle: {
+                                    id: selectedVehicle.id,
+                                    name: selectedVehicle.name,
+                                    type: selectedVehicle.id,
+                                    icon: selectedVehicle.icon,
+                                    color: 'text-[var(--primary)]',
+                                    bgColor: 'bg-[var(--primary)]/10'
+                                  },
+                                  status: 'confirmed',
+                                  price: parseInt(selectedVehicle.price.replace('₹','')) + 10,
+                                  paymentMethod: 'card',
+                                  timestamp: new Date().toISOString(),
+                                  bookingType: 'now'
+                                };
+
+                                // Save to localStorage for history
+                                const existing = JSON.parse(localStorage.getItem('bookings') || '[]');
+                                localStorage.setItem('bookings', JSON.stringify([newBooking, ...existing]));
+
+                                setBookingId(id); 
+                                setBookingStep('confirmed'); 
+                              }}
+                              className="w-full py-5 bg-[var(--primary)] text-white rounded-3xl font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(99,102,241,0.3)]"
+                            >
+                              Complete Payment
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {bookingStep === 'confirmed' && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 100 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="absolute inset-0 z-[60] bg-emerald-500 flex flex-col items-center justify-center p-12 text-center"
+                        >
+                          <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: 'spring', delay: 0.3 }}
+                            className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-8"
+                          >
+                            <span className="material-symbols-outlined text-emerald-500 text-5xl">check_circle</span>
+                          </motion.div>
+                          <h2 className="text-5xl font-black text-white tracking-tighter mb-4">Booking Confirmed!</h2>
+                          <p className="text-white/80 font-bold mb-12 text-lg">Your {selectedVehicle.name} is on the way. Booking ID: {bookingId}</p>
+                          <button 
+                            onClick={() => { setBookingStep('map'); setActiveRequest(null); setSelectedVehicle(null); }}
+                            className="px-12 py-5 bg-white text-emerald-500 rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl"
+                          >
+                            Return to Mission Control
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <div className="absolute bottom-6 right-6 z-20 bg-[var(--surface)]/90 backdrop-blur-md p-4 rounded-2xl border border-[var(--border)] shadow-2xl flex gap-6 items-center">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div><span className="text-[10px] font-black text-muted uppercase tracking-widest">Active Nodes</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#5C5C3D] shadow-[0_0_8px_rgba(92,92,61,0.5)]"></div><span className="text-[10px] font-black text-muted uppercase tracking-widest">High Demand</span></div>
-                  </div>
-                </div>
+                ) : (
+                  <TacticalRadar />
+                )}
               </motion.div>
 
               <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">

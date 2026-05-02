@@ -46,6 +46,7 @@ const RideOptionDetailPage = lazy(() => import("./pages/RideOptionDetailPage"));
 const ExploreRidesPage = lazy(() => import("./pages/ExploreRidesPage"));
 const AirportRidesPage = lazy(() => import("./pages/AirportRidesPage"));
 const ReserveRidePage = lazy(() => import("./pages/ReserveRidePage"));
+const LiveMapPage = lazy(() => import("./pages/LiveMapPage"));
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -135,6 +136,14 @@ const AnimatedRoutes = () => {
             element={
               <ProtectedRoute>
                 <DemandHeatmapsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/live-map" 
+            element={
+              <ProtectedRoute>
+                <LiveMapPage />
               </ProtectedRoute>
             } 
           />

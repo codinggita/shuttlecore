@@ -17,9 +17,6 @@
 
 
 
-<br/>
-
-> **Transforming corporate commutes** — from rigid timetables to intelligent, demand-driven transportation.
 
 <br/>
 

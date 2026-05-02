@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import ContactModal from "../components/ContactModal";
 
 const LandingPage = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -262,12 +264,17 @@ const LandingPage = () => {
                   rocket_launch
                 </span>
               </Link>
-              <Link to="/services" className="btn-secondary !px-12 !py-5 flex items-center justify-center gap-3 text-lg group border-2">
-                <span>View Operational Specs</span>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsContactModalOpen(true)}
+                className="btn-secondary !px-12 !py-5 flex items-center justify-center gap-3 text-lg group border-2"
+              >
+                <span>Contact Sales</span>
                 <span className="material-symbols-outlined text-2xl group-hover:translate-y-0.5 transition-transform">
-                  description
+                  support_agent
                 </span>
-              </Link>
+              </motion.button>
             </motion.div>
           </motion.div>
         </section>
@@ -526,6 +533,7 @@ const LandingPage = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setIsContactModalOpen(true)}
                 className="px-12 py-6 bg-[var(--surface-light)] border border-[var(--border)] text-[var(--text-main)] font-black rounded-xl hover:bg-white/10 transition-all text-xl shadow-xl"
               >
                 Contact Sales
@@ -576,6 +584,8 @@ const LandingPage = () => {
           </span>
         </div>
       </footer>
+
+      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
     </div>
   );
 };

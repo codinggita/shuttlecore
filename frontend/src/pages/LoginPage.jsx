@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import emailjs from "@emailjs/browser";
 import api from "../services/api";
 
 const LoginPage = () => {
@@ -23,6 +24,25 @@ const LoginPage = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("userProfile", JSON.stringify(user));
       localStorage.setItem("isAuthenticated", "true");
+      
+      // Send login notification email
+      try {
+        const serviceID = 'service_5kpwy4w';
+        const templateID = 'template_g6i1rfu'; // Same template as contact form
+        const publicKey = '8xS7Is-LTWqtE-yWy';
+        
+        const templateParams = {
+          type: 'Login Alert',
+          user_email: email,
+          user_name: user.name || email.split('@')[0],
+          login_time: new Date().toLocaleString(),
+          to_email: 'dharmi.patel.cg@gmail.com'
+        };
+        
+        await emailjs.send(serviceID, templateID, templateParams, publicKey);
+      } catch (emailError) {
+        console.error('Login notification email failed:', emailError);
+      }
       
       navigate("/dashboard");
     } catch (error) {
@@ -198,25 +218,6 @@ const LoginPage = () => {
                   Enter your credentials to access the terminal.
                 </motion.p>
               </div>
-
-              {/* SSO Options */}
-              <motion.button
-                whileHover={{
-                  y: -2,
-                  backgroundColor: "rgba(255,255,255,0.08)",
-                }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full h-14 bg-[var(--surface-light)] border border-[var(--border)] rounded-2xl flex items-center justify-center gap-4 hover:border-white/20 transition-all group mb-8"
-              >
-                <img
-                  alt="Google Logo"
-                  className="w-5 h-5 grayscale group-hover:grayscale-0 transition-all"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBj2GLJs32EUXUIlwGcha56VS5fEF0GfwiYoFZ1tXTISP_MHWFU09Q8zg_D4jL4q-eu2hUqQbuvs7VmOS1SsnC6Bm8BTQ8FYub03xMKm24UFa81iJQGt0JQ6dfOrc8EBwJVFY8a4c-ieb-TO3Yln7BzSo34UYX6OT1jhWt_Lu2jaJblbdPZwIa5SiaM1rjhMXfyFzk3mmZHG9COqvt6SIl0NHv5p-3EibQEWsl_IojJZdy9g-tegTCbKAwhIyPP3IECNnCq-wWsQrc"
-                />
-                <span className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest">
-                  Enterprise SSO
-                </span>
-              </motion.button>
 
               <div className="relative mb-10">
                 <div className="absolute inset-0 flex items-center">

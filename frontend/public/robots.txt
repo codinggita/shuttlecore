@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://shuttle-core1.netlify.app/sitemap.xml

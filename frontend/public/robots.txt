@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shuttle-core1.netlify.app/sitemap.xml
+Sitemap: https://shuttle-core2.netlify.app/sitemap.xml

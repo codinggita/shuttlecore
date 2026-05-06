@@ -23,9 +23,9 @@
 |---|---|
 | 🎨 Figma Design | [View on Figma](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&p=f&t=Xoa9GLNwZKz1GHoj-0) |
 | 🚀 Live Deployed Project | [Live Demo on Netlify](https://shuttle-core2.netlify.app/) |
-| 🖥️ Backend Deployed Link | [Backend API](https://shuttle-core.onrender.com)|
+| 🖥️ Backend Deployed Link | [Backend API](#) *(add your backend URL here)* |
 | 📮 Postman API Docs | [View on Postman](https://documenter.getpostman.com/view/50839318/2sBXqKofEP) |
-| 🎬 YouTube Demo Video | [Watch Demo](https://youtu.be/7Gin6qRqclM)|
+| 🎬 YouTube Demo Video | [Watch Demo](#) *(add your YouTube link here)* |
 
 ---
 
@@ -34,10 +34,11 @@
 | Screenshot 1 | Screenshot 2 |
 |---|---|
 | ![Screenshot 1](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQBd6Hr8dKZQTph7tqmA9UsfAbNkgcPpfBhOOVb_zWNV6LI?e=1lD3gC) | ![Screenshot 2](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQDHXgsj1cvrTr4hFIY9CGjsAerkUgiWRHLA78dgFgDofIg?e=UXn5gE) |
- 
+
 | Screenshot 3 | Screenshot 4 |
 |---|---|
 | ![Screenshot 3](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQAzfYY6zsbIS7354FwvDgywAZwdjUSWdYMoT21Ynv9hAt0?e=s0hWpD) | ![Screenshot 4](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQB98UBaWPc0S5RXoFF7baEiAZh1VImjlidz7xiP-S0h7fM?e=PQViML) |
+
 ---
 
 </div>

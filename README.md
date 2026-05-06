@@ -31,15 +31,13 @@
 
 ## 📸 Project Screenshots
 
-> *(Add screenshots of your application here — Desktop View, Mobile View, Admin Dashboard, Driver App, etc.)*
-
-<!-- Example:
-![Home Screen](./assets/screenshots/home.png)
-![Ride Request Flow](./assets/screenshots/ride-request.png)
-![Admin Dashboard](./assets/screenshots/admin.png)
-![Mobile View](./assets/screenshots/mobile.png)
--->
-
+| Screenshot 1 | Screenshot 2 |
+|---|---|
+| ![Screenshot 1](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQBd6Hr8dKZQTph7tqmA9UsfAbNkgcPpfBhOOVb_zWNV6LI?e=1lD3gC) | ![Screenshot 2](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQDHXgsj1cvrTr4hFIY9CGjsAerkUgiWRHLA78dgFgDofIg?e=UXn5gE) |
+ 
+| Screenshot 3 | Screenshot 4 |
+|---|---|
+| ![Screenshot 3](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQAzfYY6zsbIS7354FwvDgywAZwdjUSWdYMoT21Ynv9hAt0?e=s0hWpD) | ![Screenshot 4](https://1drv.ms/i/c/DEA77AAEC88ABB92/IQB98UBaWPc0S5RXoFF7baEiAZh1VImjlidz7xiP-S0h7fM?e=PQViML) |
 ---
 
 </div>

@@ -3,22 +3,42 @@
 <br/>
 
 ```
-  ███████╗███╗   ███╗ █████╗ ██████╗ ████████╗    ███████╗██╗  ██╗██╗   ██╗████████╗████████╗██╗     ███████╗
-  ██╔════╝████╗ ████║██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝██║  ██║██║   ██║╚══██╔══╝╚══██╔══╝██║     ██╔════╝
-  ███████╗██╔████╔██║███████║██████╔╝   ██║       ███████╗███████║██║   ██║   ██║      ██║   ██║     █████╗  
-  ╚════██║██║╚██╔╝██║██╔══██║██╔══██╗   ██║       ╚════██║██╔══██║██║   ██║   ██║      ██║   ██║     ██╔══╝  
-  ███████║██║ ╚═╝ ██║██║  ██║██║  ██║   ██║       ███████║██║  ██║╚██████╔╝   ██║      ██║   ███████╗███████╗
-  ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝       ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚══════╝
+   ███████╗██╗  ██╗██╗   ██╗████████╗████████╗██╗     ███████╗     ██████╗ ██████╗ ██████╗ ███████╗
+   ██╔════╝██║  ██║██║   ██║╚══██╔══╝╚══██╔══╝██║     ██╔════╝    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
+   ███████╗███████║██║   ██║   ██║      ██║   ██║     █████╗      ██║     ██║   ██║██████╔╝█████╗  
+   ╚════██║██╔══██║██║   ██║   ██║      ██║   ██║     ██╔══╝      ██║     ██║   ██║██╔══██╗██╔══╝  
+   ███████║██║  ██║╚██████╔╝   ██║      ██║   ███████╗███████╗    ╚██████╗╚██████╔╝██║  ██║███████╗
+   ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚══════╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
 ```
 
 ### 🚐 Real-Time Dynamic Office Shuttle Routing
 
 <br/>
 
+---
 
+## 🔗 All Deployed Links
 
+| Resource | Link |
+|---|---|
+| 🎨 Figma Design | [View on Figma](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&p=f&t=Xoa9GLNwZKz1GHoj-0) |
+| 🚀 Live Deployed Project | [Live Demo on Netlify](https://shuttle-core2.netlify.app/) |
+| 🖥️ Backend Deployed Link | [Backend API](https://shuttle-core.onrender.com)|
+| 📮 Postman API Docs | [View on Postman](https://documenter.getpostman.com/view/50839318/2sBXqKofEP) |
+| 🎬 YouTube Demo Video | [Watch Demo](https://youtu.be/7Gin6qRqclM)|
 
-<br/>
+---
+
+## 📸 Project Screenshots
+
+> *(Add screenshots of your application here — Desktop View, Mobile View, Admin Dashboard, Driver App, etc.)*
+
+<!-- Example:
+![Home Screen](./assets/screenshots/home.png)
+![Ride Request Flow](./assets/screenshots/ride-request.png)
+![Admin Dashboard](./assets/screenshots/admin.png)
+![Mobile View](./assets/screenshots/mobile.png)
+-->
 
 ---
 
@@ -35,13 +55,13 @@ Corporate employees commuting to business parks and IT campuses face a daily fru
 | 🚍 Overcrowded shuttles on others | Poor employee experience |
 | 🛣️ Rigid, unadjusted routes | Inefficient fleet utilization |
 
-Traditional systems are built around schedules — **Smart Shuttle is built around people.**
+Traditional systems are built around schedules — **Shuttle Core is built around people.**
 
 ---
 
 ## 💡 The Solution
 
-**Smart Shuttle** is a demand-responsive transportation platform that dynamically routes corporate vehicles based on **live employee requests**, real-time traffic data, and intelligent route optimization.
+**Shuttle Core** is a demand-responsive transportation platform that dynamically routes corporate vehicles based on **live employee requests**, real-time traffic data, and intelligent route optimization.
 
 Instead of employees adjusting to the shuttle, the shuttle adjusts to employees.
 
@@ -84,7 +104,7 @@ Employee Request  →  Route Optimization Engine  →  Driver App  →  Real-Tim
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Smart Shuttle System                      │
+│                       Shuttle Core System                        │
 ├────────────┬────────────┬──────────────┬───────────┬────────────┤
 │  Employee  │  Mobile /  │  Backend API │   Route   │  Driver    │
 │  Request   │  Web App   │  (Node.js /  │  Engine   │  App       │
@@ -116,7 +136,7 @@ Employee Request  →  Route Optimization Engine  →  Driver App  →  Real-Tim
 ## 📂 Project Structure
 
 ```
-Smart-Shuttle/
+Shuttle-Core/
 │
 ├── 📁 frontend/          # React UI — employee & driver interfaces
 │   ├── src/
@@ -158,7 +178,7 @@ Make sure you have the following installed:
 
 ```bash
 git clone https://github.com/Dharmi-456-design/shuttlecore
-cd smart-shuttle
+cd shuttle-core
 ```
 
 **2. Install dependencies**
@@ -206,34 +226,6 @@ Visit `http://localhost:3000` to access the app.
 
 ---
 
-## 🌐 Live Deployment
-
-Check out the live application:
-🚀 **[Live Demo on Netlify](https://shuttle-core2.netlify.app/)**
-
-
----
-## 🎨 Figma Design
- 
-Explore the full UI/UX design of Smart Shuttle — including wireframes, components, and interactive prototypes.
- 
-| Design Asset | Link |
-|---|---|
-| 🖼️ Figma Design | [View on Figma](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&p=f&t=Xoa9GLNwZKz1GHoj-0) |
-
----
-
-## 📖 API Documentation
-
-Comprehensive API documentation for the Smart Shuttle backend.
-
-| Documentation | Link |
-|---|---|
-| 📮 Postman Docs | [View on Postman](https://documenter.getpostman.com/view/50839318/2sBXqKofEP) |
-
-
----
-
 ## 🎯 Roadmap
 
 - [x] Project scaffolding & architecture design
@@ -262,7 +254,6 @@ git push origin feature/your-feature-name
 # Open a Pull Request 🎉
 ```
 
-
 ---
 
 ## 👨‍💻 Author
@@ -281,12 +272,11 @@ git push origin feature/your-feature-name
 
 ## ⭐ Support the Project
 
-If Smart Shuttle resonates with you:
+If Shuttle Core resonates with you:
 
 - ⭐ **Star** the repository to show support
 - 🍴 **Fork** it and build something great
 - 🛠️ **Contribute** a fix, feature, or idea
-
 
 ---
 
@@ -296,6 +286,6 @@ If Smart Shuttle resonates with you:
 
 <br/>
 
-*Smart Shuttle — because your commute should work for you.*
+*Shuttle Core — because your commute should work for you.*
 
 </div>

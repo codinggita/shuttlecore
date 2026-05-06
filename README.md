@@ -23,9 +23,9 @@
 |---|---|
 | 🎨 Figma Design | [View on Figma](https://www.figma.com/design/Xv1ZUE3iEw4Y2r0D3eEEsM/Untitled?node-id=652-2&p=f&t=Xoa9GLNwZKz1GHoj-0) |
 | 🚀 Live Deployed Project | [Live Demo on Netlify](https://shuttle-core2.netlify.app/) |
-| 🖥️ Backend Deployed Link | [Backend API](#) *(add your backend URL here)* |
+| 🖥️ Backend Deployed Link | [Backend API](https://shuttle-core.onrender.com)|
 | 📮 Postman API Docs | [View on Postman](https://documenter.getpostman.com/view/50839318/2sBXqKofEP) |
-| 🎬 YouTube Demo Video | [Watch Demo](#) *(add your YouTube link here)* |
+| 🎬 YouTube Demo Video | [Watch Demo](https://youtu.be/7Gin6qRqclM)|
 
 ---
 
